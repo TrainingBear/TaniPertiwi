@@ -16,35 +16,44 @@ android {
     }
 
     defaultConfig {
-        ndk{
-            abiFilters += listOf("arm64-v8a","armeabi-v7a", "x86", "x86_64")
-        }
-        applicationId = "com.trbear9.openfarm"
+//        ndk{
+//            abiFilters += listOf("arm64-v8a","armeabi-v7a", "x86", "x86_64")
+//        }
+        applicationId = "com.trbear9.ui"
         minSdk = 25
         targetSdk = 35
-        versionCode = 1
+        versionCode = 3
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    splits {
-        abi {
-// Detect app bundle and conditionally disable split abis
-            // This is needed due to a "Sequence contains more than one matching element" error
-            // present since AGP 8.9.0, for more info see:
-            // https://issuetracker.google.com/issues/402800800
+//    splits {
+//        abi {
+//// Detect app bundle and conditionally disable split abis
+//            // This is needed due to a "Sequence contains more than one matching element" error
+//            // present since AGP 8.9.0, for more info see:
+//            // https://issuetracker.google.com/issues/402800800
+//
+//            // AppBundle tasks usually contain "bundle" in their name
+//            val isBuildingBundle = gradle.startParameter.taskNames.any { it.lowercase().contains("bundle") }
+//
+//            // Disable split abis when building appBundle
+//            isEnable = !isBuildingBundle
+//
+//            reset()
+//            //noinspection ChromeOsAbiSupport
+//            include("armeabi-v7a", "arm64-v8a", "x86_64", "x86")
+//
+//            isUniversalApk = true
+//        }
+//    }
 
-            // AppBundle tasks usually contain "bundle" in their name
-            val isBuildingBundle = gradle.startParameter.taskNames.any { it.lowercase().contains("bundle") }
-
-            // Disable split abis when building appBundle
-            isEnable = !isBuildingBundle
-
-            reset()
-            //noinspection ChromeOsAbiSupport
-            include("armeabi-v7a", "arm64-v8a", "x86_64", "x86")
-
-            isUniversalApk = true
+    signingConfigs {
+        create("release") {
+            storeFile = file("/home/kujatic/Desktop/openfarm.jks")
+            storePassword = "12x;13y?23~z!"
+            keyAlias = "Jasper"
+            keyPassword = "12x;13y?23~z!"
         }
     }
 
