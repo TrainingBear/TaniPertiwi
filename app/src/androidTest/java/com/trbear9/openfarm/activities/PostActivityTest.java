@@ -1,7 +1,6 @@
-package com.trbear9.ui.activities;
+package com.trbear9.ui.view;
 
 import com.trbear9.plants.PlantClient;
-import com.trbear9.plants.parameters.blob.Plant;
 
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;

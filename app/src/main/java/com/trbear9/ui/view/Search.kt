@@ -1,4 +1,4 @@
-package com.trbear9.ui.activities
+package com.trbear9.ui.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -66,6 +66,7 @@ import com.trbear9.ui.util.Util
 import com.trbear9.ui.util.debug
 import com.trbear9.ui.util.error
 import com.trbear9.ui.fragment.PlantCardDisplayer
+import com.trbear9.ui.viewmodel.inputs
 import kotlinx.coroutines.delay
 import kotlin.math.min
 
@@ -75,53 +76,53 @@ import kotlin.math.min
 fun SearchLayout(nav: NavController? = null, from: String = "home") {
     val scroll = rememberScrollState()
     var expanded by rememberSaveable { mutableStateOf(false) }
-    var selected by rememberSaveable{ mutableStateOf("All") }
-    var query by rememberSaveable{ mutableStateOf("") }
-    var finalQuery by rememberSaveable{ mutableStateOf("") }
-    var completer = rememberSaveable{ mutableListOf<String>() }
-    val focusRequester = remember{ FocusRequester() }
+    var selected by rememberSaveable { mutableStateOf("All") }
+    var query by rememberSaveable { mutableStateOf("") }
+    var finalQuery by rememberSaveable { mutableStateOf("") }
+    var completer = rememberSaveable { mutableListOf<String>() }
+    val focusRequester = remember { FocusRequester() }
 
-    var focus by rememberSaveable{mutableStateOf(false)}
+    var focus by rememberSaveable { mutableStateOf(false) }
     val keyboard = LocalSoftwareKeyboardController.current
 
-    fun search(){
-        if(query.isEmpty()) return
+    fun search() {
+        if (query.isEmpty()) return
         inputs.searchResult.plantByCategory = mutableStateMapOf()
         inputs.searchResult.plants = mutableSetOf()
-        Data.searchByScienceName(9999, query = query){
+        Data.searchByScienceName(9999, query = query) {
             inputs.searchResult.plants!!.add(it)
             Data.plant[it]?.category?.forEach { cat ->
                 inputs.searchResult.plantByCategory?.computeIfAbsent(Util.translateCategory(cat)) {
                     mutableSetOf()
-                }?.add(Data.normalize[it]?:"null")
+                }?.add(Data.normalize[it] ?: "null")
             }
             inputs.searchResult.plantByCategory?.computeIfAbsent("All") {
                 mutableSetOf()
-            }?.add(Data.normalize[it]?:"null")
+            }?.add(Data.normalize[it] ?: "null")
 //            "Found $it".debug("PlantSearch")
         }
-        Data.searchByCommonName(9999, query = query){
+        Data.searchByCommonName(9999, query = query) {
             val name = Data.namaUmumToNamaIlmiah[it]!!
             inputs.searchResult.plants!!.add(name)
             Data.plant[it]?.category?.forEach { cat ->
                 inputs.searchResult.plantByCategory?.computeIfAbsent(Util.translateCategory(cat)) {
                     mutableSetOf()
-                }?.add(Data.normalize[name]?:"null")
+                }?.add(Data.normalize[name] ?: "null")
             }
             inputs.searchResult.plantByCategory?.computeIfAbsent("All") {
                 mutableSetOf()
-            }?.add(Data.normalize[name]?:"null")
+            }?.add(Data.normalize[name] ?: "null")
 //            "Found $name".debug("PlantSearch")
         }
         Util.getCategory().forEach {
-            "$it loaded ${inputs.searchResult.plantByCategory!!.get(it)?.size} items".debug("PlantSearch")
+            "$it loaded ${inputs.searchResult.plantByCategory!![it]?.size} items".debug("PlantSearch")
         }
         keyboard?.hide()
         finalQuery = query
         focus = false
     }
 
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
 //        runBlocking {
 //            delay(900)
 //            focusRequester.requestFocus()
@@ -131,7 +132,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
     LaunchedEffect(query) {
         completer.clear()
         focus = true
-        if(query.isNotEmpty()) {
+        if (query.isNotEmpty()) {
             Data.searchByCommonName(9999, query = query) {
                 completer.add(it)
             }
@@ -176,8 +177,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
                                     .focusRequester(focusRequester)
                                     .onFocusChanged {
                                         focus = it.isFocused
-                                    }
-                                ,
+                                    },
                                 keyboardOptions = KeyboardOptions(
                                     imeAction = ImeAction.Search
                                 ),
@@ -215,7 +215,9 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
                                 }
                             )
                         }
-                        Box(Modifier.fillMaxHeight().weight(1f)) {
+                        Box(Modifier
+                            .fillMaxHeight()
+                            .weight(1f)) {
                             Column(verticalArrangement = Arrangement.Center) {
                                 IconButton(
                                     onClick = { expanded = !expanded },
@@ -284,7 +286,10 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
             else
                 remember(finalQuery, selected) {
                     Pager(PagingConfig(pageSize = 7)) {
-                        CompleterSearchSource(inputs.searchResult.plantByCategory!![selected]?.toMutableList()?:mutableListOf())
+                        CompleterSearchSource(
+                            inputs.searchResult.plantByCategory!![selected]?.toMutableList()
+                                ?: mutableListOf()
+                        )
                     }.flow
                 }
         val plants: LazyPagingItems<String> =
@@ -292,7 +297,8 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
 
         UnifyCoachmark {
             LazyColumn(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .padding(padding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -322,7 +328,8 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
         if (focus && query.isNotEmpty()) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize().padding(padding)
+                    .fillMaxSize()
+                    .padding(padding)
                     .background(Color.DarkGray.copy(alpha = 0.8f))
                     .clip(RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp))
             ) {
@@ -341,9 +348,11 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
                                 text = items[i]!!,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Medium,
-                                modifier = Modifier.clickable {
-                                    query = items[i]!!
-                                }.padding(start = 16.dp)
+                                modifier = Modifier
+                                    .clickable {
+                                        query = items[i]!!
+                                    }
+                                    .padding(start = 16.dp)
                                     .fillMaxWidth()
                             )
                         }
@@ -354,7 +363,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
     }
 }
 
-class CompleterSearchSource(val completer: MutableList<String>) : PagingSource<Int, String>(){
+class CompleterSearchSource(val completer: MutableList<String>) : PagingSource<Int, String>() {
     override fun getRefreshKey(state: PagingState<Int, String>): Int? {
         return state.anchorPosition?.let { pos ->
             state.closestPageToPosition(pos)?.prevKey?.plus(1)
@@ -368,8 +377,9 @@ class CompleterSearchSource(val completer: MutableList<String>) : PagingSource<I
 
         return try {
             delay(500)
-            val nextKey = if (page.toDouble() >= (completer.size/pageSize)) null else page + 1
-            val item = completer.subList(page * pageSize,
+            val nextKey = if (page.toDouble() >= (completer.size / pageSize)) null else page + 1
+            val item = completer.subList(
+                page * pageSize,
                 min((page + 1) * pageSize, completer.size)
             ).toList()
             LoadResult.Page(

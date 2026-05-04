@@ -4,8 +4,8 @@ import android.graphics.Bitmap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.trbear9.ui.activities.SearchResult
-import com.trbear9.ui.activities.SoilResult
+import com.trbear9.ui.view.SearchResult
+import com.trbear9.ui.view.SoilResult
 import com.trbear9.plants.parameters.GeoParameters
 import com.trbear9.plants.parameters.Response
 import com.trbear9.plants.parameters.SoilParameters

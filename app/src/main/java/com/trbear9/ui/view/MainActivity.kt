@@ -1,15 +1,9 @@
-package com.trbear9.ui.activities
+package com.trbear9.ui.view
 
-import android.Manifest
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -77,13 +71,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import androidx.core.app.ActivityOptionsCompat
-import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
-import com.google.android.gms.location.LocationServices
 import com.pseudoankit.coachmark.LocalCoachMarkScope
 import com.pseudoankit.coachmark.UnifyCoachmark
 import com.pseudoankit.coachmark.model.HighlightedViewConfig
@@ -94,35 +83,16 @@ import com.trbear9.plants.Data
 import com.trbear9.plants.TFService
 import com.trbear9.ui.util.DataStore
 import com.trbear9.ui.util.Screen
-import com.trbear9.plants.Inputs
-import com.trbear9.plants.parameters.GeoParameters
 import com.trbear9.ui.App
 import com.trbear9.ui.LocalNav
 import com.trbear9.ui.R
 import com.trbear9.ui.util.MarkKey
-import com.trbear9.ui.util.debug
+import com.trbear9.ui.util.getContext
 import com.trbear9.ui.util.highlightConfig
-import kotlinx.coroutines.launch
-
-val inputs = Inputs()
-var cam: Boolean = false
-var gps: Boolean = false
-var perm: ActivityResultLauncher<Array<String>> = object: ActivityResultLauncher<Array<String>>(){
-    override val contract: ActivityResultContract<Array<String>, *>
-        get() = TODO("Not yet implemented")
-
-    override fun launch(
-        input: Array<String>,
-        options: ActivityOptionsCompat?
-    ) {
-    }
-
-    override fun unregister() {
-    }
-}
+import com.trbear9.ui.viewmodel.ScanTanahButton
+import com.trbear9.ui.viewmodel.perm
 
 //var firstTime = false
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -136,7 +106,7 @@ class MainActivity : ComponentActivity() {
                 value = true
             }
             LaunchedEffect(isReady) {
-                if(isReady) LocalNav.current?.navigate(Screen.home)
+                if (isReady) LocalNav.current?.navigate(Screen.home)
             }
             App(this)
         }
@@ -147,36 +117,12 @@ class MainActivity : ComponentActivity() {
         TFService.close()
     }
 }
-fun getLocation(context: Context) {
-    perm.launch(
-        arrayOf(
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        )
-    );
-    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(context, "Tolong izinkan untuk menggunakan fitur ini?", Toast.LENGTH_SHORT).show();
-        return
-    }
-    else gps = true
-
-    val geo = GeoParameters();
-    LocationServices.getFusedLocationProviderClient(context)
-        .lastLocation
-        .addOnSuccessListener {
-            if (it != null) {
-                geo.latitude = it.latitude;
-                geo.longtitude = it.longitude;
-            }
-        }
-    inputs.geo = geo;
-    "long: ${geo.longtitude} lat: ${geo.latitude} mdpl: ${geo.altitude}".debug("GETLOCATION")
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun Home(nav: NavController? = null) {
-    val context = LocalContext.current
+    val context = getContext()
     var scroll = rememberScrollState()
     var coffe by remember { mutableStateOf(false) }
 
@@ -476,23 +422,7 @@ fun Home(nav: NavController? = null) {
                                 MarkKey.scantanah.tooltip(ToolTipPlacement.Top)
                             },
                         onClick = {
-                            perm.launch(arrayOf(Manifest.permission.CAMERA))
-                            if (ContextCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.CAMERA
-                                ) != PackageManager.PERMISSION_GRANTED
-                            ) {
-                                perm.launch(arrayOf(Manifest.permission.CAMERA))
-                                Toast.makeText(
-                                    context,
-                                    "Tolong izinkan kamera untuk menggunakan fitur ini!",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            } else {
-                                cam = true
-                                DataStore.completeFirstTime()
-                                nav?.navigate(Screen.camera)
-                            }
+                            ScanTanahButton(context)
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFFF5A623)

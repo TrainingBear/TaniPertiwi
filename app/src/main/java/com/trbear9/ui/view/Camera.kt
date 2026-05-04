@@ -1,4 +1,4 @@
-package com.trbear9.ui.activities
+package com.trbear9.ui.view
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -50,6 +50,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.trbear9.ui.util.Screen
+import com.trbear9.ui.viewmodel.inputs
 
 
 private val imgCapture = ImageCapture.Builder().build()

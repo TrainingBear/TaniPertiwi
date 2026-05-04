@@ -1,4 +1,4 @@
-package com.trbear9.ui.activities
+package com.trbear9.ui.view
 
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility

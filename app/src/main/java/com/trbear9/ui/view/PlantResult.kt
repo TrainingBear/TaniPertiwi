@@ -1,4 +1,4 @@
-package com.trbear9.ui.activities
+package com.trbear9.ui.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -84,6 +84,10 @@ import com.trbear9.ui.util.info
 import com.trbear9.ui.util.Screen
 import com.trbear9.plants.parameters.Response
 import com.trbear9.ui.fragment.PlantCardDisplayer
+import com.trbear9.ui.viewmodel.completer
+import com.trbear9.ui.viewmodel.flatten
+import com.trbear9.ui.viewmodel.inputs
+import com.trbear9.ui.viewmodel.search
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onCompletion
 
@@ -106,8 +110,6 @@ var coachStep = 0
 @Composable
 @Preview()
 fun SoilResultScreen() {
-    LocalContext.current
-
     val keyboard = LocalSoftwareKeyboardController.current
     var query by rememberSaveable { mutableStateOf("") }
     var finalQuery by rememberSaveable { mutableStateOf("") }
@@ -431,7 +433,7 @@ fun SoilResultScreen() {
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = if (!predicted) "Menganalisa tanahmu.."
-                            else if (!parameterLoaded) "Mencari riwayat suhu 6 hari terakhir di daerah mu...\nPastikan koneksimu terhubung ke internet!"
+                            else if (!parameterLoaded) "Mencari riwayat suhu 6 hari terakhir di daerah mu...\nPastikan koneksimu terhubung ke internet\nUntuk hasil yang lebih akurat!"
                             else "Mencari data $current",
                             fontSize = 16.sp,
                             textAlign = TextAlign.Center,
@@ -498,9 +500,11 @@ fun SoilResultScreen() {
                         modifier = Modifier.align(Alignment.Center)
                     )
             }
-            if (loaded) NavigateSoilStats(Modifier
-                .fillMaxSize()
-                .padding(padding))
+            if (loaded) NavigateSoilStats(
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            )
         }
         if (expandedSearch) {
             Box(
@@ -538,53 +542,4 @@ fun SoilResultScreen() {
             }
         }
     }
-}
-
-fun SnapshotStateMap<Int, MutableSet<String>>.flatten(order: String): MutableList<Pair<Int, String>> {
-    val reversedList = if (order == "Tertinggi") {
-        this.toList().asReversed()
-    } else this.toList()
-    val result = mutableListOf<Pair<Int, String>>()
-    reversedList.forEach {
-        it.second.forEach { plant ->
-            result.add(it.first to plant)
-        }
-    }
-    return result
-}
-
-fun completer(query: String, holder: SnapshotStateSet<String>, limit: Int = Int.MAX_VALUE) {
-    inputs.soilResult.plants ?: return
-    var i = 0
-    outer@ for (it in (inputs.soilResult.plants) ?: return) {
-        outer2@ for (plant in it.value) {
-            val commonName = Data.namaIlmiahToNamaUmum[plant.lowercase()]
-            val prefix = query.lowercase()
-            if (commonName != null && (commonName.startsWith(prefix) ||
-                        commonName.endsWith(prefix) || commonName.contains(prefix))
-            ) {
-                holder.add(commonName)
-                if (i++ > limit) {
-                    break@outer
-                    break@outer2
-                }
-            }
-        }
-    }
-}
-
-fun search(query: String, order: String, category: String): MutableList<Pair<Int, String>> {
-    val plants = (inputs.soilResult.plantByCategory?.get(category) ?: return mutableListOf())
-        .flatten(order)
-    val result = mutableListOf<Pair<Int, String>>()
-    for (plant in plants) {
-        val name = Data.namaIlmiahToNamaUmum[plant.second.lowercase()]
-        val prefix = query.lowercase()
-        if (name != null && (name.startsWith(prefix) ||
-                    name.endsWith(prefix) || name.contains(prefix))
-        ) {
-            result.add(plant.first to plant.second)
-        }
-    }
-    return result
 }

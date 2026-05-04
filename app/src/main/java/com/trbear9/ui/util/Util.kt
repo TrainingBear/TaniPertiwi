@@ -1,8 +1,11 @@
 package com.trbear9.ui.util
 
+import android.content.Context
 import android.content.res.AssetManager
 import android.util.Log
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import com.trbear9.plants.E.CATEGORY.cereals_pseudocereals
 import com.trbear9.plants.E.CATEGORY.cover_crop
 import com.trbear9.plants.E.CATEGORY.environmental
@@ -14,6 +17,7 @@ import com.trbear9.plants.E.CATEGORY.other
 import com.trbear9.plants.E.CATEGORY.roots_tubers
 import com.trbear9.plants.E.CATEGORY.vegetables
 import com.trbear9.plants.E.CATEGORY.weed
+import com.trbear9.ui.viewmodel.perm
 import java.io.FileInputStream
 import java.io.IOException
 import java.nio.MappedByteBuffer
@@ -23,6 +27,9 @@ fun String.info(tag: String) = Log.i(tag, this)
 fun String.debug(tag: String) = Log.d(tag, this)
 fun String.warn(tag: String) = Log.w(tag, this)
 fun String.error(tag: String) = Log.e(tag, this)
+
+@Composable
+fun getContext(): Context = LocalContext.current
 
 object Util {
     fun debug(message: String) {

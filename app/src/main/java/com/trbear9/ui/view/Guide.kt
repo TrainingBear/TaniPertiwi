@@ -1,4 +1,4 @@
-package com.trbear9.ui.activities
+package com.trbear9.ui.view
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image

@@ -13,7 +13,7 @@ import com.openmeteo.api.OpenMeteo
 import com.openmeteo.api.common.time.Date
 import com.openmeteo.api.common.units.TemperatureUnit
 import com.trbear9.ui.util.Util
-import com.trbear9.ui.activities.SoilResult
+import com.trbear9.ui.view.SoilResult
 import com.trbear9.ui.util.debug
 import com.trbear9.ui.util.info
 import com.trbear9.plants.E.Category
@@ -23,7 +23,7 @@ import com.trbear9.plants.parameters.GeoParameters
 import com.trbear9.plants.parameters.Response
 import com.trbear9.plants.parameters.UserVariable
 import com.trbear9.plants.parameters.blob.Plant
-import com.trbear9.ui.activities.getLocation
+import com.trbear9.ui.util.error
 //import com.trbear9.plants.save
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -231,7 +231,11 @@ object Data {
 
         data.geo.let {
             Log.d("Data Processor", "Getting temperature..")
-            meteo(it)
+            try {
+                meteo(it)
+            } catch (e: Exception){
+                "Failed to get temperature".error("Data Processor")
+            }
             response.geo = data.geo
             response.parameterLoaded = true
             emit(response)

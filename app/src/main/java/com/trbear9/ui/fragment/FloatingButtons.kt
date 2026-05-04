@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.pseudoankit.coachmark.model.ToolTipPlacement
 import com.pseudoankit.coachmark.scope.CoachMarkScope
 import com.trbear9.ui.util.MarkKey
-import com.trbear9.ui.activities.SoilStatsActivity
+import com.trbear9.ui.view.SoilStatsActivity
 import com.trbear9.ui.util.DataStore
 import com.trbear9.ui.util.highlightConfig
 

@@ -1,4 +1,4 @@
-package com.trbear9.ui.activities
+package com.trbear9.ui.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

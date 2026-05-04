@@ -5,10 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -33,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,8 +76,8 @@ import com.trbear9.plants.E.CATEGORY.roots_tubers
 import com.trbear9.plants.E.CATEGORY.vegetables
 import com.trbear9.plants.E.CATEGORY.weed
 import com.trbear9.plants.parameters.blob.Plant
-import com.trbear9.ui.activities.PlantDetail
-import com.trbear9.ui.util.debug
+import com.trbear9.ui.view.PlantDetail
+import com.trbear9.ui.viewmodel.getPlantImage
 import kotlinx.coroutines.delay
 
 object CONS {
@@ -86,6 +88,7 @@ object CONS {
 var coached by mutableStateOf(false)
 var displayed by mutableStateOf(false)
 var ready by mutableStateOf(false)
+
 @SuppressLint("NotConstructor")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -134,25 +137,35 @@ fun CoachMarkScope.PlantCardDisplayer(
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color.LightGray)
                 ) {
-                    Box(Modifier.fillMaxWidth().aspectRatio(16 / 9f)) {
-                        val model = ImageRequest.Builder(LocalContext.current)
-                            .data("file:///android_asset/images/${ref.nama_ilmiah}.webp")
-                            .crossfade(true)
-                            .size(600, 400)
-                            .diskCachePolicy(CachePolicy.ENABLED)
-                            .memoryCachePolicy(CachePolicy.ENABLED)
-                            .build()
-                        val painter = rememberAsyncImagePainter(model)
-                        val state = painter.state
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16 / 9f)
+                    ) {
+                        var isError by remember { mutableStateOf(false) }
+                        var isLoading by remember { mutableStateOf(false) }
+                        val model = getPlantImage(ref);
                         AsyncImage(
                             model = model,
                             contentDescription = "${ref.nama_ilmiah} image",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxSize()
-                                .clip(RoundedCornerShape(16.dp))
+                                .clip(RoundedCornerShape(16.dp)),
+                            onError = {
+                                isError = true
+                                isLoading = false;
+                            },
+                            onLoading = {
+                                isLoading = true
+                                isError = false
+                            },
+                            onSuccess = {
+                                isLoading = false
+                                isError = false
+                            }
                         )
-                        if (state is AsyncImagePainter.State.Error || state is AsyncImagePainter.State.Loading) {
+                        if (isError) {
                             Column(
                                 modifier = Modifier.align(Alignment.Center),
                                 horizontalAlignment = Alignment.CenterHorizontally
@@ -171,6 +184,22 @@ fun CoachMarkScope.PlantCardDisplayer(
                                 )
                             }
                         }
+                        if (isLoading) {
+                            Column(
+                                modifier = Modifier.align(Alignment.Center),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .fillMaxSize(fraction = 0.5f)
+                                        .clip(RoundedCornerShape(16.dp))
+                                )
+                                Text(
+                                    text = "Memuat Gambar...",
+                                )
+                            }
+                        }
+
                         if (score != 0) {
                             val star = (score / 10f) * 5
                             val half = (star - star.toInt()) > 0.1f
@@ -188,7 +217,7 @@ fun CoachMarkScope.PlantCardDisplayer(
                                             key = MarkKey.skor,
                                             toolTipPlacement = ToolTipPlacement.Bottom,
                                             highlightedViewConfig = highlightConfig
-                                        ){
+                                        ) {
                                             MarkKey.skor.tooltip(ToolTipPlacement.Bottom)
                                         }
                                     else
@@ -263,13 +292,13 @@ fun CoachMarkScope.PlantCardDisplayer(
                     }
                 }
             }
-            if(!coached) "${ref.commonName} has been added coach mark highlighter!".info("PlantCard")
+            if (!coached) "${ref.commonName} has been added coach mark highlighter!".info("PlantCard")
             coached = true
         }
-        LaunchedEffect(Unit){
-            if(!flag && !displayed && ready){
+        LaunchedEffect(Unit) {
+            if (!flag && !displayed && ready) {
                 delay(1500)
-                if(!DataStore.isCompleteTanah && !DataStore.isCompleteTanaman){
+                if (!DataStore.isCompleteTanah && !DataStore.isCompleteTanaman) {
                     show(
                         MarkKey.analisa,
                         MarkKey.cocok,
@@ -295,8 +324,9 @@ fun Kat(
     bcolor: Color = Color(0xFFFF9800),
     icon: ImageVector? = null
 ) {
-    if(text.isNotEmpty()) Box(
-        modifier = Modifier.wrapContentSize()
+    if (text.isNotEmpty()) Box(
+        modifier = Modifier
+            .wrapContentSize()
             .clip(RoundedCornerShape(4.dp))
             .background(bcolor)
     ) {
@@ -371,13 +401,14 @@ fun translateCategory(category: String): String {
     }
     return "Lainnya"
 }
+
 class ImageAsset {
     companion object {
         val images = mutableMapOf<String, Bitmap>()
 
 
         fun getImage(context: Context, name: String?): Bitmap? {
-            if(name == null) return null
+            if (name == null) return null
             if (images.containsKey(name)) return images[name]!!
             try {
                 context.assets.open("images/$name.webp").use {
@@ -395,6 +426,7 @@ class ImageAsset {
 fun test() {
 
 }
+
 fun getImage(context: Context, name: String?): Bitmap? {
     if (name == null) return null
     if (ImageAsset.images.containsKey(name)) return ImageAsset.images[name]!!
