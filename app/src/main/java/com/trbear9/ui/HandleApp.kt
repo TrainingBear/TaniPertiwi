@@ -31,11 +31,11 @@ import com.trbear9.ui.view.Home
 import com.trbear9.ui.view.InputSoil
 import com.trbear9.ui.view.LoadingScreen
 import com.trbear9.ui.view.MainActivity
-import com.trbear9.ui.view.getLocation
-import com.trbear9.ui.view.gps
-import com.trbear9.ui.view.inputs
-import com.trbear9.ui.view.perm
 import com.trbear9.ui.util.Util
+import com.trbear9.ui.viewmodel.getLocation
+import com.trbear9.ui.viewmodel.gps
+import com.trbear9.ui.viewmodel.inputs
+import com.trbear9.ui.viewmodel.perm
 
 object LocalNav {
     var current: NavController? = null
@@ -43,12 +43,15 @@ object LocalNav {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun App(app: MainActivity) {
+fun App(app: MainActivity, isReady: Boolean) {
     val context = LocalContext.current
     var nav = rememberNavController()
     DisposableEffect(Unit) {
         LocalNav.current = nav
         onDispose { LocalNav.current = null }
+    }
+    if(isReady){
+        LocalNav.current?.navigate(Screen.home)
     }
     NavHost(navController = nav, startDestination = "firstLoading") {
         composable(Screen.camera) {

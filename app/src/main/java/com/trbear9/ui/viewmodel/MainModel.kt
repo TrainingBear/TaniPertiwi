@@ -8,6 +8,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import com.trbear9.plants.parameters.GeoParameters
+import com.trbear9.ui.LocalNav
 import com.trbear9.ui.util.DataStore
 import com.trbear9.ui.util.Screen
 import com.trbear9.ui.util.debug
@@ -53,7 +54,7 @@ fun ScanTanahButton(context: Context) {
     } else {
         cam = true
         DataStore.completeFirstTime()
-        nav?.navigate(Screen.camera)
+        LocalNav.current?.navigate(Screen.camera)
     }
 }
 

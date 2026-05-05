@@ -7,13 +7,13 @@ import coil.request.ImageRequest
 import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.ui.util.getContext
 
-
+val url = "https://r2-worker.jasperproject.workers.dev"
 //600x400 image size
 @Composable
 fun getPlantImage(plant: Plant): ImageRequest {
     val encodedName = Uri.encode("${plant.nama_ilmiah}.webp")
     return ImageRequest.Builder(getContext())
-        .data("file:///android_asset/images/$encodedName")
+        .data("$url/$encodedName")
         .crossfade(true)
         .size(600, 400)
         .diskCachePolicy(CachePolicy.ENABLED)
@@ -25,7 +25,7 @@ fun getPlantImage(plant: Plant): ImageRequest {
 fun getDetailedImage(plant: Plant?) : ImageRequest {
     val encodedName = Uri.encode("${plant?.nama_ilmiah}.webp")
     return ImageRequest.Builder(getContext())
-        .data("file:///android_asset/images/$encodedName")
+        .data("$url/$encodedName")
         .crossfade(true)
         .diskCachePolicy(CachePolicy.ENABLED)
         .memoryCachePolicy(CachePolicy.ENABLED)

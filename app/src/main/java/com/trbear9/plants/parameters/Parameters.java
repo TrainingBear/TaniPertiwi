@@ -10,5 +10,4 @@ import java.util.Map;
         property = "@class"
 )
 public interface Parameters {
-    Map<String, String> getParameters();
 }

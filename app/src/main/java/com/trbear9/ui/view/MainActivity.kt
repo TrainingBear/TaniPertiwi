@@ -51,7 +51,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -60,7 +59,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -72,6 +70,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import com.pseudoankit.coachmark.LocalCoachMarkScope
 import com.pseudoankit.coachmark.UnifyCoachmark
@@ -84,13 +83,15 @@ import com.trbear9.plants.TFService
 import com.trbear9.ui.util.DataStore
 import com.trbear9.ui.util.Screen
 import com.trbear9.ui.App
-import com.trbear9.ui.LocalNav
 import com.trbear9.ui.R
 import com.trbear9.ui.util.MarkKey
 import com.trbear9.ui.util.getContext
 import com.trbear9.ui.util.highlightConfig
 import com.trbear9.ui.viewmodel.ScanTanahButton
 import com.trbear9.ui.viewmodel.perm
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 //var firstTime = false
 class MainActivity : ComponentActivity() {
@@ -100,15 +101,17 @@ class MainActivity : ComponentActivity() {
             ActivityResultContracts.RequestMultiplePermissions()
         ) {}
         setContent {
-            val isReady by produceState(initialValue = false) {
-                DataStore.init(this@MainActivity)
-                Data.load(this@MainActivity)
-                value = true
+            var isReady by remember { mutableStateOf(false) }
+
+            LaunchedEffect(Unit) {
+                withContext(Dispatchers.IO) {
+                    DataStore.init(this@MainActivity)
+                    Data.load(this@MainActivity)
+                }
+                isReady = true
             }
-            LaunchedEffect(isReady) {
-                if (isReady) LocalNav.current?.navigate(Screen.home)
-            }
-            App(this)
+
+            App(this@MainActivity, isReady)
         }
     }
 
@@ -166,7 +169,11 @@ fun Home(nav: NavController? = null) {
                             horizontalArrangement = Arrangement.End,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Box(Modifier.fillMaxHeight().weight(7f)) {
+                            Box(
+                                Modifier
+                                    .fillMaxHeight()
+                                    .weight(7f)
+                            ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Image(
                                         painter = painterResource(id = R.drawable.oak_sapling),
@@ -208,13 +215,18 @@ fun Home(nav: NavController? = null) {
                                 }
                             }
 
-                            Box(Modifier.fillMaxHeight().weight(3f)) {
+                            Box(
+                                Modifier
+                                    .fillMaxHeight()
+                                    .weight(3f)
+                            ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = Icons.Default.MonetizationOn,
                                         tint = Color.Black,
                                         contentDescription = "Buy us a coffe!",
-                                        modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)
+                                        modifier = Modifier
+                                            .padding(top = 20.dp, bottom = 20.dp)
                                             .size(30.dp)
                                             .clickable { coffe = !coffe }
                                     )
@@ -223,7 +235,8 @@ fun Home(nav: NavController? = null) {
                                         imageVector = Icons.Default.QuestionMark,
                                         tint = Color.Black,
                                         contentDescription = "Help",
-                                        modifier = Modifier.padding(20.dp)
+                                        modifier = Modifier
+                                            .padding(20.dp)
                                             .size(30.dp)
                                             .clickable {
                                                 nav?.navigate(Screen.help)
@@ -232,7 +245,7 @@ fun Home(nav: NavController? = null) {
                                                 key = MarkKey.help,
                                                 toolTipPlacement = ToolTipPlacement.Start,
                                                 highlightedViewConfig = highlightConfig,
-                                            ){ MarkKey.help.tooltip(ToolTipPlacement.Start)}
+                                            ) { MarkKey.help.tooltip(ToolTipPlacement.Start) }
                                     )
                                 }
                             }
@@ -281,7 +294,8 @@ fun Home(nav: NavController? = null) {
                                         context.startActivity(intent)
                                     },
                                     modifier = Modifier
-                                        .padding(10.dp).wrapContentSize()
+                                        .padding(10.dp)
+                                        .wrapContentSize()
                                         .shadow(10.dp, RoundedCornerShape(20.dp)),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = Color(
@@ -299,12 +313,13 @@ fun Home(nav: NavController? = null) {
                                 Button(
                                     onClick = {
                                         coffe = false
-                                        if(DataStore.firstTime){
+                                        if (DataStore.firstTime) {
                                             show(MarkKey.scantanah, MarkKey.help)
                                         }
                                     },
                                     modifier = Modifier
-                                        .padding(bottom = 10.dp).wrapContentSize()
+                                        .padding(bottom = 10.dp)
+                                        .wrapContentSize()
                                         .shadow(10.dp, RoundedCornerShape(20.dp)),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = Color.Gray
@@ -331,7 +346,11 @@ fun Home(nav: NavController? = null) {
                     .verticalScroll(scroll),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(Modifier.fillMaxWidth().weight(1f)) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
                     BoxWithConstraints(Modifier.fillMaxSize()) {
                         val dynamicFontSize = (maxHeight.value / 4.4).sp
                         val icon = (maxHeight / 3)
@@ -362,7 +381,11 @@ fun Home(nav: NavController? = null) {
                         }
                     }
                 }
-                Box(Modifier.fillMaxWidth().weight(2f)) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(2f)
+                ) {
                     BoxWithConstraints(Modifier.fillMaxSize()) {
                         val dynamicFontSize = (maxHeight.value / 4).sp
                         val dy2 = (maxHeight.value / 8).sp
@@ -384,12 +407,19 @@ fun Home(nav: NavController? = null) {
                             fontSize = dynamicFontSize,
                             fontFamily = FontFamily.SansSerif,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.align(Alignment.Center).fillMaxSize()
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .fillMaxSize()
                                 .padding(top = 20.dp)
                         )
                     }
                 }
-                Box(modifier = Modifier.fillMaxWidth().weight(5f).padding(bottom = 50.dp)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(5f)
+                        .padding(bottom = 50.dp)
+                ) {
                     Image(
                         painter = painterResource(id = R.drawable.background_opsi_mainactivity_rescaled),
                         contentDescription = null,
@@ -401,9 +431,14 @@ fun Home(nav: NavController? = null) {
                     )
                 }
             }
-            Box(Modifier.fillMaxSize().padding(it)) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(it)
+            ) {
                 BoxWithConstraints(
-                    Modifier.fillMaxWidth()
+                    Modifier
+                        .fillMaxWidth()
                         .fillMaxWidth()
                         .aspectRatio(16 / 3f)
                         .align(Alignment.BottomCenter)
@@ -418,7 +453,7 @@ fun Home(nav: NavController? = null) {
                                 key = MarkKey.scantanah,
                                 toolTipPlacement = ToolTipPlacement.Top,
                                 highlightedViewConfig = highlightConfig,
-                            ){
+                            ) {
                                 MarkKey.scantanah.tooltip(ToolTipPlacement.Top)
                             },
                         onClick = {
@@ -434,7 +469,8 @@ fun Home(nav: NavController? = null) {
                             fontSize = dynamicFontSize,
                             fontWeight = FontWeight.ExtraBold,
                             color = Color.White,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier
+                                .fillMaxSize()
                                 .align(Alignment.CenterVertically),
                             textAlign = TextAlign.Center,
                         )
@@ -482,17 +518,21 @@ fun Tooltip(key: CoachMarkKey) {
 @Preview
 fun LoadingScreen() {
     Scaffold() {
-        BoxWithConstraints(Modifier.fillMaxSize().padding(it)) {
+        BoxWithConstraints(
+            Modifier
+                .fillMaxSize()
+                .padding(it)
+        ) {
             Column(Modifier.align(Alignment.Center)) {
                 Image(
                     painter = painterResource(id = R.drawable.oak_sapling),
                     contentDescription = "app icon",
-                    modifier = Modifier.size((this@BoxWithConstraints.maxWidth.value/1.7).dp)
+                    modifier = Modifier.size((this@BoxWithConstraints.maxWidth.value / 1.7).dp)
                 )
                 Text(
                     text = "Open Farm",
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = (this@BoxWithConstraints.maxWidth.value/9).sp,
+                    fontSize = (this@BoxWithConstraints.maxWidth.value / 9).sp,
                     color = Color(0xFF06E509),
                     textAlign = TextAlign.Center,
                 )
@@ -501,7 +541,10 @@ fun LoadingScreen() {
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(bottom = 50.dp)
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(bottom = 50.dp)
             ) {
 //                Image(
 //                    painter = painterResource(id = R.drawable.smanega),
@@ -511,7 +554,7 @@ fun LoadingScreen() {
                 Image(
                     painter = painterResource(id = R.drawable.fertinnv),
                     contentDescription = "logo fert innovation",
-                    modifier = Modifier.width((this@BoxWithConstraints.maxWidth.value /2).dp)
+                    modifier = Modifier.width((this@BoxWithConstraints.maxWidth.value / 2).dp)
                 )
 //                Image(
 //                    painter = painterResource(id = R.drawable.logoman3),

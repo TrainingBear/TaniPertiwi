@@ -31,6 +31,14 @@ fun String.error(tag: String) = Log.e(tag, this)
 @Composable
 fun getContext(): Context = LocalContext.current
 
+fun String.splitCommas() : List<String>{
+    val list = mutableListOf<String>()
+    this.split(", ").forEach {
+        it.split(",").forEach { final->list+=final }
+    }
+    return list
+}
+
 object Util {
     fun debug(message: String) {
         Log.d("OpenFarm", message)

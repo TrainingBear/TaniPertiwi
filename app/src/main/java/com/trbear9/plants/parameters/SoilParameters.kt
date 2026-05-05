@@ -23,17 +23,6 @@ class SoilParameters : Parameters {
         pH = soil.pH
     }
 
-    override fun getParameters(): MutableMap<String?, String?> {
-        val map: MutableMap<String?, String?> = HashMap()
-        map.put(A_soil_depth, depth?.head)
-        map.put(A_soil_texture, texture?.head)
-        map.put(A_soil_fertility, fertility?.head)
-        map.put(A_soil_drainage, drainage?.head)
-        map.put("PH", pH.toString())
-
-        return map
-    }
-
     companion object {
         /** sources:
          * - https://www.sciencedirect.com/topics/agricultural-and-biological-sciences/alluvial-soilStats

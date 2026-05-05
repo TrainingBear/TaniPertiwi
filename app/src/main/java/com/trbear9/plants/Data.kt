@@ -24,6 +24,7 @@ import com.trbear9.plants.parameters.Response
 import com.trbear9.plants.parameters.UserVariable
 import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.ui.util.error
+import com.trbear9.ui.util.warn
 //import com.trbear9.plants.save
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -36,6 +37,15 @@ import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import kotlin.collections.iterator
+import kotlin.math.min
+
+fun getData(nama: String): CSVRecord {
+    if (!Data.ecocrop.containsKey(nama)) {
+        "Data untuk $nama tidak tersedia".warn("Data Processor")
+        throw Exception("Data untuk $nama tidak tersedia")
+    }
+    return Data.ecocrop[nama]!!
+}
 
 @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 @Getter
@@ -308,8 +318,8 @@ object Data {
 
     @OptIn(com.openmeteo.api.common.Response.ExperimentalGluedUnitTimeStepValues::class)
     fun meteo(geo: GeoParameters) {
-        var max = 0.0
-        var min = 0.0
+        var max = 0.0f
+        var min = 0.0F
         var elevation = 0f
         val meteo = OpenMeteo(geo.latitude.toFloat(), geo.longtitude.toFloat())
         val temperatur = meteo.forecast {
@@ -327,7 +337,7 @@ object Data {
             temperatur.daily.getValue(temperature2mMax).run {
                 var size = 0
                 for (m in values.values){
-                    max = Math.max(m ?: continue, max)
+                    max = Math.max(m?.toFloat() ?: continue, max)
 //                    += (m ?: 28.0)
                     "Maximum temperature: $m".debug("METEO")
                     size++
@@ -338,11 +348,11 @@ object Data {
                 var size = 0
                 var flag = false
                 for (m in values.values) {
-                    min = m?:continue
+                    min = m?.toFloat()?:continue
                     if(!flag){
                         flag = true
                     }
-                    min = Math.min(m, min)
+                    min = min(m.toFloat(), min)
 //                        (m ?: 20.0)
                     "Minimum temperature: $m".debug("METEO")
                     size++

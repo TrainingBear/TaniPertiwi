@@ -85,6 +85,7 @@ import com.trbear9.plants.E.MAX_crop_cycle
 import com.trbear9.plants.E.MIN_crop_cycle
 import com.trbear9.plants.E.O_maximum_temperature
 import com.trbear9.plants.E.O_minimum_temperature
+import com.trbear9.plants.parameters.PlantDummy
 import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.ui.fragment.CONS
 import com.trbear9.ui.fragment.ImageAsset
@@ -123,7 +124,7 @@ fun getScreenWidth(): Dp {
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun PlantDetail(score: Int = 0, ref: Plant? = null, onExit: () -> Unit = {}) {
+fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit = {}) {
     val context = LocalContext.current
     val scroll = rememberScrollState()
     var image by remember { mutableStateOf<Bitmap?>(null) }
@@ -298,7 +299,7 @@ fun PlantDetail(score: Int = 0, ref: Plant? = null, onExit: () -> Unit = {}) {
                         mainAxisSpacing = 4.dp,
                         crossAxisSpacing = 4.dp
                     ) {
-                        plant.climateZone.split(", ")?.forEach {
+                        plant.climateZone?.split(", ")?.forEach {
                             Kat(
                                 Util.translateClimate(it),
                                 tcolor = Color.White,
