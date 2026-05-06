@@ -23,7 +23,8 @@ enum class MarkKey(private val tooltip: String) {
     cocok("Berikut salah satu tanaman\nyang cocok berdasarkan\ntanah anda"),
     skor("Banyaknya bintang menunjukan\nnilai kecocokan tanahmu pada\n tanaman ini"),
     analisa("Click untuk analisa tanahmu"),
-    help("Click untuk baca Panduan selengkapnya");
+    help("Click untuk baca Panduan selengkapnya"),
+    taksonomi("Click untuk detail taksonomi dari tanaman tersebut");
 
     @Composable
     fun tooltip(){

@@ -6,7 +6,7 @@ import org.apache.commons.csv.CSVRecord
 import kotlin.math.absoluteValue
 import kotlin.math.max
 
-fun evaluateAll(record: CSVRecord, input: UserVariable) : Int{
+fun evaluateAll(record: CSVRecord, input: UserVariable): Int {
     val constraints = listOf(
         RainEval,
         TemperatureEval,
@@ -21,10 +21,10 @@ fun evaluateAll(record: CSVRecord, input: UserVariable) : Int{
     var score = 0;
     for (constraint in constraints) {
         try {
-            val temp =constraint.evaluate(record, input)
+            val temp = constraint.evaluate(record, input)
 //            "    ${constraint::class.simpleName}: $temp".info("Csv");
             score += temp;
-        } catch (e: Exception){
+        } catch (e: Exception) {
 //            "Can't evaluate ${record.get(E.Science_name)} with constraint of ${constraint::class.simpleName}".warn("CsvHandler")
         }
     }
@@ -55,7 +55,7 @@ object TemperatureEval : Constraint {
         val mn = record.get(E.A_minimum_temperature).toFloat()
         val mx = record.get(E.A_maximum_temperature).toFloat()
         return if (input.geo.min >= mn && input.geo.max <= mx) 2 else {
-            (max(0f, mn - input.geo.min) + max(input.geo.max - mx, 0f)).toInt() * -1 /2;
+            (max(0f, mn - input.geo.min) + max(input.geo.max - mx, 0f)).toInt() * -1 / 2;
         }
     }
 }
@@ -65,7 +65,7 @@ object CycleEval : Constraint {
         record: CSVRecord,
         input: UserVariable
     ): Int {
-        input.custom?:return 0;
+        input.custom ?: return 0;
         val mn = record.get(E.MIN_crop_cycle).toInt()
         val mx = record.get(E.MAX_crop_cycle).toInt()
         return if (input.custom?.panen in mn..mx) 100 else {
@@ -125,10 +125,12 @@ object DrainageEval : Constraint {
         record: CSVRecord,
         input: UserVariable
     ): Int {
-        return if (record.get(E.A_soil_drainage).splitCommas().contains(input.soil.drainage?.head)) 1
+        return if (record.get(E.A_soil_drainage).splitCommas()
+                .contains(input.soil.drainage?.head)
+        ) 1
         else -2
     }
- }
+}
 
 object AltitudeEval : Constraint {
     override fun evaluate(
@@ -136,34 +138,52 @@ object AltitudeEval : Constraint {
         input: UserVariable
     ): Int {
         val mxAlt = record.get(E.O_maximum_altitude).toFloat()
-        return if(input.geo.altitude <= mxAlt) 1;
+        return if (input.geo.altitude <= mxAlt) 1;
         else -1;
     }
 }
+
 object ClimateEval : Constraint {
     override fun evaluate(
         record: CSVRecord,
         input: UserVariable
     ): Int {
         var score = 0;
-        if(record.get(E.Climate_zone).splitCommas().contains(input.geo.iklim?.head)) score++;
-        else score-=354
+        if (record.get(E.Climate_zone).splitCommas().contains(input.geo.iklim?.head)) score++;
+        else score -= 354
         return score
     }
 }
+
 object LatitudeEval : Constraint {
     override fun evaluate(
         record: CSVRecord,
         input: UserVariable
     ): Int {
-        val mnLat = record.get(E.A_minimum_latitude).toFloat()
-        val mxLat = record.get(E.A_maximum_latitude).toFloat()
-        return if (input.geo.latitude in mnLat..mxLat) 1;
-        else {
-            input.geo.latitude.toFloat().coerceIn(
-                Math.min(mnLat, mxLat),
-                Math.max(mnLat, mxLat)
-            ).absoluteValue.toInt()*-1;
+
+        val mnRaw = record.get(E.A_minimum_latitude)
+        val mxRaw = record.get(E.A_maximum_latitude)
+
+        // Handle NA
+        if (mnRaw == "NA" || mxRaw == "NA") return 0
+
+        val mnLat = mnRaw.toFloat().absoluteValue
+        val mxLat = mxRaw.toFloat().absoluteValue
+
+        val min = minOf(mnLat, mxLat)
+        val max = maxOf(mnLat, mxLat)
+
+        val userLat = input.geo.latitude.absoluteValue.toFloat()
+
+        return if (userLat in min..max) {
+            1
+        } else {
+            val distance = when {
+                userLat < min -> min - userLat
+                userLat > max -> userLat - max
+                else -> 0f
+            }
+            -distance.toInt()
         }
     }
 }

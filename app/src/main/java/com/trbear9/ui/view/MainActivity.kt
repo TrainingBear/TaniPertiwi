@@ -27,9 +27,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Park
@@ -44,6 +47,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -61,8 +65,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
@@ -89,6 +95,7 @@ import com.trbear9.ui.util.getContext
 import com.trbear9.ui.util.highlightConfig
 import com.trbear9.ui.viewmodel.ScanTanahButton
 import com.trbear9.ui.viewmodel.perm
+import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -196,7 +203,7 @@ fun Home(nav: NavController? = null) {
                                                         fontSize = 24.sp,
                                                     )
                                                 ) {
-                                                    append("OpenFarm")
+                                                    append("TaniPertiwi")
                                                 }
                                                 withStyle(
                                                     style = SpanStyle(
@@ -205,7 +212,7 @@ fun Home(nav: NavController? = null) {
                                                         fontSize = 16.sp,
                                                     )
                                                 ) {
-                                                    append("\nby Jasper")
+                                                    append("\nby Jaksara")
                                                 }
                                             },
                                             lineHeight = 18.sp,
@@ -261,79 +268,120 @@ fun Home(nav: NavController? = null) {
                         .padding(it)
                         .wrapContentSize(),
                 ) {
-                    BoxWithConstraints(Modifier.fillMaxSize()) {
-                        Column(
+                    Column(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(Color(0xFFFFFFFF))
+                            .padding(horizontal = 24.dp, vertical = 28.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Icon
+                        Box(
                             modifier = Modifier
-                                .wrapContentSize()
-                                .clip(RoundedCornerShape(30.dp))
-                                .background(Color(0x99FFFFFF)),
-//                            .border(BorderStroke(1.dp, Color.Black)),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                                .size(56.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFFFF3E0)),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Image(
-                                imageVector = Icons.Default.MonetizationOn,
-                                contentDescription = "Coffee",
-                                modifier = Modifier.size(50.dp)
+                            Icon(
+                                imageVector = Icons.Default.Favorite,
+                                contentDescription = "Support",
+                                tint = Color(0xFFFF9100),
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+
+                        Spacer(Modifier.height(14.dp))
+
+                        // Headline
+                        Text(
+                            text = "Dukung pengembangan aplikasi ini",
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 24.sp
+                        )
+
+                        Spacer(Modifier.height(10.dp))
+
+                        // Description
+                        Text(
+                            text = "Jika kamu merasa project ini membantu, kamu bisa mendukung kami melalui donasi. Dukunganmu membantu biaya server dan pengembangan fitur baru agar project ini tetap berjalan.",
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Center,
+                            color = Color.Gray,
+                            lineHeight = 20.sp
+                        )
+
+                        Spacer(Modifier.height(16.dp))
+
+                        // Social proof hint
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Color(0xFFF5F5F5))
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = Color(0xFF1D9E75),
+                                modifier = Modifier.size(16.dp)
                             )
                             Text(
-                                text = "Aplikasi ini di buat oleh pelajar SMAN 1 Ambarawa dan pelajar MAN 3 Jakarta pusat." +
-                                        "\nSebagai tanda dukungan, bisa beri kami secangkir kopi:",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Normal,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(10.dp)
+                                text = "Sekali donasi sudah sangat berarti untuk keberlanjutan aplikasi ini",
+                                fontSize = 12.sp,
+                                color = Color.DarkGray,
+                                lineHeight = 18.sp
                             )
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Button(
-                                    onClick = {
-                                        val intent =
-                                            Intent(
-                                                Intent.ACTION_VIEW,
-                                                "https://saweria.co/Kujatic".toUri()
-                                            )
-                                        context.startActivity(intent)
-                                    },
-                                    modifier = Modifier
-                                        .padding(10.dp)
-                                        .wrapContentSize()
-                                        .shadow(10.dp, RoundedCornerShape(20.dp)),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color(
-                                            0xFFFF9100
-                                        )
-                                    ),
-                                ) {
-                                    Text(
-                                        text = "Beri dukungan!",
-                                        fontSize = 18.sp,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.ExtraBold
-                                    )
-                                }
-                                Button(
-                                    onClick = {
-                                        coffe = false
-                                        if (DataStore.firstTime) {
-                                            show(MarkKey.scantanah, MarkKey.help)
-                                        }
-                                    },
-                                    modifier = Modifier
-                                        .padding(bottom = 10.dp)
-                                        .wrapContentSize()
-                                        .shadow(10.dp, RoundedCornerShape(20.dp)),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color.Gray
-                                    ),
-                                ) {
-                                    val fontsize = (this@BoxWithConstraints.maxWidth.value / 27).sp
-                                    Text(
-                                        text = "Tidak, terimakasih!",
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Normal,
-                                        fontSize = fontsize
-                                    )
+                        }
+
+                        Spacer(Modifier.height(18.dp))
+
+                        // Primary CTA
+                        Button(
+                            onClick = {
+                                val intent = Intent(
+                                    Intent.ACTION_VIEW,
+                                    "https://trakteer.id/kujatic/tip".toUri()
+                                )
+                                context.startActivity(intent)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFF9100)
+                            ),
+                            shape = RoundedCornerShape(14.dp),
+                            contentPadding = PaddingValues(vertical = 13.dp)
+                        ) {
+                            Text(
+                                text = "Donasi sekarang via Saweria",
+                                fontSize = 15.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+
+                        Spacer(Modifier.height(4.dp))
+
+                        // Dismiss
+                        TextButton(
+                            onClick = {
+                                coffe = false
+                                if (DataStore.firstTime) {
+                                    show(MarkKey.scantanah, MarkKey.help)
                                 }
                             }
+                        ) {
+                            Text(
+                                text = "Mungkin nanti",
+                                color = Color.LightGray,
+                                fontSize = 13.sp
+                            )
                         }
                     }
                 }
@@ -391,7 +439,7 @@ fun Home(nav: NavController? = null) {
                         val dy2 = (maxHeight.value / 8).sp
                         Text(
                             text = buildAnnotatedString {
-                                append("Open Farm")
+                                append("Tani Pertiwi")
                                 withStyle(
                                     style = SpanStyle(
                                         fontWeight = FontWeight.Bold,
@@ -530,7 +578,7 @@ fun LoadingScreen() {
                     modifier = Modifier.size((this@BoxWithConstraints.maxWidth.value / 1.7).dp)
                 )
                 Text(
-                    text = "Open Farm",
+                    text = "Tani Pertiwi",
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = (this@BoxWithConstraints.maxWidth.value / 9).sp,
                     color = Color(0xFF06E509),

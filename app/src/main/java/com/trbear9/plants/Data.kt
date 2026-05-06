@@ -118,9 +118,12 @@ object Data {
     val ecocrop = mutableMapOf<String, CSVRecord>()
     fun load(context: Context) {
         CsvHandler.load(context)
+        var cnt = 0;
         CsvHandler.ecocropcsv?.forEach {
             ecocrop[it[Science_name]] = it
+            cnt++;
         }
+        "Loaded $cnt total plants on ECOCROP.Csv".info("Data Processor")
         TFService.load(context)
         context.assets.list("serialized")?.forEach {
             if(it!="CSV" && it!="ecocrop.ser") {

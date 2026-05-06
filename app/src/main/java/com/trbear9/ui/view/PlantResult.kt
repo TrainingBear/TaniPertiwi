@@ -1,5 +1,6 @@
 package com.trbear9.ui.view
 
+import SoilResultTopBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -151,6 +152,11 @@ fun SoilResultScreen() {
     var predicted by rememberSaveable { mutableStateOf<Boolean>(inputs.soilResult?.response?.predicted == true) }
     var parameterLoaded by rememberSaveable { mutableStateOf<Boolean>(inputs.soilResult?.response?.parameterLoaded == true) }
     var noResponse by rememberSaveable { mutableStateOf<Boolean>(inputs.soilResult.response == null) }
+    var hasil by rememberSaveable {
+        mutableIntStateOf(
+            inputs.soilResult?.response?.total ?: 0
+        )
+    }
 
     var search = remember { mutableStateSetOf<String>() }
     var focusRequester = remember { FocusRequester() }
@@ -173,6 +179,7 @@ fun SoilResultScreen() {
                 target = it.target
                 predicted = it.predicted
                 parameterLoaded = it.parameterLoaded
+                hasil = it.total
             }
         }
     }
@@ -185,181 +192,23 @@ fun SoilResultScreen() {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFF5F5F5)),
-                title = {
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = (if (expandedSearch) Modifier.fillMaxWidth() else Modifier.weight(
-                                1f
-                            ))
-                        ) {
-                            BasicTextField(
-                                value = query,
-                                onValueChange = { input ->
-                                    query = input
-                                    search.clear()
-                                    expandedSearch = true
-                                },
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(
-                                    imeAction = ImeAction.Search
-                                ),
-                                keyboardActions = KeyboardActions(
-                                    onSearch = {
-                                        expandedSearch = false
-                                        keyboard?.hide()
-                                        hasFocus = false
-                                        finalQuery = query
-                                        "ExpandedSearch: $expandedSearch".debug("PlantResult")
-                                    },
-                                ),
-                                modifier = Modifier
-                                    .height(35.dp)
-                                    .padding(end = 12.dp)
-                                    .focusRequester(focusRequester)
-                                    .onFocusChanged { focusState ->
-                                        hasFocus = focusState.hasFocus
-                                    },
-                                decorationBox = { innerTextField ->
-                                    BoxWithConstraints(
-                                        Modifier
-                                            .height(35.dp)
-                                            .fillMaxWidth()
-                                            .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
-                                        contentAlignment = Alignment.CenterStart
-                                    ) {
-                                        val size = (maxHeight.value / 2).sp
-                                        Column(verticalArrangement = Arrangement.Center) {
-                                            if (query.isEmpty() && !hasFocus) {
-                                                Text(
-                                                    "Masukan nama tanaman",
-                                                    color = Color.Gray,
-                                                    fontSize = size,
-                                                    modifier = Modifier
-                                                        .padding(start = 10.dp)
-                                                )
-                                            } else
-                                                Box(
-                                                    Modifier
-                                                        .wrapContentSize()
-                                                        .padding(start = 10.dp)
-                                                ) {
-                                                    if (expandedSearch && query.isNotEmpty()) Row(
-                                                        horizontalArrangement = Arrangement.End,
-                                                        modifier = Modifier.fillMaxWidth()
-                                                    ) {
-                                                        IconButton(
-                                                            onClick = { query = "" }
-                                                        ) {
-                                                            Icon(
-                                                                Icons.Default.Close,
-                                                                "Clear",
-                                                                tint = Color.Gray
-                                                            )
-                                                        }
-                                                    }
-                                                    innerTextField()
-                                                }
-                                        }
-                                    }
-                                }
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Row(
-                            Modifier.clickable { expandCat = !expandCat },
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = order,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Normal,
-                            )
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = "Order",
-                                tint = Color.Yellow,
-                                modifier = Modifier
-                                    .size(30.dp)
-                            )
-                            DropdownMenu(
-                                expanded = expandCat,
-                                onDismissRequest = { expandCat = false },
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text("Tertinggi") },
-                                    onClick = {
-                                        order = "Tertinggi"
-                                        expandCat = false
-                                        expandedSearch = false
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Terendah") },
-                                    onClick = {
-                                        order = "Terendah"
-                                        expandCat = false
-                                        expandedSearch = false
-                                    },
-                                )
-                            }
-                        }
-
-                        Row(
-                            modifier = Modifier
-                                .clickable { expanded = !expanded },
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = selected.take(10) + if (selected.length > 10) ".." else "",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Normal
-                            )
-                            Icon(
-                                imageVector = Icons.Default.KeyboardArrowDown,
-                                contentDescription = "Filter",
-                                modifier = Modifier.size(30.dp),
-                                tint = Color.Black
-                            )
-                            Box {
-                                DropdownMenu(
-                                    expanded = expanded,
-                                    onDismissRequest = { expanded = false },
-                                    modifier = Modifier.height(300.dp),
-                                    scrollState = scroll
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text("All") },
-                                        onClick = {
-                                            expanded = false
-                                            selected = "All"
-                                            expandedSearch = false
-//                                            query = ""
-                                        }
-                                    )
-                                    Util.getCategory().forEach {
-                                        DropdownMenuItem(
-                                            text = { Text(it) },
-                                            onClick = {
-                                                expanded = false
-                                                selected = it
-                                                expandedSearch = false
-//                                                query = ""
-                                            },
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            )
+                SoilResultTopBar(
+                    query = query,
+                    onQueryChange = { query = it; search.clear() },
+                    onSearch = { finalQuery = query },
+                    selected = selected,
+                    onSelectedChange = { selected = it },
+                    order = order,
+                    onOrderChange = { order = it },
+                    hasFocus = hasFocus,
+                    onFocusChange = { hasFocus = it },
+                    expandedSearch = expandedSearch,
+                    onExpandedSearchChange = { expandedSearch = it },
+                    focusRequester = focusRequester,
+                    keyboard = keyboard,
+                    scroll = scroll,
+                    hasil = hasil
+                )
         },
         bottomBar = {
             var selected by rememberSaveable { mutableIntStateOf(1) }

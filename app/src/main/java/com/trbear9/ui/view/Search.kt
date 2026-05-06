@@ -1,5 +1,6 @@
 package com.trbear9.ui.view
 
+import SoilResultTopBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -36,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -75,7 +77,6 @@ import kotlin.math.min
 @Composable
 fun SearchLayout(nav: NavController? = null, from: String = "home") {
     val scroll = rememberScrollState()
-    var expanded by rememberSaveable { mutableStateOf(false) }
     var selected by rememberSaveable { mutableStateOf("All") }
     var query by rememberSaveable { mutableStateOf("") }
     var finalQuery by rememberSaveable { mutableStateOf("") }
@@ -149,128 +150,26 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
     }
     val items = pagerFlow.collectAsLazyPagingItems()
 
+    var order by rememberSaveable { mutableStateOf("Tertinggi") }
+    var expandedSearch by rememberSaveable { mutableStateOf(false) }
+    var hasFocus by rememberSaveable { mutableStateOf(false) }
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Row(
-                        Modifier.fillMaxSize(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            Modifier
-                                .fillMaxHeight()
-                                .weight(4f)
-                        ) {
-                            BasicTextField(
-                                value = query,
-                                onValueChange = { input ->
-                                    if (input.all { !it.isDigit() }) {
-                                        query = input
-                                    }
-                                },
-                                singleLine = true,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(35.dp)
-                                    .align(Alignment.Center)
-                                    .focusRequester(focusRequester)
-                                    .onFocusChanged {
-                                        focus = it.isFocused
-                                    },
-                                keyboardOptions = KeyboardOptions(
-                                    imeAction = ImeAction.Search
-                                ),
-                                keyboardActions = KeyboardActions(
-                                    onSearch = {
-                                        search()
-                                    }
-                                ),
-                                decorationBox = { innerTextField ->
-                                    BoxWithConstraints(
-                                        Modifier
-                                            .fillMaxSize()
-                                            .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
-                                        contentAlignment = Alignment.CenterStart
-                                    ) {
-                                        val size = (maxHeight.value / 2).sp
-                                        Column(verticalArrangement = Arrangement.Center) {
-                                            if (query.isEmpty() && !focus) {
-                                                Text(
-                                                    "Masukan nama tanaman",
-                                                    color = Color.Gray,
-                                                    fontSize = size,
-                                                    modifier = Modifier
-                                                        .padding(start = 10.dp)
-                                                )
-                                            } else Box(
-                                                Modifier
-                                                    .wrapContentSize()
-                                                    .padding(start = 10.dp)
-                                            ) {
-                                                innerTextField()
-                                            }
-                                        }
-                                    }
-                                }
-                            )
-                        }
-                        Box(Modifier
-                            .fillMaxHeight()
-                            .weight(1f)) {
-                            Column(verticalArrangement = Arrangement.Center) {
-                                IconButton(
-                                    onClick = { expanded = !expanded },
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.MoreVert,
-                                        contentDescription = "Back",
-                                        modifier = Modifier.fillMaxSize(0.5f)
-                                    )
-                                }
-                                DropdownMenu(
-                                    expanded = expanded,
-                                    onDismissRequest = { expanded = false },
-                                    modifier = Modifier.height(300.dp),
-                                    scrollState = scroll
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text("All") },
-                                        onClick = {
-                                            expanded = false
-                                            selected = "All"
-                                            focus = false
-//                                            query = ""
-                                        }
-                                    )
-                                    Util.getCategory().forEach {
-                                        DropdownMenuItem(
-                                            text = { Text(it) },
-                                            onClick = {
-                                                expanded = false
-                                                selected = it
-                                                focus = false
-//                                                query = ""
-                                            },
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        nav?.navigate(from)
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                }
+            SoilResultTopBar(
+                query = query,
+                onQueryChange = { query = it; completer.clear() },
+                onSearch = { finalQuery = query; search() },
+                selected = selected,
+                onSelectedChange = { selected = it },
+                order = order,
+                onOrderChange = { order = it },
+                hasFocus = hasFocus,
+                onFocusChange = { hasFocus = it },
+                expandedSearch = expandedSearch,
+                onExpandedSearchChange = { expandedSearch = it },
+                focusRequester = focusRequester,
+                keyboard = keyboard,
+                scroll = scroll,
             )
         }
     ) { padding ->
@@ -287,7 +186,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
                 remember(finalQuery, selected) {
                     Pager(PagingConfig(pageSize = 7)) {
                         CompleterSearchSource(
-                            inputs.searchResult.plantByCategory!![selected]?.toMutableList()
+                            inputs.searchResult.plantByCategory?.get(selected)?.toMutableList()
                                 ?: mutableListOf()
                         )
                     }.flow

@@ -87,6 +87,30 @@ object Util {
         }
     }
 
+    fun bulkCategoryTranslate(categories: Set<String>): String?{
+        var ans = "";
+        categories.forEach {
+            ans += translateCategory(it) + ", "
+        }
+        ans.trimEnd { it == ',' }
+        return ans
+    }
+    fun bulkCategoryTranslate(categories: String?): String?{
+        categories?:return null;
+        var ans = "";
+        categories.splitCommas().forEach {
+            ans += translateCategory(it) + ", "
+        }
+        return ans;
+    }
+    fun bulkClimateTranslate(climates: String?): String?{
+        climates?:return null;
+        var ans = "";
+        climates.splitCommas().forEach {
+            ans += translateClimate(it) + ", "
+        }
+        return ans;
+    }
     fun translateCategory(category: String): String {
         when (category) {
             other.head -> return "Lainnya"

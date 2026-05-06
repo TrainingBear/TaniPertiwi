@@ -24,24 +24,33 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -67,6 +76,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -110,19 +120,31 @@ import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  SoilStats.kt  –  redesigned soil analytics screen
+//  Palette: #F9F6F0 cream · #1B4332 dark green · #52B788 mid green
+//           #D8F3DC light green · #F5A623 amber · #E9ECE7 divider
+// ─────────────────────────────────────────────────────────────────────────────
+
+private val SoilGreenDark = Color(0xFF1B4332)
+private val SoilGreenMid = Color(0xFF52B788)
+private val SoilGreenLight = Color(0xFFD8F3DC)
+private val SoilCream = Color(0xFFF9F6F0)
+private val SoilAmber = Color(0xFFF5A623)
+private val SoilAmberLight = Color(0xFFFFF3E0)
+private val SoilDivider = Color(0xFFE0EDE4)
+private val SoilTextPrimary = Color(0xFF1A1A1A)
+private val SoilTextMuted = Color(0xFF6B7B6E)
+private val SoilCardBg = Color(0xFFFFFFFE)
+
 val labelListKey = ExtraStore.Key<List<String>>()
-private val backgroundCardColor: Color = Color(0x99FFFFFF)
-private val backgroundTitleColor: Color = Color(0x27050091)
-private val clipRound: Dp = 15.dp
+private val clipRound: Dp = 16.dp
 
 class SoilStatsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SoilStats {
-                this.onBackPressedDispatcher.onBackPressed()
-                this.finish()
-            }
+            SoilStats { onBackPressedDispatcher.onBackPressed(); finish() }
         }
     }
 }
@@ -131,401 +153,409 @@ class SoilStatsActivity : ComponentActivity() {
 @Composable
 fun SoilStats(click: () -> Unit = {}) {
     val scroll = rememberScrollState()
-    var response by remember { mutableStateOf(inputs.soilResult.response) }
-    var collected by remember { mutableStateOf(inputs.soilResult.collected) }
-    var soilType by remember { mutableStateOf(response?.soilMax?.first ?: "Belum diketahui") }
-    var soilPred by remember { mutableFloatStateOf(response?.soilMax?.second ?: 0.0f) }
-    var ferr by remember { mutableStateOf(response?.soil?.fertility ?: "Belum diketahui") }
-    var texr by remember { mutableStateOf(response?.soil?.texture ?: "Belum diketahui") }
-    var drain by remember { mutableStateOf(response?.soil?.drainage ?: "Belum diketahui") }
-    var depth by remember { mutableIntStateOf(inputs.soil.numericDepth) }
+    val response by remember { mutableStateOf(inputs.soilResult.response) }
+    val collected by remember { mutableStateOf(inputs.soilResult.collected) }
+    val soilType by remember { mutableStateOf(response?.soilMax?.first ?: "Belum diketahui") }
+    val soilPred by remember { mutableFloatStateOf(response?.soilMax?.second ?: 0f) }
+    val ferr by remember { mutableStateOf(response?.soil?.fertility ?: "Belum diketahui") }
+    val texr by remember { mutableStateOf(response?.soil?.texture ?: "Belum diketahui") }
+    val drain by remember { mutableStateOf(response?.soil?.drainage ?: "Belum diketahui") }
+    val depth by remember { mutableIntStateOf(inputs.soil.numericDepth) }
+    val geo by remember { mutableStateOf(response?.geo) }
     val modelProducer = remember { CartesianChartModelProducer() }
-    var list = remember { mutableStateListOf<Float>() }
-    val geo by remember { mutableStateOf(inputs.soilResult.response?.geo) }
+    val list = remember { mutableStateListOf<Float>() }
 
     LaunchedEffect(Unit) {
-        collected = inputs.soilResult.collected
         modelProducer.runTransaction {
             columnSeries {
-                response?.soilPrediction?.run {
-                    forEach { pair ->
-                        list.add(pair.second)
-                    }
-                }
+                response?.soilPrediction?.forEach { pair -> list.add(pair.second) }
                 series(
-                    if (list.isEmpty()) {
-                        listOf(
-                            Random.nextFloat(), Random.nextFloat(),
-                            Random.nextFloat(), Random.nextFloat(),
-                            Random.nextFloat(), Random.nextFloat(),
-                        )
-                    } else list
+                    if (list.isEmpty()) List(6) { Random.nextFloat() } else list
                 )
-                extras {
-                    it[labelListKey] = TFService.labels
-                }
+                extras { it[labelListKey] = TFService.labels }
             }
         }
     }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background( // BACKGROUND
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFFCFE5D4),
-                        Color(0xFFEEEED9)
-                    ), end = Offset.Zero, start = Offset(300f, 500f)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(Color(0xFFE8F5E9), SoilCream, Color(0xFFF0EDE6))
                 )
             )
     ) {
-        Scaffold(
-            containerColor = Color.Transparent,
-//            bottomBar = {
-//                var selected by remember { mutableIntStateOf(2) }
-//                NavigationBar {
-//                    NavigationBarItem(
-//                        selected = selected == 0,
-//                        onClick = {
-//                            selected = 0
-//                            nav?.navigate(Screen.home)
-//                        },
-//                        icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-//                        label = { Text("Home") }
-//                    )
-//                    NavigationBarItem(
-//                        selected = selected == 1,
-//                        onClick = {
-//                            selected = 1
-//                            nav?.navigate(Screen.soilResult)
-//                        },
-//                        icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
-//                        label = { Text("Tanaman") }
-//                    )
-//                }
-//            }
-        ) { padding ->
-            Box(modifier = Modifier.padding(padding)) {
-                if (!collected && false)
+        Scaffold(containerColor = Color.Transparent) { padding ->
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .verticalScroll(scroll)
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+
+                // ── Page title ────────────────────────────────────────────
+                Spacer(Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Spacer(Modifier.width(48.dp)) // offset for close btn
                     Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = buildAnnotatedString {
-                                withStyle(
-                                    style = SpanStyle(
-                                        fontSize = 40.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                    )
-                                ) {
-                                    append("Oopps!\n")
-                                }
-                                withStyle(
-                                    style = SpanStyle(
-                                        fontSize = 20.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                ) {
-                                    append("Anda sepertinya belum memotret tanah anda")
-                                }
-                            },
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 20.dp)
+                            "Analisis Tanah",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = SoilGreenDark
                         )
-                        Button(
-                            onClick = {
-                                click()
-                            },
-                            modifier = Modifier.padding(top = 20.dp)
-                        ) {
-                            Text(text = "Potret Tanahmu Sekarang")
-                        }
+                        Text(
+                            "Hasil pemindaian tanahmu",
+                            fontSize = 13.sp,
+                            color = SoilTextMuted
+                        )
                     }
-                else
-                    Column(
-                        modifier = Modifier.verticalScroll(scroll)
+                    Spacer(Modifier.width(48.dp))
+                }
+
+                // ── Soil photo ────────────────────────────────────────────
+                SoilCard {
+                    SoilSectionTitle("Foto yang di potret", Icons.Default.CameraAlt)
+                    Spacer(Modifier.height(10.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16 / 9f)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(SoilGreenLight)
                     ) {
-                        //TODO jangan lupa kondisi originalnya
-//                        if (false) {
-//                            Column(
-//                                horizontalAlignment = Alignment.CenterHorizontally,
-//                                verticalArrangement = Arrangement.Center,
-//                                modifier = Modifier
-//                                    .fillMaxWidth()
-//                                    .padding(10.dp)
-//                            ) {
-//                                Text(
-//                                    text = "Tunggu sebentar...",
-//                                    fontSize = 20.sp,
-//                                    fontFamily = FontFamily.Monospace
-//                                )
-//                            }
-//                        }
-//                        if (response?.soilPrediction == null) TODO jan lupa jga itu
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
+                        Image(
+                            painter = if (inputs.image != null)
+                                BitmapPainter(inputs.image!!.asImageBitmap())
+                            else rememberVectorPainter(Icons.Default.Image),
+                            contentDescription = "Foto tanah",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        // confidence badge overlay
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(365.dp)
-                                .wrapContentHeight()
-                                .padding(10.dp)
-                                .clip(RoundedCornerShape(clipRound))
-                                .background(backgroundCardColor)
+                                .align(Alignment.BottomStart)
+                                .padding(8.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(SoilGreenDark.copy(alpha = 0.75f))
+                                .padding(horizontal = 10.dp, vertical = 5.dp)
                         ) {
                             Text(
-                                text = "Tanah yang kamu potret",
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 22.5.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(backgroundTitleColor)
+                                text = soilType,
+                                color = Color.White,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold
                             )
-                            Box(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(16 / 11f)
-                                    .padding(15.dp)
-                            ) {
-                                Image(
-                                    painter = if (inputs.image != null)
-                                        BitmapPainter(inputs.image!!.asImageBitmap())
-                                    else rememberVectorPainter(Icons.Default.Image),
-                                    contentDescription = "Tanah",
-                                    contentScale = ContentScale.FillWidth,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .clip(RoundedCornerShape(clipRound))
-                                )
-                            }
                         }
-
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(365.dp)
-                                .padding(10.dp)
-                                .clip(RoundedCornerShape(clipRound))
-                                .background(backgroundCardColor)
+                                .align(Alignment.BottomEnd)
+                                .padding(8.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(SoilAmber.copy(alpha = 0.9f))
+                                .padding(horizontal = 10.dp, vertical = 5.dp)
                         ) {
                             Text(
-                                text = "Diagram Prediksi Tanah",
-                                fontSize = 20.sp,
-                                textAlign = TextAlign.Center,
-                                fontWeight = FontWeight.Medium,
-                                fontFamily = FontFamily.Monospace,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(backgroundTitleColor)
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(5.dp)
-                            ) {
-                                JetpackComposeBasicColumnChart(
-                                    modelProducer,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .align(Alignment.Center)
-                                )
-                            }
-                        }
-
-                        val value: Response? = response
-                        val pH: Float? = inputs.soil.pH ?: value?.soil?.pH
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(10.dp)
-                                .clip(RoundedCornerShape(clipRound))
-                                .background(backgroundCardColor)
-                        ) {
-                            var isTanahPage by remember { mutableStateOf(true) }
-                            Text(
-                                text = "Hasil Prediksi",
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 30.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(backgroundTitleColor)
-                            )
-                            val selectedColor = Color(0xFF036ECB)
-                            val unSelectedColor = Color(0xFF484F59)
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 10.dp, vertical = 5.dp),
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier = Modifier
-                                        .weight(.5f)
-                                        .padding(horizontal = 5.5.dp)
-                                        .clickable { isTanahPage = true }
-                                ) {
-                                    Text(
-                                        text = "Tanah",
-                                        fontSize = 18.sp,
-                                        color = if (isTanahPage) selectedColor else unSelectedColor,
-                                        modifier = Modifier.padding(bottom = 2.dp)
-                                    )
-                                    if (isTanahPage)
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(2.dp)
-                                                .background(selectedColor)
-                                        )
-                                }
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier = Modifier
-                                        .weight(.5f)
-                                        .padding(horizontal = 5.5.dp)
-                                        .clickable { isTanahPage = false }
-                                ) {
-                                    Text(
-                                        text = "Geografis",
-                                        fontSize = 18.sp,
-                                        color = if (!isTanahPage) selectedColor else unSelectedColor,
-                                        modifier = Modifier.padding(bottom = 2.dp)
-                                    )
-                                    if (!isTanahPage)
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(2.dp)
-                                                .background(selectedColor)
-                                        )
-                                }
-                            }
-                            if (isTanahPage) {
-                                Map(
-                                    "PH: ",
-                                    (inputs.soil.pH
-                                        ?: (value?.soil?.pH.toString() + " (default)")).toString()
-                                )
-                                var pred = soilPred * 100.0
-                                Map("Tipe:", "$soilType ${String.format("%.2f", pred)}%")
-                                Map("Tekstur:", texr.toString())
-                                Map("Drainase:", drain.toString())
-                                Map("Kesuburan:", ferr.toString())
-                                Map("Kedalaman:", depth.toString())
-                            } else {
-                                Map("MDPL:", geo?.altitude?.round())
-                                Map("Iklim:", geo?.iklim?.head)
-                                Map("Min ºC:", geo?.min?.round())
-                                Map("Max ºC:", geo?.max?.round())
-                            }
-                        }
-                        if (pH != null && pH <= 7) {
-                            val dosisKg = getDosis(soilType, pH, 7f, depth) * 1000
-                            Cat(
-                                Icons.Default.LocalHospital, "Netralisasi pH tanah",
-//                                "dengan kedalaman tanah: $depth cm. " +
-                                "Untuk mencapai angka pH netral **dari ${
-                                    inputs.soil.pH
-                                        ?: (value?.soil?.pH.toString() + " (default)")
-                                } -> 7**," +
-                                        " di butuhkan **${dosisKg.round()} kg** kapur dolmit per hektar atau **${(dosisKg / 100).round()} kg** kapur dolmit per meter persegi",
-                            )
-                        } else {
-                            Cat(
-                                Icons.Default.LocalHospital,
-                                "Netralisasi pH tanah",
-                                "**Tanah Anda bersifat terlalu basa pH > 7. Kondisi ini dapat menghambat penyerapan unsur hara oleh tanaman.** Tambahkan bahan organik seperti kompos, pupuk kandang, atau serasah daun untuk menurunkan pH secara alami." +
-                                        "Untuk hasil lebih cepat, Anda dapat menambahkan sedikit belerang (sulfur) dan menjaga kelembapan tanah dengan penyiraman rutin."
+                                text = "${String.format("%.1f", soilPred * 100)}%",
+                                color = Color.White,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold
                             )
                         }
-                        Cat(Icons.Default.WaterDrop, "Retensi Air", retention(soilType))
                     }
-                IconButton(
-                    onClick = { click() },
-                    modifier = Modifier
-                        .padding(24.dp)
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.8f))
+                }
+
+                // ── Prediction chart ──────────────────────────────────────
+                SoilCard {
+                    SoilSectionTitle("Diagram Prediksi Jenis Tanah", Icons.Default.BarChart)
+                    Spacer(Modifier.height(10.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(230.dp)
+                    ) {
+                        JetpackComposeBasicColumnChart(
+                            modelProducer,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+
+                // ── Prediction results with tab ───────────────────────────
+                SoilCard {
+                    var isTanahPage by remember { mutableStateOf(true) }
+                    val value: Response? = response
+                    val pH: Float? = inputs.soil.pH ?: value?.soil?.pH
+
+                    SoilSectionTitle("Hasil Prediksi", Icons.Default.Analytics)
+                    Spacer(Modifier.height(10.dp))
+
+                    // Tab row
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(SoilGreenLight)
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        SoilTab(
+                            label = "Tanah",
+                            selected = isTanahPage,
+                            onClick = { isTanahPage = true },
+                            modifier = Modifier.weight(1f)
+                        )
+                        SoilTab(
+                            label = "Geografis",
+                            selected = !isTanahPage,
+                            onClick = { isTanahPage = false },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    if (isTanahPage) {
+                        val pred = soilPred * 100.0
+                        Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                            SoilDataRow("pH Tanah", (inputs.soil.pH ?: value?.soil?.pH).toString())
+                            SoilDividerLine()
+                            SoilDataRow(
+                                "Tipe Tanah",
+                                "$soilType  •  ${String.format("%.2f", pred)}%"
+                            )
+                            SoilDividerLine()
+                            SoilDataRow("Tekstur", texr.toString())
+                            SoilDividerLine()
+                            SoilDataRow("Drainase", drain.toString())
+                            SoilDividerLine()
+                            SoilDataRow("Kesuburan", ferr.toString())
+                            SoilDividerLine()
+                            SoilDataRow("Kedalaman", "$depth cm")
+                        }
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                            SoilDataRow("MDPL", geo?.altitude?.round() ?: "–")
+                            SoilDividerLine()
+                            SoilDataRow("Iklim", geo?.iklim?.head ?: "–")
+                            SoilDividerLine()
+                            SoilDataRow("Min °C", geo?.min?.round() ?: "–")
+                            SoilDividerLine()
+                            SoilDataRow("Max °C", geo?.max?.round() ?: "–")
+                        }
+                    }
+                }
+
+                // ── pH neutralisation advice ──────────────────────────────
+                val value: Response? = response
+                val pH: Float? = inputs.soil.pH ?: value?.soil?.pH
+                if (pH != null) {
+                    if (pH <= 7f) {
+                        val dosisKg = getDosis(soilType, pH, 7f, depth) * 1000
+                        SoilAdviceCard(
+                            icon = Icons.Default.LocalHospital,
+                            title = "Netralisasi pH Tanah",
+                            accent = SoilGreenDark,
+                            accentLight = SoilGreenLight
+                        ) {
+                            MarkdownText(
+                                markdown = "Untuk mencapai pH netral **dari ${
+                                    inputs.soil.pH ?: (value?.soil?.pH.toString() + " (default)")
+                                } → 7**, dibutuhkan **${dosisKg.round()} kg** kapur dolomit per hektar " +
+                                        "atau **${(dosisKg / 100).round()} kg** per meter persegi.",
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    color = SoilTextPrimary,
+                                    lineHeight = 22.sp
+                                )
+                            )
+                        }
+                    } else {
+                        SoilAdviceCard(
+                            icon = Icons.Default.LocalHospital,
+                            title = "Netralisasi pH Tanah",
+                            accent = SoilAmber,
+                            accentLight = SoilAmberLight
+                        ) {
+                            MarkdownText(
+                                markdown = "**Tanah Anda terlalu basa (pH > 7).** Kondisi ini dapat menghambat penyerapan hara. " +
+                                        "Tambahkan kompos, pupuk kandang, atau serasah daun untuk menurunkan pH secara alami. " +
+                                        "Untuk hasil lebih cepat, tambahkan sedikit belerang (sulfur) dan jaga kelembapan tanah.",
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    color = SoilTextPrimary,
+                                    lineHeight = 22.sp
+                                )
+                            )
+                        }
+                    }
+                }
+
+                // ── Water retention advice ────────────────────────────────
+                SoilAdviceCard(
+                    icon = Icons.Default.WaterDrop,
+                    title = "Retensi Air",
+                    accent = Color(0xFF1565C0),
+                    accentLight = Color(0xFFE3F2FD)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close"
+                    MarkdownText(
+                        markdown = retention(soilType),
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            color = SoilTextPrimary,
+                            lineHeight = 22.sp
+                        )
                     )
                 }
+
+                Spacer(Modifier.height(72.dp))
             }
+        }
+
+        // Close button – floating top-left
+        IconButton(
+            onClick = click,
+            modifier = Modifier
+                .padding(12.dp)
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.9f))
+                .align(Alignment.TopStart)
+        ) {
+            Icon(Icons.Default.Close, "Tutup", tint = SoilGreenDark)
         }
     }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  Private helper composables
+// ─────────────────────────────────────────────────────────────────────────────
+
 @Composable
-private fun Map(key: String, value: String?) {
+private fun SoilCard(content: @Composable ColumnScope.() -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(clipRound),
+        colors = CardDefaults.cardColors(containerColor = SoilCardBg),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            content = content
+        )
+    }
+}
+
+@Composable
+private fun SoilSectionTitle(text: String, icon: ImageVector) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(SoilGreenLight),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, null, tint = SoilGreenMid, modifier = Modifier.size(18.dp))
+        }
+        Spacer(Modifier.width(10.dp))
+        Text(text, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = SoilGreenDark)
+    }
+}
+
+@Composable
+private fun SoilTab(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(if (selected) SoilGreenDark else Color.Transparent)
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            fontSize = 14.sp,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+            color = if (selected) Color.White else SoilTextMuted
+        )
+    }
+}
+
+@Composable
+private fun SoilDataRow(key: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = key,
-            fontWeight = FontWeight.Normal,
-            fontSize = 20.sp,
-            modifier = Modifier.padding(vertical = 2.5.dp)
-        )
-        Text(
-            text = value ?: "Belum diketahui",
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 20.sp,
-            modifier = Modifier.padding(vertical = 2.5.dp)
-        )
+        Text(key, fontSize = 14.sp, color = SoilTextMuted, fontWeight = FontWeight.Normal)
+        Text(value, fontSize = 14.sp, color = SoilTextPrimary, fontWeight = FontWeight.Bold)
     }
 }
 
 @Composable
-private fun Cat(icon: ImageVector, head: String, body: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(10.dp)
-            .clip(RoundedCornerShape(clipRound))
-            .background(backgroundCardColor)
+private fun SoilDividerLine() {
+    Divider(color = SoilDivider, thickness = 0.5.dp)
+}
+
+@Composable
+private fun SoilAdviceCard(
+    icon: ImageVector,
+    title: String,
+    accent: Color,
+    accentLight: Color,
+    content: @Composable () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(clipRound),
+        colors = CardDefaults.cardColors(containerColor = SoilCardBg),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Text(
-            text = head,
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(backgroundTitleColor)
-        )
-        Row(modifier = Modifier.padding(start = 5.dp, end = 10.dp, top = 10.dp, bottom = 10.dp)) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(25.dp)
-            )
-            MarkdownText(
-                markdown = body,
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Coloured header band
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.5.dp)
-            )
-//            Text(
-//                text = md, fontSize = 17.sp,
-//                textAlign = TextAlign.Left,
-//                fontWeight = FontWeight.Normal,
-//                modifier = Modifier.padding(start = 5.dp)
-//            )
+                    .background(accentLight)
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(accent.copy(alpha = 0.15f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(icon, null, tint = accent, modifier = Modifier.size(18.dp))
+                }
+                Spacer(Modifier.width(10.dp))
+                Text(title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = accent)
+            }
+            // Body
+            Box(modifier = Modifier.padding(16.dp)) { content() }
         }
     }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Chart (unchanged logic, updated column color to match palette)
+// ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun JetpackComposeBasicColumnChart(
@@ -534,52 +564,46 @@ private fun JetpackComposeBasicColumnChart(
 ) {
     val scroll = rememberVicoScrollState()
     CartesianChartHost(
-        chart =
-            rememberCartesianChart(
-                rememberColumnCartesianLayer(
-                    columnProvider = ColumnCartesianLayer.ColumnProvider.series(
-                        rememberLineComponent(
-                            fill = fill(Color(0xFF2979FF)),
-                            thickness = 10.dp,
-                            shadow = Shadow(4f),
-                            margins = Insets(2f),
-                        ),
+        chart = rememberCartesianChart(
+            rememberColumnCartesianLayer(
+                columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+                    rememberLineComponent(
+                        fill = fill(SoilGreenMid),
+                        thickness = 10.dp,
+                        shadow = Shadow(4f),
+                        margins = Insets(2f),
                     ),
-                    columnCollectionSpacing = 2.dp,
-                    dataLabel = rememberTextComponent(
-                        textAlignment = Layout.Alignment.ALIGN_NORMAL,
-                    ),
-                    verticalAxisPosition = Axis.Position.Vertical.Start,
-                    rangeProvider = remember {
-                        CartesianLayerRangeProvider.fixed(
-                            minY = 0.0,
-                            maxY = 1.0
-                        )
-                    },
                 ),
-                startAxis = VerticalAxis.rememberStart(
-                    labelRotationDegrees = 0f,
-                    size = BaseAxis.Size.auto(0.dp, 100.dp),
-                    verticalLabelPosition = Position.Vertical.Center,
-                    horizontalLabelPosition = VerticalAxis.HorizontalLabelPosition.Outside,
-                    label = rememberAxisLabelComponent(
-                        color = Color.Black
-                    )
+                columnCollectionSpacing = 2.dp,
+                dataLabel = rememberTextComponent(
+                    textAlignment = Layout.Alignment.ALIGN_NORMAL,
                 ),
-                topAxis = HorizontalAxis.rememberTop(
-                    label = rememberTextComponent(
-                        textSize = 12.sp,
-                        textAlignment = Layout.Alignment.ALIGN_CENTER,
-                        typeface = Typeface.MONOSPACE,
-                        lineCount = 1,
-                        lineHeight = 16.sp,
-                    ),
-                    valueFormatter = CartesianValueFormatter { context, x, _ ->
-                        context.model.extraStore[labelListKey][x.toInt()]
-                    },
-                    labelRotationDegrees = -80f,
-                )
+                verticalAxisPosition = Axis.Position.Vertical.Start,
+                rangeProvider = remember {
+                    CartesianLayerRangeProvider.fixed(minY = 0.0, maxY = 1.0)
+                },
             ),
+            startAxis = VerticalAxis.rememberStart(
+                labelRotationDegrees = 0f,
+                size = BaseAxis.Size.auto(0.dp, 100.dp),
+                verticalLabelPosition = Position.Vertical.Center,
+                horizontalLabelPosition = VerticalAxis.HorizontalLabelPosition.Outside,
+                label = rememberAxisLabelComponent(color = SoilGreenDark)
+            ),
+            topAxis = HorizontalAxis.rememberTop(
+                label = rememberTextComponent(
+                    textSize = 12.sp,
+                    textAlignment = Layout.Alignment.ALIGN_CENTER,
+                    typeface = Typeface.MONOSPACE,
+                    lineCount = 1,
+                    lineHeight = 16.sp,
+                ),
+                valueFormatter = CartesianValueFormatter { context, x, _ ->
+                    context.model.extraStore[labelListKey][x.toInt()]
+                },
+                labelRotationDegrees = -80f,
+            )
+        ),
         animateIn = true,
         modelProducer = modelProducer,
         modifier = modifier,

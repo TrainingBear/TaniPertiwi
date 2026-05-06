@@ -56,9 +56,9 @@ fun PointDetail(
     subtitle: String = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vehicular, mauris ut faucets tincidunt",
     id: String = " ",
     credits: List<String>? = listOf("play.jasperproject.com", "www.google.com"),
-    details: List<Triple<Pair<Painter, String?>?, String, String>> = listOf(
+    details: List<Triple<Pair<Int?, String?>?, String, String>> = listOf(
         Triple(
-            Pair(painterResource(R.drawable.padi), "Somewhere"),
+            Pair(R.drawable.padi, "Somewhere"),
             "lorem ipsum sit amet test",
             """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vehicula, mauris ut faucibus tincidunt
                 |
@@ -187,7 +187,7 @@ fun PointDetail(
 }
 
 @Composable
-private fun Card(perInfo: Triple<Pair<Painter, String?>?, String, String>) {
+private fun Card(perInfo: Triple<Pair<Int?, String?>?, String, String>) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -204,7 +204,7 @@ private fun Card(perInfo: Triple<Pair<Painter, String?>?, String, String>) {
                     )
             ) {
                 Image(
-                    painter = perInfo.first!!.first,
+                    painter = perInfo.first!!.first?.let {painterResource(it)} ?: painterResource(R.drawable.oak_sapling),
                     contentDescription = "Image per point",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
