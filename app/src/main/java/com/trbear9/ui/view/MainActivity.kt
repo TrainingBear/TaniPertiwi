@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -99,6 +101,11 @@ import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 
 //var firstTime = false
 class MainActivity : ComponentActivity() {
@@ -562,54 +569,179 @@ private fun ColumnScope.CoachMarkTargetText(
 fun Tooltip(key: CoachMarkKey) {
 }
 
+private val LSGreenDark  = Color(0xFF1B4332)
+private val LSGreenMid   = Color(0xFF52B788)
+private val LSGreenLight = Color(0xFFD8F3DC)
+private val LSCream      = Color(0xFFF9F6F0)
+
 @Composable
 @Preview
 fun LoadingScreen() {
-    Scaffold() {
-        BoxWithConstraints(
-            Modifier
-                .fillMaxSize()
-                .padding(it)
+    // ── Animation states ───────────────────────────────────────────────────
+    val infiniteTransition = rememberInfiniteTransition(label = "splash")
+
+    // Logo: gentle pulse scale
+    val logoScale by infiniteTransition.animateFloat(
+        initialValue  = 0.95f,
+        targetValue   = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation  = tween(1400, easing = EaseInOutSine),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "logoScale"
+    )
+
+    // Dot loading indicator
+    val dotPhase by infiniteTransition.animateFloat(
+        initialValue  = 0f,
+        targetValue   = 3f,
+        animationSpec = infiniteRepeatable(
+            animation  = tween(900, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "dotPhase"
+    )
+
+    // Entrance fade-in on first composition
+    var visible by remember { mutableStateOf(false) }
+    val contentAlpha by animateFloatAsState(
+        targetValue   = if (visible) 1f else 0f,
+        animationSpec = tween(700, easing = FastOutSlowInEasing),
+        label         = "contentAlpha"
+    )
+    val contentSlide by animateFloatAsState(
+        targetValue   = if (visible) 0f else 40f,
+        animationSpec = tween(700, easing = FastOutSlowInEasing),
+        label         = "contentSlide"
+    )
+    LaunchedEffect(Unit) { visible = true }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    0f   to Color(0xFFE8F5E9),
+                    0.5f to LSCream,
+                    1f   to Color(0xFFF0EDE6)
+                )
+            )
+    ) {
+        // Decorative blurred circle top-right
+        Box(
+            modifier = Modifier
+                .size(220.dp)
+                .offset(x = 100.dp, y = (-60).dp)
+                .clip(CircleShape)
+                .background(LSGreenLight.copy(alpha = 0.5f))
+                .align(Alignment.TopEnd)
+        )
+        // Decorative blurred circle bottom-left
+        Box(
+            modifier = Modifier
+                .size(160.dp)
+                .offset(x = (-50).dp, y = 50.dp)
+                .clip(CircleShape)
+                .background(LSGreenMid.copy(alpha = 0.12f))
+                .align(Alignment.BottomStart)
+        )
+
+        // ── Center content ─────────────────────────────────────────────
+        Column(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .alpha(contentAlpha)
+                .offset(y = contentSlide.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(Modifier.align(Alignment.Center)) {
-                Image(
-                    painter = painterResource(id = R.drawable.oak_sapling),
-                    contentDescription = "app icon",
-                    modifier = Modifier.size((this@BoxWithConstraints.maxWidth.value / 1.7).dp)
-                )
-                Text(
-                    text = "Tani Pertiwi",
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = (this@BoxWithConstraints.maxWidth.value / 9).sp,
-                    color = Color(0xFF06E509),
-                    textAlign = TextAlign.Center,
-                )
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
+            // Logo in circle container
+            Box(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(bottom = 50.dp)
+                    .size(150.dp)
+                    .scale(logoScale)
+                    .clip(RoundedCornerShape(36.dp))
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(LSGreenLight, Color.White)
+                        )
+                    ),
+                contentAlignment = Alignment.Center
             ) {
-//                Image(
-//                    painter = painterResource(id = R.drawable.smanega),
-//                    contentDescription = "logo sma ambarawa 1",
-//                    modifier = Modifier.width(60.dp)
-//                )
                 Image(
-                    painter = painterResource(id = R.drawable.fertinnv),
-                    contentDescription = "logo fert innovation",
-                    modifier = Modifier.width((this@BoxWithConstraints.maxWidth.value / 2).dp)
+                    painter            = painterResource(R.drawable.oak_sapling),
+                    contentDescription = "App icon",
+                    modifier           = Modifier.size(100.dp)
                 )
-//                Image(
-//                    painter = painterResource(id = R.drawable.logoman3),
-//                    contentDescription = "logo man jakarta 3",
-//                    modifier = Modifier.width(60.dp)
-//                )
             }
+
+            Spacer(Modifier.height(28.dp))
+
+            // App name
+            Text(
+                text       = "Tani Pertiwi",
+                fontWeight = FontWeight.ExtraBold,
+                fontSize   = 36.sp,
+                color      = LSGreenDark,
+                textAlign  = TextAlign.Center,
+                letterSpacing = 0.5.sp
+            )
+
+            Spacer(Modifier.height(6.dp))
+
+            // Tagline
+            Text(
+                text       = "Agrikultur Cerdas Berbasis Teknologi",
+                fontSize   = 13.sp,
+                color      = LSGreenMid,
+                fontWeight = FontWeight.Medium,
+                textAlign  = TextAlign.Center
+            )
+
+            Spacer(Modifier.height(36.dp))
+
+            // Animated dot indicator
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment     = Alignment.CenterVertically
+            ) {
+                repeat(3) { index ->
+                    val dotAlpha = when {
+                        dotPhase.toInt() == index -> 1f
+                        else                      -> 0.25f
+                    }
+                    val dotScale = if (dotPhase.toInt() == index) 1.3f else 1f
+                    Box(
+                        modifier = Modifier
+                            .size(9.dp)
+                            .scale(dotScale)
+                            .clip(CircleShape)
+                            .alpha(dotAlpha)
+                            .background(LSGreenMid)
+                    )
+                }
+            }
+        }
+
+        // ── Bottom logo ────────────────────────────────────────────────
+        Column(
+            modifier            = Modifier
+                .align(Alignment.BottomCenter)
+                .alpha(contentAlpha)
+                .padding(bottom = 48.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+//            Text(
+//                "Powered by",
+//                fontSize = 11.sp,
+//                color    = Color(0xFFADB5AD),
+//                fontWeight = FontWeight.Normal
+//            )
+//            Image(
+//                painter            = painterResource(R.drawable.smanega),
+//                contentDescription = "Fert Innovation logo",
+//                modifier           = Modifier.width(140.dp)
+//            )
         }
     }
 }

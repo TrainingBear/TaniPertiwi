@@ -2,37 +2,23 @@ package com.trbear9.ui.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,194 +33,335 @@ import com.trbear9.ui.util.DataStore
 import com.trbear9.ui.util.Screen
 import dev.jeziellago.compose.markdowntext.MarkdownText
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  Palette
+// ─────────────────────────────────────────────────────────────────────────────
+private val PDGreenDark   = Color(0xFF1B4332)
+private val PDGreenMid    = Color(0xFF52B788)
+private val PDGreenLight  = Color(0xFFD8F3DC)
+private val PDCream       = Color(0xFFF9F6F0)
+private val PDCardBg      = Color(0xFFFFFFFE)
+private val PDTextMuted   = Color(0xFF6B7B6E)
+private val PDDivider     = Color(0xFFE0EDE4)
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  PointDetail
+// ─────────────────────────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun PointDetail(
     nav: NavController? = null,
-    title: String = "LOREM IPSUM DOLOR",
-    subtitle: String = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vehicular, mauris ut faucets tincidunt",
+    title: String = "Tanah",
+    subtitle: String = "Tanah sangat vital peranannya bagi semua kehidupan di bumi karena tanah mendukung kehidupan tumbuhan.",
     id: String = " ",
-    credits: List<String>? = listOf("play.jasperproject.com", "www.google.com"),
+    credits: List<String>? = listOf("en.wikipedia.org/wiki/Soil_pH", "agrotek.id/istilah/retensi-air"),
     details: List<Triple<Pair<Int?, String?>?, String, String>> = listOf(
         Triple(
-            Pair(R.drawable.padi, "Somewhere"),
-            "lorem ipsum sit amet test",
-            """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vehicula, mauris ut faucibus tincidunt
-                |
-                |A fawtawtiauawhawkja iaefrhgofpkl aofaef  eaofjiae awop awi as a as huihusurahr aw.
-            """.trimMargin()
+            Pair(R.drawable.padi, "pertanian.uma.ac.id"),
+            "Pengertian",
+            "Tanah sangat vital peranannya bagi semua kehidupan di bumi karena tanah mendukung kehidupan tumbuhan dengan menyediakan unsur hara dan air sekaligus sebagai penopang akar tanaman."
         )
     )
 ) {
+    val isAlreadyDone = DataStore.contains(id)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFFBDB5A4),
-                        Color(0xFFB5A4C4),
-                        Color(0xFF99B6AC)
-                    ), end = Offset.Zero, start = Offset.Infinite
-                )
+                Brush.verticalGradient(listOf(Color(0xFFE8F5E9), PDCream, Color(0xFFF0EDE6)))
             )
     ) {
-        Scaffold(
-            containerColor = Color.Transparent,
-            topBar = {
-                TopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-                    modifier = Modifier
-                        .wrapContentHeight(),
-//                        .border(width = 3.25.dp, color = Color(0x60000000)),
-                    navigationIcon = {
-                        IconButton(
-                            modifier = Modifier
-                                .padding(10.dp)
-                                .clip(RoundedCornerShape(8.dp))
-//                                .background(Color(0x80EAEAEA))
-                                .size(40.dp),
-                            onClick = { nav?.navigateUp() },
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                                contentDescription = "back arrow",
-                                tint = Color.Black,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(RoundedCornerShape(1.dp))
-                                    .background(Color(0x8BFFFFFF))
-//                                    .padding(5.dp)
-                            )
-                        }
-                    },
-                    title = {
-                        Text(
-                            text = title,
-                            fontWeight = FontWeight.ExtraBold,
-                            overflow = TextOverflow.Visible,
-                            fontSize = 28.sp
-                        )
-                    }
-                )
-            }
-        ) {
+        Scaffold(containerColor = Color.Transparent) { padding ->
             LazyColumn(
-                modifier = Modifier
+                modifier       = Modifier
                     .fillMaxSize()
-                    .padding(it)
-                    .padding(start = 20.dp, end = 20.dp)
-//                    .background(Color(0x23FFFFFF))
+                    .padding(padding),
+                contentPadding = PaddingValues(bottom = 32.dp)
             ) {
+
+                // ── Hero header ───────────────────────────────────────────
                 item {
-                    Text(
-                        text = subtitle,
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Justify,
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(10.dp)
-                    )
-                }
-                for (perInfo in details) {
-                    item { Card(perInfo) }
-                }
-                item {
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxSize()
-//                            .background(Color(0x41FFFFFF))
-                            .padding(8.5.dp)
-                    ) {
-                        if (credits != null) {
-                            Text(
-                                text = "Credits for source of informations",
-                                fontWeight = FontWeight.Bold
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(PDGreenDark, Color(0xFF2D6A4F), PDGreenMid)
+                                )
                             )
-                            for (a: String in credits)
-                                Text(text = "-\u00A0${a}")
-                        }
-                        Row(
-                            horizontalArrangement = Arrangement.Center,
+                    ) {
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 20.dp, horizontal = 45.dp)
-                                .shadow(10.dp, RoundedCornerShape(20.dp), clip = true)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(Color(0xBE16B613))
-                                .clickable {
-                                    DataStore.setBoolean(id, true)
-                                    nav?.navigate(Screen.help)
-                                }
+                                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp)
                         ) {
+                            // Back button
+                            IconButton(
+                                onClick  = { nav?.navigateUp() },
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.15f))
+                            ) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                    "Kembali",
+                                    tint     = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+
+                            Spacer(Modifier.height(12.dp))
+
                             Text(
-                                text =
-                                    if (DataStore.contains(id)) "Kembali"
-                                    else "Selesai",
-                                color = Color(0xFFF0F3D0),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 30.sp,
-                                modifier = Modifier.padding(10.dp)
+                                text       = title,
+                                fontSize   = 30.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color      = Color.White,
+                                overflow   = TextOverflow.Visible
                             )
+
+                            Spacer(Modifier.height(10.dp))
+
+                            // Subtitle inset box
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(Color.White.copy(alpha = 0.12f))
+                                    .padding(14.dp)
+                            ) {
+                                Text(
+                                    text       = subtitle,
+                                    fontSize   = 15.sp,
+                                    color      = Color.White.copy(alpha = 0.9f),
+                                    textAlign  = TextAlign.Justify,
+                                    lineHeight = 23.sp
+                                )
+                            }
                         }
                     }
+                }
+
+                // ── Content cards ─────────────────────────────────────────
+                itemsIndexed(details) { index, perInfo ->
+                    Spacer(Modifier.height(if (index == 0) 16.dp else 0.dp))
+                    ContentCard(index = index + 1, total = details.size, perInfo = perInfo)
+                    Spacer(Modifier.height(12.dp))
+                }
+
+                // ── Credits ───────────────────────────────────────────────
+                if (!credits.isNullOrEmpty()) {
+                    item {
+                        Card(
+                            shape     = RoundedCornerShape(14.dp),
+                            colors    = CardDefaults.cardColors(containerColor = PDCardBg),
+                            elevation = CardDefaults.cardElevation(1.dp),
+                            modifier  = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Row(
+                                    verticalAlignment     = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(Icons.Default.Link, null, tint = PDGreenMid, modifier = Modifier.size(18.dp))
+                                    Text(
+                                        "Sumber Informasi",
+                                        fontSize   = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color      = PDGreenDark
+                                    )
+                                }
+                                Spacer(Modifier.height(10.dp))
+                                credits.forEachIndexed { i, credit ->
+                                    if (i > 0) HorizontalDivider(
+                                        color     = PDDivider,
+                                        thickness = 0.5.dp,
+                                        modifier  = Modifier.padding(vertical = 6.dp)
+                                    )
+                                    Text(
+                                        text     = credit,
+                                        fontSize = 12.sp,
+                                        color    = PDTextMuted,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(16.dp))
+                    }
+                }
+
+                // ── Finish / Back button ──────────────────────────────────
+                item {
+                    Column(
+                        modifier            = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        if (isAlreadyDone) {
+                            Row(
+                                modifier              = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(PDGreenLight)
+                                    .padding(vertical = 16.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment     = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Default.CheckCircle, null, tint = PDGreenMid, modifier = Modifier.size(22.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    "Topik ini sudah selesai!",
+                                    fontSize   = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color      = PDGreenDark
+                                )
+                            }
+                            Spacer(Modifier.height(12.dp))
+                            OutlinedButton(
+                                onClick  = { nav?.navigate(Screen.help) },
+                                shape    = RoundedCornerShape(16.dp),
+                                colors   = ButtonDefaults.outlinedButtonColors(contentColor = PDGreenDark),
+                                modifier = Modifier.fillMaxWidth().height(52.dp)
+                            ) {
+                                Text("Kembali ke Panduan", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            }
+                        } else {
+                            Button(
+                                onClick  = {
+                                    DataStore.setBoolean(id, true)
+                                    nav?.navigate(Screen.help)
+                                },
+                                shape    = RoundedCornerShape(16.dp),
+                                colors   = ButtonDefaults.buttonColors(containerColor = PDGreenDark),
+                                elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp)
+                                    .shadow(8.dp, RoundedCornerShape(16.dp))
+                            ) {
+                                Icon(Icons.Default.CheckCircle, null, tint = Color.White, modifier = Modifier.size(20.dp))
+                                Spacer(Modifier.width(10.dp))
+                                Text(
+                                    "Tandai Selesai",
+                                    fontSize   = 17.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color      = Color.White
+                                )
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(32.dp))
                 }
             }
         }
     }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  ContentCard – individual info section
+// ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun Card(perInfo: Triple<Pair<Int?, String?>?, String, String>) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .background(Color(0x41FFFFFF))
-            .padding(bottom = 10.dp)
+private fun ContentCard(
+    index: Int,
+    total: Int,
+    perInfo: Triple<Pair<Int?, String?>?, String, String>
+) {
+    Card(
+        shape     = RoundedCornerShape(16.dp),
+        colors    = CardDefaults.cardColors(containerColor = PDCardBg),
+        elevation = CardDefaults.cardElevation(2.dp),
+        modifier  = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
     ) {
-        if (perInfo.first != null)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(
-                        width = 3.dp,
-                        color = Color(0x4D000000)
-                    )
-            ) {
-                Image(
-                    painter = perInfo.first!!.first?.let {painterResource(it)} ?: painterResource(R.drawable.oak_sapling),
-                    contentDescription = "Image per point",
-                    contentScale = ContentScale.Fit,
+        Column(modifier = Modifier.fillMaxWidth()) {
+
+            // Section header badge
+            if (perInfo.second.isNotBlank()) {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-
-                )
-                if (perInfo.first!!.second != null)
+                        .background(PDGreenLight)
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalAlignment     = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Box(
+                        modifier         = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(PDGreenMid),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            index.toString(),
+                            fontSize   = 13.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color      = Color.White
+                        )
+                    }
                     Text(
-                        text = "sc: " + perInfo.first!!.second!!,
-                        fontSize = 9.sp,
-                        color = Color.White,
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(end = 5.dp)
+                        perInfo.second,
+                        fontSize   = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color      = PDGreenDark,
+                        modifier   = Modifier.weight(1f)
                     )
+                    Text(
+                        "$index / $total",
+                        fontSize = 12.sp,
+                        color    = PDTextMuted
+                    )
+                }
             }
-//        Text(
-//            text = perInfo.second,
-//            fontSize = 20.sp,
-//            fontWeight = FontWeight.Bold,
-//            textAlign = TextAlign.Center,
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(top = 10.dp)
-//        )
-        MarkdownText(
-            markdown = perInfo.third,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.5.dp)
-        )
+
+            // Image
+            if (perInfo.first?.first != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16 / 9f)
+                        .background(PDGreenLight)
+                ) {
+                    Image(
+                        painter            = painterResource(perInfo.first!!.first!!),
+                        contentDescription = perInfo.second,
+                        contentScale       = ContentScale.Crop,
+                        modifier           = Modifier.fillMaxSize()
+                    )
+                    // Image credit badge
+                    perInfo.first?.second?.let { credit ->
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(8.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color.Black.copy(alpha = 0.5f))
+                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                        ) {
+                            Text("© $credit", fontSize = 10.sp, color = Color.White)
+                        }
+                    }
+                }
+            }
+
+            // Markdown body
+            if (perInfo.third.isNotBlank()) {
+                MarkdownText(
+                    markdown = perInfo.third,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                )
+            }
+        }
     }
 }

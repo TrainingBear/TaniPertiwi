@@ -4,533 +4,550 @@ import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Message
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.LocalPolice
-import androidx.compose.material.icons.filled.Task
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.trbear9.ui.R
 import com.trbear9.ui.util.Screen
+import dev.jeziellago.compose.markdowntext.BuildConfig
 
-private val backgroundCardColor: Color = Color(0x4DFFFFFF)
-private val backgroundTitleColor: Color = Color(0x27050091)
-private val clipRound: Dp = 15.dp
+// ─────────────────────────────────────────────────────────────────────────────
+//  Palette (consistent with the rest of the app)
+// ─────────────────────────────────────────────────────────────────────────────
+private val AUGreenDark   = Color(0xFF1B4332)
+private val AUGreenMid    = Color(0xFF52B788)
+private val AUGreenLight  = Color(0xFFD8F3DC)
+private val AUCream       = Color(0xFFF9F6F0)
+private val AUAmber       = Color(0xFFF5A623)
+private val AUAmberLight  = Color(0xFFFFF3E0)
+private val AUCardBg      = Color(0xFFFFFFFE)
+private val AUTextPrimary = Color(0xFF1A1A1A)
+private val AUTextMuted   = Color(0xFF6B7B6E)
+private val AUDivider     = Color(0xFFE0EDE4)
+private val AUBlue        = Color(0xFF1565C0)
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  AboutUs screen
+// ─────────────────────────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun AboutUs(nav: NavController? = null) {
-    val context = LocalContext.current
-    val urihandler = LocalUriHandler.current
+    val context    = LocalContext.current
+    val uriHandler = LocalUriHandler.current
+    val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFFC8E3CA),
-                        Color(0xFFD7EEE4),
-                        Color(0xFFE5E1D2)  // ulang atau variasi
-                    ), start = Offset(500f, 0f), end = Offset.Infinite
-                )
+                Brush.verticalGradient(listOf(Color(0xFFE8F5E9), AUCream, Color(0xFFF0EDE6)))
             )
     ) {
-        Scaffold(
-            containerColor = Color.Transparent,
-            topBar = {
-                Box {
-                    TopAppBar(
-                        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+        Scaffold(containerColor = Color.Transparent) { padding ->
+            LazyColumn(
+                modifier       = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentPadding = PaddingValues(bottom = 48.dp)
+            ) {
+
+                // ── Hero ──────────────────────────────────────────────────
+                item {
+                    Box(
                         modifier = Modifier
-                            .wrapContentHeight()
-                            .border(width = 2.dp, color = Color(0x12000000)),
-                        navigationIcon = {
-                            IconButton(
-                                modifier = Modifier
-                                    .padding(10.dp)
-                                    .clip(RoundedCornerShape(5.dp))
-//                                .background(Color(0x80EAEAEA))
-                                    .size(40.dp),
-                                onClick = { nav?.navigate(Screen.home) },
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                                    contentDescription = "back arrow",
-                                    tint = Color.Black,
-                                    modifier = Modifier.fillMaxSize()
+                            .fillMaxWidth()
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(AUGreenDark, Color(0xFF2D6A4F), AUGreenMid)
                                 )
-                            }
-                        },
-                        title = {
+                            )
+                    ) {
+                        // Back button
+                        IconButton(
+                            onClick  = { nav?.navigate(Screen.home) },
+                            modifier = Modifier
+                                .padding(12.dp)
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.15f))
+                                .align(Alignment.TopStart)
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                "Kembali",
+                                tint     = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+                        Column(
+                            modifier            = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 56.dp, bottom = 32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            // App icon / sapling image in circle
                             Box(
                                 modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(vertical = 10.dp),
+                                    .size(110.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.15f)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = "Tentang Kami",
-//                                    textAlign = TextAlign.Center,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 30.sp,
-                                    overflow = TextOverflow.Visible
+                                Image(
+                                    painter            = painterResource(R.drawable.oak_sapling),
+                                    contentDescription = "TaniPertiwi logo",
+                                    contentScale       = ContentScale.Fit,
+                                    modifier           = Modifier.size(80.dp)
                                 )
                             }
-                        }
-                    )
-                }
-            }
-        ) { padding ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(10.dp)
-                    .clip(RoundedCornerShape(clipRound))
-//                    .background(backgroundCardColor)
-            ) {
-                item {
-                    Image(
-                        painter = painterResource(id = R.drawable.oak_sapling),
-                        contentDescription = "About Us",
-//            contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Text(
-                        text = "Panduan cerdas untuk Agrikultur berkelanjutan berbasis tehnologi.",
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        modifier = Modifier.padding(
-                            start = 60.dp,
-                            end = 60.dp,
-                            top = 6.dp,
-                            bottom = 10.dp
-                        )
-                    )
-                }
-                item @Composable {
-                    Text(
-                        text = "Pengenalan",
-                        fontSize = 25.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 5.dp, horizontal = 10.dp)
-                    )
-                    Text(
-                        text = "Aplikasi ini mulai dikembangkan pada 24 Mei 2025 oleh Kukuh, Refan (Pelajar SMA Negeri 1 Ambarawa) dan Renaldi (Pelajar MAN 3 Jakarta Pusat)",
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Justify,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 10.dp, end = 10.dp, bottom = 20.dp)
-                    )
-                }
-                item @Composable {
-                    val licenseExpand = remember { mutableStateOf(false) }
-                    ExpandCard(
-                        text = "Lisensi",
-                        backgroundColor = Color(0x3400FF2A),
-                        imageVector = Icons.Default.LocalPolice,
-                        isExpanded = licenseExpand
-                    ) {
-                        val annotated = buildAnnotatedString {
-                            append("© 2025 Jasper\n")
-                            append("Aplikasi ini di dalam lisensi Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).\n")
-                            append("Anda bebas menggunakan dan membagikan aplikasi ini dengan atribusi yang tepat.\n\n")
 
-                            append("License details: ")
+                            Spacer(Modifier.height(16.dp))
 
-                            // add clickable link
-                            pushStringAnnotation(
-                                tag = "URL",
-                                annotation = "https://creativecommons.org/licenses/by-sa/4.0/"
+                            Text(
+                                "Tani Pertiwi",
+                                fontSize   = 34.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color      = Color.White
                             )
-                            withStyle(
-                                style = SpanStyle(
-                                    color = Color(0xFF1565C0),
-                                    textDecoration = TextDecoration.Underline,
+                            Text(
+                                "Panduan cerdas untuk Agrikultur\nberkelanjutan berbasis teknologi.",
+                                fontSize   = 14.sp,
+                                color      = Color.White.copy(alpha = 0.8f),
+                                textAlign  = TextAlign.Center,
+                                lineHeight = 21.sp,
+                                modifier   = Modifier.padding(horizontal = 40.dp, vertical = 8.dp)
+                            )
+
+                            // Version chip
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(Color.White.copy(alpha = 0.15f))
+                                    .padding(horizontal = 16.dp, vertical = 6.dp)
+                            ) {
+                                Text(
+                                    "v${packageInfo.versionName}  •  2025",
+                                    fontSize  = 13.sp,
+                                    color     = Color.White.copy(alpha = 0.9f),
                                     fontWeight = FontWeight.Medium
                                 )
-                            ) {
-                                append("https://creativecommons.org/licenses/by-sa/4.0/")
                             }
-                            pop()
-
-                            append("\n\nThird-party data and components:\n")
-                            append("Ecocrop database © FAO 2025\n")
-
-                            pushStringAnnotation(
-                                tag = "URL",
-                                annotation = "https://gaez.fao.org/pages/ecocrop-search"
-                            )
-                            withStyle(
-                                SpanStyle(
-                                    color = Color(0xFF1565C0),
-                                    textDecoration = TextDecoration.Underline
-                                )
-                            ) {
-                                append("https://gaez.fao.org/pages/ecocrop-search")
-                            }
-                            pop()
-
-                            append("Accessed 9 November 2025\nUsed under FAO Terms and Conditions for non-commercial use.\n\n")
-
-                            append("Taxonomic plant © The Trustees of the Royal Botanic Gardens, Kew.\n")
-                            append("Licensed under CC BY 4.0.\n")
-                            pushStringAnnotation(
-                                tag = "URL",
-                                annotation = "https://www.kew.org/science/data-and-resources"
-                            )
-                            withStyle(
-                                SpanStyle(
-                                    color = Color(0xFF1565C0),
-                                    textDecoration = TextDecoration.Underline
-                                )
-                            ) {
-                                append("https://www.kew.org/science/data-and-resources")
-                            }
-                            pop()
-
-                            append("\nWeather API © Open Meteo API.\n")
-                            append("Licensed under Licensed under Attribution 4.0 International (CC BY 4.0)\n")
-                            pushStringAnnotation(
-                                tag = "URL",
-                                annotation = "https://open-meteo.com/"
-                            )
-                            withStyle(
-                                SpanStyle(
-                                    color = Color(0xFF1565C0),
-                                    textDecoration = TextDecoration.Underline
-                                )
-                            ) {
-                                append("https://open-meteo.com/")
-                            }
-                            pop()
                         }
-                        ClickableText(
-                            text = annotated,
-                            onClick = { offset ->
-                                annotated.getStringAnnotations(
-                                    tag = "URL",
-                                    start = offset,
-                                    end = offset
-                                )
-                                    .firstOrNull()?.let { annotation ->
-                                        urihandler.openUri(annotation.item)
-                                    }
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(5.dp)
-                        )
                     }
                 }
-                item @Composable {
-                    val medSosExpand = remember { mutableStateOf(false) }
-                    ExpandCard(
-                        text = "Media Social",
-                        backgroundColor = Color(0x4D11FF00),
-                        imageVector = Icons.AutoMirrored.Filled.Message,
-                        isExpanded = medSosExpand
+
+                // ── Intro card ────────────────────────────────────────────
+                item {
+                    Spacer(Modifier.height(16.dp))
+                    AUCard(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        AUSectionTitle("Pengenalan", Icons.Default.Info)
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            text = "Aplikasi ini mulai dikembangkan pada 24 Mei 2025 oleh " +
+                                    "Kukuh, Refan (Pelajar SMA Negeri 1 Ambarawa) dan " +
+                                    "Renaldi (Pelajar MAN 3 Jakarta Pusat).",
+                            fontSize   = 15.sp,
+                            color      = AUTextPrimary,
+                            textAlign  = TextAlign.Justify,
+                            lineHeight = 24.sp
+                        )
+                    }
+                    Spacer(Modifier.height(10.dp))
+                }
+
+                // ── Team logos ────────────────────────────────────────────
+                item {
+                    AUCard(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        AUSectionTitle("Institusi", Icons.Default.School)
+                        Spacer(Modifier.height(14.dp))
+                        Row(
+                            modifier              = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment     = Alignment.CenterVertically
+                        ) {
+                            // SMAN 1 Ambarawa
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier            = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable {
+                                        context.startActivity(
+                                            Intent(Intent.ACTION_VIEW, "https://sman1ambarawa.sch.id/".toUri())
+                                        )
+                                    }
+                                    .padding(12.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(64.dp)
+                                        .clip(CircleShape)
+                                        .background(AUGreenLight),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Image(
+                                        painter            = painterResource(R.drawable.smanega),
+                                        contentDescription = "SMA Negeri 1 Ambarawa",
+                                        contentScale       = ContentScale.Fit,
+                                        modifier           = Modifier.size(52.dp)
+                                    )
+                                }
+                                Spacer(Modifier.height(6.dp))
+                                Text("SMAN 1 Ambarawa", fontSize = 11.sp, color = AUTextMuted, textAlign = TextAlign.Center)
+                            }
+
+                            // Divider
+                            Box(modifier = Modifier.width(1.dp).height(60.dp).background(AUDivider))
+
+                            // MAN 3 Jakarta
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier            = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable {
+                                        context.startActivity(
+                                            Intent(Intent.ACTION_VIEW, "https://man3jkt.sch.id/".toUri())
+                                        )
+                                    }
+                                    .padding(12.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(64.dp)
+                                        .clip(CircleShape)
+                                        .background(AUAmberLight),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Image(
+                                        painter            = painterResource(R.drawable.logoman3),
+                                        contentDescription = "MAN 3 Jakarta",
+                                        contentScale       = ContentScale.Fit,
+                                        modifier           = Modifier.size(52.dp)
+                                    )
+                                }
+                                Spacer(Modifier.height(6.dp))
+                                Text("MAN 3 Jakarta Pusat", fontSize = 11.sp, color = AUTextMuted, textAlign = TextAlign.Center)
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(10.dp))
+                }
+
+                // ── License expand card ───────────────────────────────────
+                item {
+                    val licenseExpand = remember { mutableStateOf(false) }
+                    val licenseAnnotated = buildAnnotatedString {
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = AUGreenDark)) {
+                            append("© 2025 Jaksara\n\n")
+                        }
+                        append("Aplikasi ini di dalam lisensi Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0). " +
+                                "Anda bebas menggunakan dan membagikan aplikasi ini dengan atribusi yang tepat.\n\n")
+                        withStyle(SpanStyle(fontWeight = FontWeight.Medium)) { append("License details: ") }
+                        pushStringAnnotation("URL", "https://creativecommons.org/licenses/by-sa/4.0/")
+                        withStyle(SpanStyle(color = AUBlue, textDecoration = TextDecoration.Underline)) {
+                            append("creativecommons.org/licenses/by-sa/4.0/")
+                        }
+                        pop()
+                        append("\n\n")
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("Data pihak ketiga:\n") }
+                        append("• Ecocrop database © FAO 2025  ")
+                        pushStringAnnotation("URL", "https://gaez.fao.org/pages/ecocrop-search")
+                        withStyle(SpanStyle(color = AUBlue, textDecoration = TextDecoration.Underline)) {
+                            append("gaez.fao.org")
+                        }
+                        pop()
+                        append("\n• Taxonomic plant © Royal Botanic Gardens, Kew – CC BY 4.0  ")
+                        pushStringAnnotation("URL", "https://www.kew.org/science/data-and-resources")
+                        withStyle(SpanStyle(color = AUBlue, textDecoration = TextDecoration.Underline)) {
+                            append("kew.org")
+                        }
+                        pop()
+                        append("\n• Weather API © Open-Meteo – CC BY 4.0  ")
+                        pushStringAnnotation("URL", "https://open-meteo.com/")
+                        withStyle(SpanStyle(color = AUBlue, textDecoration = TextDecoration.Underline)) {
+                            append("open-meteo.com")
+                        }
+                        pop()
+                    }
+                    AUExpandCard(
+                        title       = "Lisensi",
+                        icon        = Icons.Default.LocalPolice,
+                        accent      = AUGreenDark,
+                        accentLight = AUGreenLight,
+                        isExpanded  = licenseExpand
                     ) {
-                        val anotated = buildAnnotatedString {
-                            withStyle(
-                                SpanStyle(
-                                    fontWeight = FontWeight.Bold
-                                )
-                            ) {
-                                append("Discord: ")
-                            }
-                            pushStringAnnotation(
-                                tag = "URL",
-                                annotation = "https://discord.gg/fbAZSd3Hf2"
-                            )
-                            withStyle(
-                                SpanStyle(
-                                    color = Color(0xFF1565C0),
-                                    textDecoration = TextDecoration.Underline
-                                )
-                            ) {
-                                append("https://discord.gg/fbAZSd3Hf2")
-                            }
-                            pop()
-                            append("\n\n")
-                            withStyle(
-                                SpanStyle(
-                                    fontWeight = FontWeight.Bold
-                                )
-                            ) {
-                                append("Youtube: ")
-                            }
-                            pushStringAnnotation(
-                                tag = "URL",
-                                annotation = "https://www.youtube.com/channel/UCglCTRnlIGvO5o5VfI1t9NQ"
-                            )
-                            withStyle(
-                                SpanStyle(
-                                    color = Color(0xFF1565C0),
-                                    textDecoration = TextDecoration.Underline
-                                )
-                            ) {
-                                append("https://www.youtube.com/channel/kujatic")
-                            }
-                            pop()
-                        }
                         ClickableText(
-                            text = anotated,
-                            onClick = { offset ->
-                                anotated.getStringAnnotations(
-                                    tag = "URL",
-                                    start = offset,
-                                    end = offset
-                                )
-                                    .firstOrNull()?.let { annotation ->
-                                        urihandler.openUri(annotation.item)
-                                    }
+                            text     = licenseAnnotated,
+                            onClick  = { offset ->
+                                licenseAnnotated.getStringAnnotations("URL", offset, offset)
+                                    .firstOrNull()?.let { uriHandler.openUri(it.item) }
                             },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(5.dp)
+                            modifier = Modifier.fillMaxWidth().padding(16.dp)
                         )
                     }
+                    Spacer(Modifier.height(10.dp))
                 }
-                item @Composable {
-                    val medSosExpand = remember { mutableStateOf(false) }
-                    ExpandCard(
-                        text = "FAQ",
-                        backgroundColor = Color(0x5400D023),
-                        imageVector = Icons.Default.Task,
-                        isExpanded = medSosExpand
+
+                // ── Social Media expand card ──────────────────────────────
+                item {
+                    val socialExpand = remember { mutableStateOf(false) }
+                    val socialAnnotated = buildAnnotatedString {
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("Discord  ") }
+                        pushStringAnnotation("URL", "https://discord.gg/fbAZSd3Hf2")
+                        withStyle(SpanStyle(color = AUBlue, textDecoration = TextDecoration.Underline)) {
+                            append("discord.gg/fbAZSd3Hf2")
+                        }
+                        pop()
+                        append("\n\n")
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("YouTube  ") }
+                        pushStringAnnotation("URL", "https://www.youtube.com/channel/UCglCTRnlIGvO5o5VfI1t9NQ")
+                        withStyle(SpanStyle(color = AUBlue, textDecoration = TextDecoration.Underline)) {
+                            append("youtube.com/c/kujatic")
+                        }
+                        pop()
+                    }
+                    AUExpandCard(
+                        title       = "Media Sosial",
+                        icon        = Icons.AutoMirrored.Filled.Message,
+                        accent      = Color(0xFF1565C0),
+                        accentLight = Color(0xFFE3F2FD),
+                        isExpanded  = socialExpand
+                    ) {
+                        ClickableText(
+                            text     = socialAnnotated,
+                            onClick  = { offset ->
+                                socialAnnotated.getStringAnnotations("URL", offset, offset)
+                                    .firstOrNull()?.let { uriHandler.openUri(it.item) }
+                            },
+                            modifier = Modifier.fillMaxWidth().padding(16.dp)
+                        )
+                    }
+                    Spacer(Modifier.height(10.dp))
+                }
+
+                // ── FAQ expand card ───────────────────────────────────────
+                item {
+                    val faqExpand = remember { mutableStateOf(false) }
+                    val faqs = listOf(
+                        "Bagaimana aplikasi ini dapat dipercaya?" to
+                                "Kami menggunakan data tanaman dari ECOCROP oleh FAO. Setiap data umum pada tanaman sudah terverifikasi oleh para ahli, sehingga semua data tanaman di aplikasi ini sangat dapat dipercaya.",
+                        "Mengapa terdapat tanaman asing di hasil rekomendasi saya?" to
+                                "Data tanaman mencakup tanaman di seluruh dunia. Tanaman tersebut tidak tersebar secara luas, sehingga tidak tersebar ke Indonesia.",
+                        "Apakah aplikasi ini berguna untuk petani maupun pemula?" to
+                                "Ya, sangat berguna seperti mencari informasi maupun rekomendasi tanaman atau tumbuhan, yang cocok untuk ditanam sesuai dengan tanah/media yang ingin ditanam."
+                    )
+                    AUExpandCard(
+                        title       = "FAQ",
+                        icon        = Icons.Default.QuestionAnswer,
+                        accent      = AUAmber,
+                        accentLight = AUAmberLight,
+                        isExpanded  = faqExpand
+                    ) {
+                        Column(
+                            modifier            = Modifier.fillMaxWidth().padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
+                        ) {
+                            faqs.forEachIndexed { i, (q, a) ->
+                                if (i > 0) HorizontalDivider(color = AUDivider, thickness = 0.5.dp)
+                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Text(
+                                        "Q: $q",
+                                        fontSize   = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color      = AUTextPrimary
+                                    )
+                                    Text(
+                                        "A: $a",
+                                        fontSize   = 14.sp,
+                                        color      = AUTextMuted,
+                                        lineHeight = 21.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(24.dp))
+                }
+
+                // ── Footer ────────────────────────────────────────────────
+                item {
+                    Column(
+                        modifier            = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = buildAnnotatedString {
-                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("1. Q: ") }
-                                withStyle(SpanStyle(fontWeight = FontWeight.Normal)) {
-                                    append("Bagaimana aplikasi ini dapat di percaya?\n")
-                                }
-                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("   A: ") }
-                                withStyle(SpanStyle(fontWeight = FontWeight.Normal)) {
-                                    append("Kami menggunakan data tanaman dari ECOCROP oleh FAO. ")
-                                    append("Setiap data umum pada tanaman sudah terverifikasi oleh para ahli, ")
-                                    append("sehingga semua data tanaman di aplikasi ini sangat dapat dipercaya.\n\n")
-                                }
-                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("2. Q: ") }
-                                withStyle(SpanStyle(fontWeight = FontWeight.Normal)) {
-                                    append("Mengapa terdapat tanaman asing di hasil rekomendasi tanaman saya?\n")
-                                }
-                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("   A: ") }
-                                withStyle(SpanStyle(fontWeight = FontWeight.Normal)) {
-                                    append("Data tanaman mencakup tanaman di seluruh dunia. ")
-                                    append("Tanaman tersebut tidak tersebar secara luas, ")
-                                    append("sehingga tidak tersebar ke indonesia.\n\n")
-                                }
-                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("3. Q: ") }
-                                withStyle(SpanStyle(fontWeight = FontWeight.Normal)) {
-                                    append("Apakah aplikasi ini berguna untuk para petani maupun ")
-                                    append("seseorang yang ingin memulai untuk bertani/berkebun?\n")
-                                }
-                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("   A: ") }
-                                withStyle(SpanStyle(fontWeight = FontWeight.Normal)) {
-                                    append("Ya, sangat berguna seperti mencari informasi maupun rekomendasi ")
-                                    append("tanaman atau tumbuhan, yang cocok untuk ditanam ")
-                                    append("yang sesuai dengan tanah/media yang ingin ditanam.")
-                                }
-                            },
-                            fontSize = 18.5.sp,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(7.25.dp)
+                            "Dibuat dengan ❤️ oleh tim Jaksara",
+                            fontSize  = 13.sp,
+                            color     = AUTextMuted,
+                            fontStyle = FontStyle.Italic
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "Version ${packageInfo.versionName}  •  © 2025",
+                            fontSize = 12.sp,
+                            color    = AUTextMuted.copy(alpha = 0.6f)
                         )
                     }
-                }
-                item @Composable {
-                    Spacer(modifier = Modifier.height(40.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(90.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.smanega),
-                            contentDescription = "logo SMAN Ambarawa 1",
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .padding(5.5.dp)
-                                .clickable {
-                                    val intent = Intent(
-                                        Intent.ACTION_VIEW,
-                                        "https://sman1ambarawa.sch.id/".toUri()
-                                    )
-                                    context.startActivity(intent)
-                                }
-                        )
-                        Image(
-                            painter = painterResource(id = R.drawable.logoman3),
-                            contentDescription = "logo MAN Jakarta 3",
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .padding(5.5.dp)
-                                .clickable {
-                                    val intent = Intent(
-                                        Intent.ACTION_VIEW,
-                                        "https://man3jkt.sch.id/".toUri()
-                                    )
-                                    context.startActivity(intent)
-                                }
-                        )
-                    }
-                    Text(
-                        text = "Version: 1.0.0   Tahun rilis: 2025",
-                        fontSize = 18.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                    )
-                }
-                item {
-                    Spacer(modifier = Modifier.height(30.dp))
+                    Spacer(Modifier.height(32.dp))
                 }
             }
         }
     }
 }
 
-/**
- * Custom [Composable] element
- * */
+// ─────────────────────────────────────────────────────────────────────────────
+//  Helper composables
+// ─────────────────────────────────────────────────────────────────────────────
+
 @Composable
-private fun ExpandCard(
-    text: String,
-    backgroundColor: Color,
-    contentColor: Color = lerp(backgroundColor, Color.White, .5f),
-    imageVector: ImageVector,
-    isExpanded: MutableState<Boolean>,
-    content: @Composable (BoxScope.() -> Unit)
+private fun AUCard(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(55.dp)
-            .background(backgroundColor)
-            .clickable { isExpanded.value = !isExpanded.value }
-            .padding(8.5.dp),
-        verticalAlignment = Alignment.CenterVertically,
-//        horizontalArrangement = Arrangement.Center
+    Card(
+        modifier  = modifier.fillMaxWidth(),
+        shape     = RoundedCornerShape(16.dp),
+        colors    = CardDefaults.cardColors(containerColor = AUCardBg),
+        elevation = CardDefaults.cardElevation(2.dp),
     ) {
-        Icon(
-            imageVector = imageVector,
-            contentDescription = "Icon",
-            tint = Color.Black,
-            modifier = Modifier
-                .weight(.15f)
-                .fillMaxSize()
-                .padding(3.5.dp)
-        )
-        Text(
-            text = text,
-            fontSize = 23.sp,
-            fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Start,
-            modifier = Modifier
-                .weight(.7f)
-                .padding(start = 2.5.dp)
-        )
-        Icon(//               gtw napa kebalik jir
-            imageVector = if (isExpanded.value) Icons.Default.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            tint = Color.Black,
-            contentDescription = "Expand the menu",
-            modifier = Modifier
-                .weight(.15f)
-                .fillMaxSize()
-        )
+        Column(modifier = Modifier.padding(16.dp), content = content)
     }
-    val animateTime = 400
-    AnimatedVisibility(
-        visible = isExpanded.value,
-        enter = expandVertically(
-            expandFrom = Alignment.Top,
-            animationSpec = tween(
-                durationMillis = animateTime,
-                easing = LinearOutSlowInEasing
-            )
-        ) + fadeIn(),
-        exit = shrinkVertically(
-            shrinkTowards = Alignment.Top,
-            animationSpec = tween(
-                durationMillis = animateTime,
-                easing = FastOutLinearInEasing
-            )
-        )
-    ) {
+}
+
+@Composable
+private fun AUSectionTitle(text: String, icon: ImageVector, tint: Color = AUGreenMid) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
+                .size(32.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(AUGreenLight),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, null, tint = tint, modifier = Modifier.size(18.dp))
+        }
+        Spacer(Modifier.width(10.dp))
+        Text(text, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = AUGreenDark)
+    }
+}
+
+@Composable
+private fun AUExpandCard(
+    title:       String,
+    icon:        ImageVector,
+    accent:      Color,
+    accentLight: Color,
+    isExpanded:  MutableState<Boolean>,
+    content:     @Composable ColumnScope.() -> Unit
+) {
+    val arrowAngle by animateFloatAsState(
+        targetValue   = if (isExpanded.value) 90f else 0f,
+        animationSpec = tween(300),
+        label         = "arrowRotate"
+    )
+
+    Card(
+        modifier  = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        shape     = RoundedCornerShape(16.dp),
+        colors    = CardDefaults.cardColors(containerColor = AUCardBg),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        // Header row
+        Row(
+            modifier = Modifier
                 .fillMaxWidth()
-                .background(contentColor)
-        ) { content() }
+                .clip(if (isExpanded.value) RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp) else RoundedCornerShape(16.dp))
+                .background(accentLight)
+                .clickable { isExpanded.value = !isExpanded.value }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment     = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(accent.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, null, tint = accent, modifier = Modifier.size(18.dp))
+            }
+            Text(
+                title,
+                fontSize   = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color      = accent,
+                modifier   = Modifier.weight(1f)
+            )
+            Icon(
+                Icons.Default.KeyboardArrowRight,
+                null,
+                tint     = accent,
+                modifier = Modifier.size(22.dp).rotate(arrowAngle)
+            )
+        }
+
+        // Expandable body
+        AnimatedVisibility(
+            visible = isExpanded.value,
+            enter   = expandVertically(
+                expandFrom    = Alignment.Top,
+                animationSpec = tween(350, easing = LinearOutSlowInEasing)
+            ) + fadeIn(tween(250)),
+            exit    = shrinkVertically(
+                shrinkTowards = Alignment.Top,
+                animationSpec = tween(300, easing = FastOutLinearInEasing)
+            ) + fadeOut(tween(200))
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(AUCardBg),
+                content = content
+            )
+        }
     }
 }

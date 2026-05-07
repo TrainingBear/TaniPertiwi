@@ -7,10 +7,15 @@ import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.widget.Toast
+import androidx.compose.animation.*
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.IntOffset
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -41,25 +46,146 @@ object LocalNav {
     var current: NavController? = null
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  Shared transition constants
+// ─────────────────────────────────────────────────────────────────────────────
+private const val DURATION_MS = 500
+private const val FADE_DURATION = 250
+private val easing = FastOutSlowInEasing
+
+/** Slide in from right (forward navigation) */
+private val enterSlideFromRight: AnimatedContentTransitionScope<*>.() -> EnterTransition = {
+    slideIn(
+        animationSpec = tween(DURATION_MS, easing = easing),
+        initialOffset = { IntOffset(it.width, 0) }
+    ) + fadeIn(tween(FADE_DURATION))
+}
+
+/** Slide out to left (forward navigation – old screen leaving) */
+private val exitSlideToLeft: AnimatedContentTransitionScope<*>.() -> ExitTransition = {
+    slideOut(
+        animationSpec = tween(DURATION_MS, easing = easing),
+        targetOffset = { IntOffset(-it.width / 4, 0) }
+    ) + fadeOut(tween(FADE_DURATION))
+}
+
+/** Slide in from left (back navigation – screen returning) */
+private val popEnterSlideFromLeft: AnimatedContentTransitionScope<*>.() -> EnterTransition = {
+    slideIn(
+        animationSpec = tween(DURATION_MS, easing = easing),
+        initialOffset = { IntOffset(-it.width / 4, 0) }
+    ) + fadeIn(tween(FADE_DURATION))
+}
+
+/** Slide out to right (back navigation – screen being popped) */
+private val popExitSlideToRight: AnimatedContentTransitionScope<*>.() -> ExitTransition = {
+    slideOut(
+        animationSpec = tween(DURATION_MS, easing = easing),
+        targetOffset = { IntOffset(it.width, 0) }
+    ) + fadeOut(tween(FADE_DURATION))
+}
+
+/** Fade-only transition – used for screens that feel more "modal" (stats overlay, loading) */
+private val enterFade: AnimatedContentTransitionScope<*>.() -> EnterTransition = {
+    fadeIn(tween(FADE_DURATION + 80))
+}
+private val exitFade: AnimatedContentTransitionScope<*>.() -> ExitTransition = {
+    fadeOut(tween(FADE_DURATION))
+}
+
+/** Slide up from bottom – used for detail/overlay screens */
+private val enterSlideFromBottom: AnimatedContentTransitionScope<*>.() -> EnterTransition = {
+    slideIn(
+        animationSpec = tween(DURATION_MS, easing = easing),
+        initialOffset = { IntOffset(0, it.height / 5) }
+    ) + fadeIn(tween(FADE_DURATION))
+}
+private val exitSlideToBottom: AnimatedContentTransitionScope<*>.() -> ExitTransition = {
+    slideOut(
+        animationSpec = tween(DURATION_MS, easing = easing),
+        targetOffset = { IntOffset(0, it.height / 5) }
+    ) + fadeOut(tween(FADE_DURATION))
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  App
+// ─────────────────────────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App(app: MainActivity, isReady: Boolean) {
     val context = LocalContext.current
-    var nav = rememberNavController()
+    val nav = rememberNavController()
+
     DisposableEffect(Unit) {
         LocalNav.current = nav
         onDispose { LocalNav.current = null }
     }
-    if(isReady){
-        LocalNav.current?.navigate(Screen.home)
+
+    LaunchedEffect(isReady) {
+        if (isReady) {
+            nav.navigate(Screen.home) {
+                popUpTo(Screen.firstLoading) {
+                    inclusive = true
+                }
+                launchSingleTop = true
+            }
+        }
     }
-    NavHost(navController = nav, startDestination = "firstLoading") {
-        composable(Screen.camera) {
+
+    NavHost(
+        navController = nav,
+        startDestination = Screen.firstLoading,
+        // Default transitions for the whole graph (overridden per-composable below)
+        enterTransition = enterSlideFromRight,
+        exitTransition = exitSlideToLeft,
+        popEnterTransition = popEnterSlideFromLeft,
+        popExitTransition = popExitSlideToRight,
+    ) {
+
+        // ── Loading ───────────────────────────────────────────────────────
+        composable(
+            route = Screen.firstLoading,
+            enterTransition = { enterFade() },
+            exitTransition = { exitFade() },
+            popEnterTransition = { enterFade() },
+            popExitTransition = { exitFade() },
+        ) {
+            LoadingScreen()
+        }
+
+        // ── Home ──────────────────────────────────────────────────────────
+        composable(
+            route = Screen.home,
+            // Home uses fade so returning to it doesn't feel jarring
+            enterTransition = { enterFade() },
+            exitTransition = { exitFade() },
+            popEnterTransition = { enterFade() },
+            popExitTransition = { exitFade() },
+        ) {
+            Home(nav)
+        }
+
+        // ── Camera ────────────────────────────────────────────────────────
+        composable(
+            route = Screen.camera,
+            enterTransition = enterSlideFromRight,
+            exitTransition = exitSlideToLeft,
+            popEnterTransition = popEnterSlideFromLeft,
+            popExitTransition = popExitSlideToRight,
+        ) {
             CameraActivity(nav, onClick = {
                 nav.navigate(Screen.inputSoil)
             })
         }
-        composable(Screen.inputSoil) {
+
+        // ── Input Soil ────────────────────────────────────────────────────
+        composable(
+            route = Screen.inputSoil,
+            enterTransition = enterSlideFromRight,
+            exitTransition = exitSlideToLeft,
+            popEnterTransition = popEnterSlideFromLeft,
+            popExitTransition = popExitSlideToRight,
+        ) {
             InputSoil(nav, onClick = { pH: Float?, depth: Int? ->
                 perm.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION))
                 if (ContextCompat.checkSelfPermission(
@@ -85,56 +211,73 @@ fun App(app: MainActivity, isReady: Boolean) {
                     variable.soil = soil
                     inputs.soilResult.collected = false
                     inputs.response = Data.process(variable, inputs.soilResult)
-//                Toast.makeText(context, "finished", Toast.LENGTH_SHORT)
-//                    .show()
-                    Util.debug("Job has been finished!")
                     inputs.soilResult.res = inputs.response
+                    Util.debug("Job has been finished!")
 
-                    if (isNetworkAvailable(app))
-                        nav.navigate(Screen.soilResult)
-                    else {
-                        Toast.makeText(context, "Tidak ada koneksi internet!", Toast.LENGTH_SHORT).show()
-                        nav.navigate(Screen.soilResult)
+                    if (!isNetworkAvailable(app)) {
+                        Toast.makeText(context, "Tidak ada koneksi internet!", Toast.LENGTH_SHORT)
+                            .show()
                     }
+                    nav.navigate(Screen.soilResult)
                 }
             })
         }
-        composable(Screen.soilResult) {
-//            val intent = Intent(app, PlantResultActivity::class.java)
-//            app.startActivity(intent)
+
+        // ── Soil Result ───────────────────────────────────────────────────
+        composable(
+            route = Screen.soilResult,
+            // Slide up from bottom – feels like results "appearing"
+            enterTransition = enterSlideFromBottom,
+            exitTransition = exitFade,
+            popEnterTransition = { enterFade() },
+            popExitTransition = exitSlideToBottom,
+        ) {
             SoilResultScreen()
         }
-        composable(Screen.search) {
-            SearchLayout(
-                nav = nav
-            )
+
+        // ── Search ────────────────────────────────────────────────────────
+        composable(
+            route = Screen.search,
+            enterTransition = enterSlideFromRight,
+            exitTransition = exitSlideToLeft,
+            popEnterTransition = popEnterSlideFromLeft,
+            popExitTransition = popExitSlideToRight,
+        ) {
+            SearchLayout(nav = nav)
         }
-        composable(Screen.soilStats) {
-//            SoilStats(nav)
+
+        // ── Soil Stats (launched as Activity, keep transition minimal) ────
+        composable(
+            route = Screen.soilStats,
+            enterTransition = { enterFade() },
+            exitTransition = { exitFade() },
+            popEnterTransition = { enterFade() },
+            popExitTransition = { exitFade() },
+        ) {
             val intent = Intent(context, SoilStatsActivity::class.java)
             context.startActivity(intent)
         }
-        composable(Screen.home) {
-            Home(nav)
-        }
-        composable(Screen.help) {
+
+        // ── Guide (Help) ──────────────────────────────────────────────────
+        composable(
+            route = Screen.help,
+            enterTransition = enterSlideFromRight,
+            exitTransition = exitSlideToLeft,
+            popEnterTransition = popEnterSlideFromLeft,
+            popExitTransition = popExitSlideToRight,
+        ) {
             Guide(nav)
         }
-        composable(Screen.about) {
-            AboutUs(nav)
-//            AndroidView(
-//                factory = {
-//                    LayoutInflater.from(it).inflate(R.layout.activity_about_me, null)
-//                },
-//                update = {
-//                    val aboutMe = it.findViewById<ImageButton>(R.id.buttonBackmenuabout)
-//                    aboutMe.setOnClickListener {
-//                        nav.navigateUp()
-//                    }
-//                }
-//            )
-        }
-        composable(Screen.guidePointDetail){
+
+        // ── Guide Point Detail ────────────────────────────────────────────
+        composable(
+            route = Screen.guidePointDetail,
+            // Slides up – feels like a detail sheet opening
+            enterTransition = enterSlideFromBottom,
+            exitTransition = exitFade,
+            popEnterTransition = { enterFade() },
+            popExitTransition = exitSlideToBottom,
+        ) {
             PointDetail(
                 nav = nav,
                 title = Guide.guidePointer!!.second.first,
@@ -143,14 +286,24 @@ fun App(app: MainActivity, isReady: Boolean) {
                 details = Guide.guidePointer!!.third,
                 credits = Guide.guidePointer!!.second.third
             )
-//            Guide.guidePointer = null
         }
-        composable(Screen.firstLoading){
-            LoadingScreen()
+
+        // ── About Us ──────────────────────────────────────────────────────
+        composable(
+            route = Screen.about,
+            enterTransition = enterSlideFromRight,
+            exitTransition = exitSlideToLeft,
+            popEnterTransition = popEnterSlideFromLeft,
+            popExitTransition = popExitSlideToRight,
+        ) {
+            AboutUs(nav)
         }
     }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  Helpers
+// ─────────────────────────────────────────────────────────────────────────────
 fun isNetworkAvailable(context: Context): Boolean {
     val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val network = cm.activeNetwork ?: return false
