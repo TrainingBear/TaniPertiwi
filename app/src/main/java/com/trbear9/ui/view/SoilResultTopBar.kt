@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
@@ -24,7 +25,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -75,11 +75,11 @@ fun SoilResultTopBar(
     val categoryOptions = listOf("All") + Util.getCategory()
 
     var expandCat by rememberSaveable { mutableStateOf(false) }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color(0xFFF5F5F5))
+            .statusBarsPadding()
     ) {
         // ── Row 1: Search + Category dropdown ──────────────────────────────
         Row(
@@ -207,40 +207,8 @@ fun SoilResultTopBar(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Sort chips (Tertinggi / Terendah)
-//            sortOptions.forEach { option ->
-//                val isSelected = order == option
-//                Row(
-//                    modifier = Modifier
-//                        .height(32.dp)
-//                        .clip(RoundedCornerShape(20.dp))
-//                        .background(if (isSelected) Color(0xFF2E7D32) else Color.White)
-//                        .border(
-//                            1.dp,
-//                            if (isSelected) Color(0xFF2E7D32) else Color.LightGray,
-//                            RoundedCornerShape(20.dp)
-//                        )
-//                        .clickable { onOrderChange(option) }
-//                        .padding(horizontal = 12.dp),
-//                    verticalAlignment = Alignment.CenterVertically,
-//                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-//                ) {
-//                    Icon(
-//                        imageVector = Icons.Default.Star,
-//                        contentDescription = null,
-//                        tint = if (isSelected) Color.White else Color(0xFFF9C429),
-//                        modifier = Modifier.size(16.dp)
-//                    )
-//                    Text(
-//                        text = option,
-//                        fontSize = 13.sp,
-//                        color = if (isSelected) Color.White else Color.Black,
-//                        fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
-//                    )
-//                }
-//            }
             Text(
-                text="menampilkan $hasil tanaman",
+                text = "menampilkan $hasil tanaman",
                 fontSize = 13.sp,
                 color = Color.Black,
                 fontWeight = FontWeight.Normal,

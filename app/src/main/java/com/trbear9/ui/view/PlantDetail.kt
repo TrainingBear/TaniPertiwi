@@ -12,7 +12,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -23,12 +22,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.StarHalf
@@ -68,13 +67,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -82,39 +78,18 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import com.google.accompanist.flowlayout.FlowRow
 import com.pseudoankit.coachmark.UnifyCoachmark
-import com.pseudoankit.coachmark.model.ToolTipPlacement
-import com.pseudoankit.coachmark.scope.enableCoachMark
-import com.trbear9.plants.Data
-import com.trbear9.ui.fragment.NavigateSoilStats
-import com.trbear9.ui.util.Util
-import com.trbear9.plants.E.A_maximum_ph
-import com.trbear9.plants.E.A_minimum_ph
-import com.trbear9.plants.E.Climate_zone
-import com.trbear9.plants.E.MAX_crop_cycle
-import com.trbear9.plants.E.MIN_crop_cycle
-import com.trbear9.plants.E.O_maximum_temperature
-import com.trbear9.plants.E.O_minimum_temperature
 import com.trbear9.plants.parameters.PlantDummy
 import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.ui.fragment.CONS
 import com.trbear9.ui.fragment.ImageAsset
-import com.trbear9.ui.fragment.Kat
-import com.trbear9.ui.util.MarkKey
-import com.trbear9.ui.util.highlightConfig
-import com.trbear9.ui.view.Divider
+import com.trbear9.ui.fragment.NavigateSoilStats
 import com.trbear9.ui.viewmodel.DataModelAcces
 import com.trbear9.ui.viewmodel.getDetailedImage
 import dev.jeziellago.compose.markdowntext.MarkdownText
@@ -163,13 +138,18 @@ fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit =
             .fillMaxSize()
             .background(Cream)
     ) {
-        Column(modifier = Modifier.verticalScroll(scroll)) {
+        Column(
+            modifier = Modifier
+                .verticalScroll(scroll)
+        ) {
 
             // ── Hero image ────────────────────────────────────────────────
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(16 / 10f)
+                    .background(GreenLight)
+                    .statusBarsPadding()
             ) {
                 var isError by remember { mutableStateOf(false) }
                 var isLoading by remember { mutableStateOf(false) }
@@ -190,7 +170,6 @@ fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit =
                         .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
-                                0f to Color.Transparent,
                                 0.55f to Color.Transparent,
                                 1f to Color(0xCC1B4332)
                             )
@@ -222,27 +201,16 @@ fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit =
                 }
 
                 if (isLoading) {
-                    Box(Modifier
-                        .fillMaxSize()
-                        .background(GreenLight)) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .background(GreenLight)
+                    ) {
                         CircularProgressIndicator(
                             color = GreenMid,
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }
-                }
-
-                // Close button – top left
-                IconButton(
-                    onClick = onExit,
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.85f))
-                        .align(Alignment.TopStart)
-                ) {
-                    Icon(Icons.Default.Close, "Close", tint = GreenDark)
                 }
 
                 // Score badge – top right
@@ -314,7 +282,7 @@ fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit =
                 ) {
 
                     // Description card
-                    SectionCard() {
+                    SectionCard {
                         Text(
                             text = plant.deskripsi ?: "Deskripsi untuk tanaman ini belum tersedia.",
                             fontSize = 15.sp,
@@ -333,7 +301,7 @@ fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit =
                                 add(
                                     Triple(
                                         "PH Ideal",
-                                        "${plant.minPH}–${plant.maxPH}",
+                                        plantSpecFormatting(plant.minPH, plant.maxPH, ""),
                                         Icons.Default.Science
                                     )
                                 )
@@ -342,8 +310,11 @@ fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit =
                                 add(
                                     Triple(
                                         "Waktu Panen",
-                                        if (plant.minCycle != plant.maxCycle) "${plant.minCycle}–${plant.maxCycle} hari"
-                                        else "${plant.minCycle} hari",
+                                        plantSpecFormatting(
+                                            plant.minCycle,
+                                            plant.maxCycle,
+                                            " hari"
+                                        ),
                                         Icons.Default.HourglassEmpty
                                     )
                                 )
@@ -352,7 +323,11 @@ fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit =
                                 add(
                                     Triple(
                                         "Temperatur",
-                                        "${plant.minTemperature}–${plant.maxTemperature}°C",
+                                        plantSpecFormatting(
+                                            plant.minTemperature,
+                                            plant.maxTemperature,
+                                            "°C"
+                                        ),
                                         Icons.Default.Whatshot
                                     )
                                 )
@@ -363,7 +338,13 @@ fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit =
                             plant.salinity?.let {
                                 add(Triple("Kadar Garam", it, Icons.Default.WaterDrop))
                             }
-                            add(Triple("Kecocokan Tanah", "$score / 10", Icons.Default.Star))
+                            add(
+                                Triple(
+                                    "Kecocokan Tanah",
+                                    "${if (score == 0) '–' else score} / 10",
+                                    Icons.Default.Star
+                                )
+                            )
                         }
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             stats.chunked(2).forEach { row ->
@@ -394,8 +375,8 @@ fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit =
                             markdown = buildString {
                                 append("**Kecocokan iklim:** ${plant.iklim}\n")
                                 append("**Kategori:** ${plant.kategori}\n")
-                                plant.sinonim?.let { if(it.isNotEmpty()) append("**Nama lain:** $it\n") }
-                                plant.skalaProduksi?.let { if(it.isNotEmpty()) append("**Skala produksi:** $it") }
+                                plant.sinonim?.let { if (it.isNotEmpty()) append("**Nama lain:** $it\n") }
+                                plant.skalaProduksi?.let { if (it.isNotEmpty()) append("**Skala produksi:** $it") }
                             },
                             style = TextStyle(
                                 fontSize = 15.sp,
@@ -481,7 +462,7 @@ fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit =
                             ref.productSystem?.rumah_tangga ?: "Belum tersedia",
                             GreenLight,
 //                            GreenDark
-                                    Color.Black
+                            Color.Black
                         )
                         Spacer(Modifier.height(8.dp))
                         ProductionScaleRow(
@@ -489,7 +470,7 @@ fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit =
                             ref.productSystem?.komersial ?: "Belum tersedia",
                             AmberLight,
 //                            Color(0xFF7B4F00)
-                                    Color.Black
+                            Color.Black
                         )
                         Spacer(Modifier.height(8.dp))
                         ProductionScaleRow(
@@ -497,13 +478,13 @@ fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit =
                             ref.productSystem?.industri ?: "Belum tersedia",
                             Color(0xFFEDE7F6),
 //                            Color(0xFF4527A0)
-                                    Color.Black
+                            Color.Black
                         )
                     }
 
                     // Risk (optional)
                     plant.resiko?.let { resiko ->
-                        if(resiko.isNotEmpty()) SectionCard(backgroundColor = Color(0xFFFFF8E1)) {
+                        if (resiko.isNotEmpty()) SectionCard(backgroundColor = Color(0xFFFFF8E1)) {
                             SectionTitle("Resiko", Icons.Default.Warning, iconTint = Amber)
                             Spacer(Modifier.height(8.dp))
                             Text(resiko, fontSize = 15.sp, color = TextPrimary, lineHeight = 24.sp)
@@ -514,7 +495,19 @@ fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit =
                 }
             }
         }
-
+        // Close button – top left
+        IconButton(
+            onClick = onExit,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .statusBarsPadding()
+                .padding(start = 16.dp)
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.85f))
+        ) {
+            Icon(Icons.Default.Close, "Close", tint = GreenDark)
+        }
         // Coachmark overlay (unchanged)
         UnifyCoachmark {
             NavigateSoilStats(Modifier.fillMaxSize())
@@ -568,7 +561,7 @@ private fun StatChip(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
             .background(GreenLight)
-            .padding(horizontal = 12.dp, vertical = 10.dp)
+            .padding(10.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(icon, null, tint = GreenMid, modifier = Modifier.size(14.dp))
@@ -576,7 +569,11 @@ private fun StatChip(
             Text(label, fontSize = 11.sp, color = TextMuted, fontWeight = FontWeight.Medium)
         }
         Spacer(Modifier.height(4.dp))
-        Text(value, fontSize = 14.sp, color = GreenDark, fontWeight = FontWeight.Bold)
+        Text(
+            text = value, fontSize = 14.sp,
+            color = GreenDark, fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(start = 2.5.dp)
+        )
     }
 }
 
@@ -668,4 +665,8 @@ fun Label(head: String, body: String, icon: ImageVector) {
             }
         }
     }
+}
+
+private fun plantSpecFormatting(minValue: String?, maxValue: String?, symbol: String): String {
+    return "${if (minValue == maxValue) minValue else "$minValue–$maxValue"}$symbol"
 }

@@ -39,10 +39,11 @@ import java.io.ObjectOutputStream
 import kotlin.collections.iterator
 import kotlin.math.min
 
-fun getData(nama: String): CSVRecord {
+fun getData(nama: String): CSVRecord? {
     if (!Data.ecocrop.containsKey(nama)) {
         "Data untuk $nama tidak tersedia".warn("Data Processor")
-        throw Exception("Data untuk $nama tidak tersedia")
+        return null
+//        throw Exception("Data untuk $nama tidak tersedia")
     }
     return Data.ecocrop[nama]!!
 }
