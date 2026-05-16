@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,7 +46,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.WaterDrop
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -67,7 +65,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
@@ -75,13 +72,8 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -117,7 +109,6 @@ import com.trbear9.ui.viewmodel.inputs
 import com.trbear9.ui.viewmodel.retention
 import com.trbear9.ui.viewmodel.round
 import dev.jeziellago.compose.markdowntext.MarkdownText
-import kotlin.math.absoluteValue
 import kotlin.random.Random
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -365,7 +356,8 @@ fun SoilStats(click: () -> Unit = {}) {
                             accentLight = SoilGreenLight
                         ) {
                             MarkdownText(
-                                markdown = "Untuk mencapai pH netral **dari ${
+                                markdown = if (pH == 7f) "pH tanah anda bagus dan netral!"
+                                else "Untuk mencapai pH netral **dari ${
                                     inputs.soil.pH ?: (value?.soil?.pH.toString() + " (default)")
                                 } → 7**, dibutuhkan **${dosisKg.round()} kg** kapur dolomit per hektar " +
                                         "atau **${(dosisKg / 100).round()} kg** per meter persegi.",

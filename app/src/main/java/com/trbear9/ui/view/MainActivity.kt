@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
@@ -67,10 +66,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
@@ -78,7 +75,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import com.pseudoankit.coachmark.LocalCoachMarkScope
 import com.pseudoankit.coachmark.UnifyCoachmark
@@ -97,9 +93,7 @@ import com.trbear9.ui.util.getContext
 import com.trbear9.ui.util.highlightConfig
 import com.trbear9.ui.viewmodel.ScanTanahButton
 import com.trbear9.ui.viewmodel.perm
-import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.*
@@ -190,10 +184,11 @@ fun Home(nav: NavController? = null) {
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Image(
-                                        painter = painterResource(id = R.drawable.oak_sapling),
+                                        painter = painterResource(id = R.drawable.icon_app),
                                         contentDescription = "Help",
                                         modifier = Modifier
                                             .size(40.dp)
+                                            .padding(end = 5.dp)
                                             .clickable { nav?.navigate(Screen.about) }
                                     )
                                     Column(
@@ -452,12 +447,14 @@ fun Home(nav: NavController? = null) {
                                         fontWeight = FontWeight.Bold,
                                         fontSize = dy2,
                                         fontFamily = FontFamily.SansSerif,
+                                        color = Color(0xFF20481D)
                                     )
                                 ) {
                                     append("\n")
                                     append("Panduan cerdas untuk Agrikultur berkelanjutan berbasis tehnologi.")
                                 }
                             },
+                            color = Color(0xFF1B1B1B),
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = dynamicFontSize,
                             fontFamily = FontFamily.SansSerif,
@@ -473,7 +470,7 @@ fun Home(nav: NavController? = null) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(5f)
-                        .padding(bottom = 50.dp)
+                        .padding(bottom = 62.dp)
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.background_opsi_mainactivity_rescaled),
@@ -490,6 +487,10 @@ fun Home(nav: NavController? = null) {
                 Modifier
                     .fillMaxSize()
                     .padding(it)
+                    .background(Brush.verticalGradient(
+                        0.7f to Color.Transparent,
+                        1f to Color(0xCC143418)
+                    ))
             ) {
                 BoxWithConstraints(
                     Modifier
@@ -569,10 +570,10 @@ private fun ColumnScope.CoachMarkTargetText(
 fun Tooltip(key: CoachMarkKey) {
 }
 
-private val LSGreenDark  = Color(0xFF1B4332)
-private val LSGreenMid   = Color(0xFF52B788)
+private val LSGreenDark = Color(0xFF1B4332)
+private val LSGreenMid = Color(0xFF52B788)
 private val LSGreenLight = Color(0xFFD8F3DC)
-private val LSCream      = Color(0xFFF9F6F0)
+private val LSCream = Color(0xFFF9F6F0)
 
 @Composable
 @Preview
@@ -582,10 +583,10 @@ fun LoadingScreen() {
 
     // Logo: gentle pulse scale
     val logoScale by infiniteTransition.animateFloat(
-        initialValue  = 0.95f,
-        targetValue   = 1.05f,
+        initialValue = 0.95f,
+        targetValue = 1.05f,
         animationSpec = infiniteRepeatable(
-            animation  = tween(1400, easing = EaseInOutSine),
+            animation = tween(1400, easing = EaseInOutSine),
             repeatMode = RepeatMode.Reverse
         ),
         label = "logoScale"
@@ -593,10 +594,10 @@ fun LoadingScreen() {
 
     // Dot loading indicator
     val dotPhase by infiniteTransition.animateFloat(
-        initialValue  = 0f,
-        targetValue   = 3f,
+        initialValue = 0f,
+        targetValue = 3f,
         animationSpec = infiniteRepeatable(
-            animation  = tween(900, easing = LinearEasing),
+            animation = tween(900, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "dotPhase"
@@ -605,14 +606,14 @@ fun LoadingScreen() {
     // Entrance fade-in on first composition
     var visible by remember { mutableStateOf(false) }
     val contentAlpha by animateFloatAsState(
-        targetValue   = if (visible) 1f else 0f,
+        targetValue = if (visible) 1f else 0f,
         animationSpec = tween(700, easing = FastOutSlowInEasing),
-        label         = "contentAlpha"
+        label = "contentAlpha"
     )
     val contentSlide by animateFloatAsState(
-        targetValue   = if (visible) 0f else 40f,
+        targetValue = if (visible) 0f else 40f,
         animationSpec = tween(700, easing = FastOutSlowInEasing),
-        label         = "contentSlide"
+        label = "contentSlide"
     )
     LaunchedEffect(Unit) { visible = true }
 
@@ -621,9 +622,9 @@ fun LoadingScreen() {
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    0f   to Color(0xFFE8F5E9),
+                    0f to Color(0xFFE8F5E9),
                     0.5f to LSCream,
-                    1f   to Color(0xFFF0EDE6)
+                    1f to Color(0xFFF0EDE6)
                 )
             )
     ) {
@@ -668,9 +669,9 @@ fun LoadingScreen() {
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter            = painterResource(R.drawable.oak_sapling),
+                    painter = painterResource(R.drawable.icon_app),
                     contentDescription = "App icon",
-                    modifier           = Modifier.size(100.dp)
+                    modifier = Modifier.size(100.dp)
                 )
             }
 
@@ -678,11 +679,11 @@ fun LoadingScreen() {
 
             // App name
             Text(
-                text       = "Tani Pertiwi",
+                text = "Tani Pertiwi",
                 fontWeight = FontWeight.ExtraBold,
-                fontSize   = 36.sp,
-                color      = LSGreenDark,
-                textAlign  = TextAlign.Center,
+                fontSize = 36.sp,
+                color = LSGreenDark,
+                textAlign = TextAlign.Center,
                 letterSpacing = 0.5.sp
             )
 
@@ -690,11 +691,11 @@ fun LoadingScreen() {
 
             // Tagline
             Text(
-                text       = "Agrikultur Cerdas Berbasis Teknologi",
-                fontSize   = 13.sp,
-                color      = LSGreenMid,
+                text = "Agrikultur Cerdas Berbasis Teknologi",
+                fontSize = 13.sp,
+                color = LSGreenMid,
                 fontWeight = FontWeight.Medium,
-                textAlign  = TextAlign.Center
+                textAlign = TextAlign.Center
             )
 
             Spacer(Modifier.height(36.dp))
@@ -702,12 +703,12 @@ fun LoadingScreen() {
             // Animated dot indicator
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment     = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 repeat(3) { index ->
                     val dotAlpha = when {
                         dotPhase.toInt() == index -> 1f
-                        else                      -> 0.25f
+                        else -> 0.25f
                     }
                     val dotScale = if (dotPhase.toInt() == index) 1.3f else 1f
                     Box(
@@ -724,7 +725,7 @@ fun LoadingScreen() {
 
         // ── Bottom logo ────────────────────────────────────────────────
         Column(
-            modifier            = Modifier
+            modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .alpha(contentAlpha)
                 .padding(bottom = 48.dp),

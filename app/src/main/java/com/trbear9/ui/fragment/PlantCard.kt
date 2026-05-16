@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -49,10 +48,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
-import coil.request.CachePolicy
-import coil.request.ImageRequest
 import com.google.accompanist.flowlayout.FlowRow
 import com.pseudoankit.coachmark.model.ToolTipPlacement
 import com.pseudoankit.coachmark.scope.CoachMarkScope
@@ -144,7 +139,7 @@ fun CoachMarkScope.PlantCardDisplayer(
                     ) {
                         var isError by remember { mutableStateOf(false) }
                         var isLoading by remember { mutableStateOf(false) }
-                        val model = getPlantImage(ref);
+                        val model = getPlantImage(ref)
                         AsyncImage(
                             model = model,
                             contentDescription = "${ref.nama_ilmiah} image",
@@ -154,7 +149,7 @@ fun CoachMarkScope.PlantCardDisplayer(
                                 .clip(RoundedCornerShape(16.dp)),
                             onError = {
                                 isError = true
-                                isLoading = false;
+                                isLoading = false
                             },
                             onLoading = {
                                 isLoading = true
@@ -256,9 +251,8 @@ fun CoachMarkScope.PlantCardDisplayer(
 
                 // Plant Description
                 Text(
-                    text = ref.description?.take(100) + if ((ref.description?.length
-                            ?: 0) > 100
-                    ) "..." else "",
+                    text = ref.description?.take(100) +
+                            if ((ref.description?.length ?: 0) > 100) "..." else "",
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 6.dp)
                 )

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -38,21 +39,23 @@ fun CoachMarkScope.NavigateSoilStats(modifier: Modifier) {
     BoxWithConstraints(modifier) {
         Column(
             Modifier
-            .align(Alignment.BottomEnd)
-            .padding(20.dp)
-            .enableCoachMark(
-                key = MarkKey.analisa,
-                toolTipPlacement = ToolTipPlacement.Start,
-                highlightedViewConfig = highlightConfig
-            ) {
-                MarkKey.analisa.tooltip(ToolTipPlacement.Start)
-            },
+                .align(Alignment.BottomEnd)
+                .statusBarsPadding()
+                .padding(20.dp)
+                .enableCoachMark(
+                    key = MarkKey.analisa,
+                    toolTipPlacement = ToolTipPlacement.Start,
+                    highlightedViewConfig = highlightConfig
+                ) {
+                    MarkKey.analisa.tooltip(ToolTipPlacement.Start)
+                },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             val fontSize = (this@BoxWithConstraints.maxWidth.value / 27).sp
             Icon(
                 Icons.Default.Grain, contentDescription = "Tanah",
-                modifier = Modifier.size(this@BoxWithConstraints.maxWidth / 9)
+                modifier = Modifier
+                    .size(this@BoxWithConstraints.maxWidth / 9)
 //                        .border(5.dp, Color(0xFFCFE5D4))
                     .shadow(
                         10.dp,

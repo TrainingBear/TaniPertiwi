@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -89,7 +88,7 @@ fun Guide(nav: NavController? = null) {
                 num = 1,
                 title = "Tanah",
                 desc = "Tanah sangat vital peranannya bagi semua kehidupan di bumi",
-                icon = R.drawable.oak_sapling,
+                icon = R.drawable.icon_app,
                 credits = listOf(
                     "https://en.wikipedia.org/wiki/Soil_pH",
                     "https://fnb.tech/id/what-is-soil-ph/",
@@ -150,7 +149,7 @@ fun Guide(nav: NavController? = null) {
                 num = 2,
                 title = "Tanaman",
                 desc = "Tanaman menjadi dasar seluruh rantai makanan dan sumber pangan",
-                icon = R.drawable.oak_sapling,
+                icon = R.drawable.icon_app,
                 credits = listOf(
                     "https://id.wikipedia.org/wiki/Tanaman",
                     "https://id.wikipedia.org/wiki/Hama",
@@ -200,7 +199,7 @@ fun Guide(nav: NavController? = null) {
                 num = 3,
                 title = "Pupuk",
                 desc = "Pupuk menyediakan zat hara yang sangat dibutuhkan tanaman",
-                icon = R.drawable.oak_sapling,
+                icon = R.drawable.icon_app,
                 credits = listOf(
                     "https://id.wikipedia.org/wiki/Pupuk",
                     "https://id.my-best.com/139242"
@@ -273,87 +272,92 @@ fun Guide(nav: NavController? = null) {
         )
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(listOf(Color(0xFFE8F5E9), GuideCream, Color(0xFFF0EDE6)))
-            )
-    ) {
-        Scaffold(containerColor = Color.Transparent) { padding ->
+    Scaffold(
+        containerColor = Color.Transparent, topBar = {
+            // ── Top bar ───────────────────────────────────────────────
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(GuideGreenDark, Color(0xFF2D6A4F), GuideGreenMid)
+                        )
+                    )
+            ) {
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
+                    ),
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { nav?.navigate(Screen.home) },
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.15f))
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                "Kembali",
+                                tint = Color.White
+                            )
+                        }
+                    },
+                    title = {
+                        OutlinedTextField(
+                            value = query,
+                            onValueChange = { query = it },
+                            placeholder = {
+                                Text(
+                                    "Cari panduan...",
+                                    color = Color.White.copy(alpha = 0.6f),
+                                    fontSize = 14.sp
+                                )
+                            },
+                            textStyle = TextStyle(color = Color.White, fontSize = 14.sp),
+                            singleLine = true,
+                            trailingIcon = {
+                                Icon(
+                                    Icons.Default.Search,
+                                    null,
+                                    tint = Color.White.copy(alpha = 0.7f)
+                                )
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                                focusedBorderColor = Color.White.copy(alpha = 0.8f),
+                                cursorColor = Color.White,
+                                unfocusedContainerColor = Color.White.copy(alpha = 0.1f),
+                                focusedContainerColor = Color.White.copy(alpha = 0.15f),
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp)
+                                .padding(end = 12.dp)
+                        )
+                    }
+                )
+            }
+        },
+        content = { padding ->
             Column(
                 modifier = Modifier
                     .padding(padding)
                     .fillMaxSize()
             ) {
-                // ── Top bar ───────────────────────────────────────────────
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            Brush.linearGradient(
-                                colors = listOf(GuideGreenDark, Color(0xFF2D6A4F), GuideGreenMid)
-                            )
-                        )
-                ) {
-                    TopAppBar(
-                        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-                        navigationIcon = {
-                            IconButton(
-                                onClick = { nav?.navigate(Screen.home) },
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.15f))
-                            ) {
-                                Icon(
-                                    Icons.AutoMirrored.Filled.ArrowBack,
-                                    "Kembali",
-                                    tint = Color.White
-                                )
-                            }
-                        },
-                        title = {
-                            OutlinedTextField(
-                                value = query,
-                                onValueChange = { query = it },
-                                placeholder = {
-                                    Text(
-                                        "Cari panduan...",
-                                        color = Color.White.copy(alpha = 0.6f),
-                                        fontSize = 14.sp
-                                    )
-                                },
-                                textStyle = TextStyle(color = Color.White, fontSize = 14.sp),
-                                singleLine = true,
-                                trailingIcon = {
-                                    Icon(
-                                        Icons.Default.Search,
-                                        null,
-                                        tint = Color.White.copy(alpha = 0.7f)
-                                    )
-                                },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                                    focusedBorderColor = Color.White.copy(alpha = 0.8f),
-                                    cursorColor = Color.White,
-                                    unfocusedContainerColor = Color.White.copy(alpha = 0.1f),
-                                    focusedContainerColor = Color.White.copy(alpha = 0.15f),
-                                ),
-                                shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(50.dp)
-                                    .padding(end = 12.dp)
-                            )
-                        }
-                    )
-                }
-
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    Color(0xFFE8F5E9), GuideCream, Color(0xFFF0EDE6)
+                                )
+                            )
+                        ),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -372,7 +376,7 @@ fun Guide(nav: NavController? = null) {
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                // Sapling image
+                                // Icon image
                                 Box(
                                     modifier = Modifier
                                         .size(72.dp)
@@ -381,7 +385,7 @@ fun Guide(nav: NavController? = null) {
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Image(
-                                        painter = painterResource(R.drawable.oak_sapling),
+                                        painter = painterResource(R.drawable.icon_app),
                                         contentDescription = "Sapling",
                                         contentScale = ContentScale.Fit,
                                         modifier = Modifier.size(52.dp)
@@ -446,12 +450,10 @@ fun Guide(nav: NavController? = null) {
                         val isDone = DataStore.contains(item.id)
                         GuideCard(nav = nav, item = item, isDone = isDone)
                     }
-
                     item { Spacer(Modifier.height(24.dp)) }
                 }
             }
-        }
-    }
+        })
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
