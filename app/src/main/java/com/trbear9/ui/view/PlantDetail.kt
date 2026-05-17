@@ -504,7 +504,7 @@ fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit =
                 .padding(start = 16.dp)
                 .size(36.dp)
                 .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.85f))
+                .background(Color.White.copy(alpha = 0.8f))
         ) {
             Icon(Icons.Default.Close, "Close", tint = GreenDark)
         }

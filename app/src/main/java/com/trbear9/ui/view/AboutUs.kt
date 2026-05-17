@@ -14,6 +14,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,7 +51,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.trbear9.ui.R
-import com.trbear9.ui.util.Screen
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Palette (consistent with the rest of the app)
@@ -108,24 +109,6 @@ fun AboutUs(nav: NavController? = null) {
                         )
                         .statusBarsPadding()
                 ) {
-                    // Back button
-                    IconButton(
-                        onClick = { nav?.popBackStack() },
-                        modifier = Modifier
-                            .padding(12.dp)
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.15f))
-                            .align(Alignment.TopStart)
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                            "Kembali",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -440,6 +423,23 @@ fun AboutUs(nav: NavController? = null) {
                 }
                 Spacer(Modifier.height(32.dp))
             }
+        }
+        // Back button
+        IconButton(
+            onClick = { nav?.popBackStack() },
+            modifier = Modifier
+                .statusBarsPadding()
+                .padding(start = 16.dp)
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.8f))
+        ) {
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                "Kembali",
+                tint = AUGreenDark,
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }
