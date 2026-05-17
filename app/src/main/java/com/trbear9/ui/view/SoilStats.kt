@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -177,21 +178,20 @@ fun SoilStats(click: () -> Unit = {}) {
                 )
             )
     ) {
-        Scaffold(containerColor = Color.Transparent) { padding ->
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .verticalScroll(scroll)
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
                 // ── Page title ────────────────────────────────────────────
-                Spacer(Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Spacer(Modifier.width(48.dp)) // offset for close btn
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .background(SoilGreenLight)
+                        .statusBarsPadding()
+                ) {
                     Column(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
@@ -206,219 +206,230 @@ fun SoilStats(click: () -> Unit = {}) {
                             color = SoilTextMuted
                         )
                     }
-                    Spacer(Modifier.width(48.dp))
                 }
-
-                // ── Soil photo ────────────────────────────────────────────
-                SoilCard {
-                    SoilSectionTitle("Foto yang di potret", Icons.Default.CameraAlt)
-                    Spacer(Modifier.height(10.dp))
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(16 / 9f)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(SoilGreenLight)
-                    ) {
-                        Image(
-                            painter = if (inputs.image != null)
-                                BitmapPainter(inputs.image!!.asImageBitmap())
-                            else rememberVectorPainter(Icons.Default.Image),
-                            contentDescription = "Foto tanah",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                        // confidence badge overlay
+            },
+            content = { padding ->
+                Column(
+                    modifier = Modifier
+                        .padding(padding)
+                        .verticalScroll(scroll)
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // ── Soil photo ────────────────────────────────────────────
+                    SoilCard {
+                        SoilSectionTitle("Foto yang di potret", Icons.Default.CameraAlt)
+                        Spacer(Modifier.height(10.dp))
                         Box(
                             modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(8.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(SoilGreenDark.copy(alpha = 0.75f))
-                                .padding(horizontal = 10.dp, vertical = 5.dp)
+                                .fillMaxWidth()
+                                .aspectRatio(16 / 9f)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(SoilGreenLight)
                         ) {
-                            Text(
-                                text = soilType,
-                                color = Color.White,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold
+                            Image(
+                                painter = if (inputs.image != null)
+                                    BitmapPainter(inputs.image!!.asImageBitmap())
+                                else rememberVectorPainter(Icons.Default.Image),
+                                contentDescription = "Foto tanah",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
                             )
+                            // confidence badge overlay
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomStart)
+                                    .padding(8.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(SoilGreenDark.copy(alpha = 0.75f))
+                                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                            ) {
+                                Text(
+                                    text = soilType,
+                                    color = Color.White,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(8.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(SoilAmber.copy(alpha = 0.9f))
+                                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                            ) {
+                                Text(
+                                    text = "${String.format("%.1f", soilPred * 100)}%",
+                                    color = Color.White,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
+                    }
+
+                    // ── Prediction chart ──────────────────────────────────────
+                    SoilCard {
+                        SoilSectionTitle("Diagram Prediksi Jenis Tanah", Icons.Default.BarChart)
+                        Spacer(Modifier.height(10.dp))
                         Box(
                             modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(8.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(SoilAmber.copy(alpha = 0.9f))
-                                .padding(horizontal = 10.dp, vertical = 5.dp)
+                                .fillMaxWidth()
+                                .height(230.dp)
                         ) {
-                            Text(
-                                text = "${String.format("%.1f", soilPred * 100)}%",
-                                color = Color.White,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold
+                            JetpackComposeBasicColumnChart(
+                                modelProducer,
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
                     }
-                }
 
-                // ── Prediction chart ──────────────────────────────────────
-                SoilCard {
-                    SoilSectionTitle("Diagram Prediksi Jenis Tanah", Icons.Default.BarChart)
-                    Spacer(Modifier.height(10.dp))
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(230.dp)
-                    ) {
-                        JetpackComposeBasicColumnChart(
-                            modelProducer,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                    // ── Prediction results with tab ───────────────────────────
+                    SoilCard {
+                        var isTanahPage by remember { mutableStateOf(true) }
+                        val value: Response? = response
+                        val pH: Float? = inputs.soil.pH ?: value?.soil?.pH
+
+                        SoilSectionTitle("Hasil Prediksi", Icons.Default.Analytics)
+                        Spacer(Modifier.height(10.dp))
+
+                        // Tab row
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(SoilGreenLight)
+                                .padding(4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            SoilTab(
+                                label = "Tanah",
+                                selected = isTanahPage,
+                                onClick = { isTanahPage = true },
+                                modifier = Modifier.weight(1f)
+                            )
+                            SoilTab(
+                                label = "Geografis",
+                                selected = !isTanahPage,
+                                onClick = { isTanahPage = false },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+
+                        Spacer(Modifier.height(12.dp))
+
+                        if (isTanahPage) {
+                            val pred = soilPred * 100.0
+                            Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                                SoilDataRow(
+                                    "pH Tanah",
+                                    (inputs.soil.pH ?: value?.soil?.pH).toString()
+                                )
+                                SoilDividerLine()
+                                SoilDataRow(
+                                    "Tipe Tanah",
+                                    "$soilType  •  ${String.format("%.2f", pred)}%"
+                                )
+                                SoilDividerLine()
+                                SoilDataRow("Tekstur", texr.toString())
+                                SoilDividerLine()
+                                SoilDataRow("Drainase", drain.toString())
+                                SoilDividerLine()
+                                SoilDataRow("Kesuburan", ferr.toString())
+                                SoilDividerLine()
+                                SoilDataRow("Kedalaman", "$depth cm")
+                            }
+                        } else {
+                            Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                                SoilDataRow("MDPL", geo?.altitude?.round() ?: "–")
+                                SoilDividerLine()
+                                SoilDataRow("Iklim", geo?.iklim?.head ?: "–")
+                                SoilDividerLine()
+                                SoilDataRow("Min °C", geo?.min?.round() ?: "–")
+                                SoilDividerLine()
+                                SoilDataRow("Max °C", geo?.max?.round() ?: "–")
+                            }
+                        }
                     }
-                }
 
-                // ── Prediction results with tab ───────────────────────────
-                SoilCard {
-                    var isTanahPage by remember { mutableStateOf(true) }
+                    // ── pH neutralisation advice ──────────────────────────────
                     val value: Response? = response
                     val pH: Float? = inputs.soil.pH ?: value?.soil?.pH
+                    if (pH != null) {
+                        if (pH <= 7f) {
+                            val dosisKg = getDosis(soilType, pH, 7f, depth) * 1000
+                            SoilAdviceCard(
+                                icon = Icons.Default.LocalHospital,
+                                title = "Netralisasi pH Tanah",
+                                accent = SoilGreenDark,
+                                accentLight = SoilGreenLight
+                            ) {
+                                MarkdownText(
+                                    markdown = if (pH == 7f) "pH tanah anda bagus dan netral!"
+                                    else "Untuk mencapai pH netral **dari ${
+                                        inputs.soil.pH ?: (value?.soil?.pH.toString() + " (default)")
+                                    } → 7**, dibutuhkan **${dosisKg.round()} kg** kapur dolomit per hektar " +
+                                            "atau **${(dosisKg / 100).round()} kg** per meter persegi.",
+                                    style = TextStyle(
+                                        fontSize = 14.sp,
+                                        color = SoilTextPrimary,
+                                        lineHeight = 22.sp
+                                    )
+                                )
+                            }
+                        } else {
+                            SoilAdviceCard(
+                                icon = Icons.Default.LocalHospital,
+                                title = "Netralisasi pH Tanah",
+                                accent = SoilAmber,
+                                accentLight = SoilAmberLight
+                            ) {
+                                MarkdownText(
+                                    markdown = "**Tanah Anda terlalu basa (pH > 7).** Kondisi ini dapat menghambat penyerapan hara. " +
+                                            "Tambahkan kompos, pupuk kandang, atau serasah daun untuk menurunkan pH secara alami. " +
+                                            "Untuk hasil lebih cepat, tambahkan sedikit belerang (sulfur) dan jaga kelembapan tanah.",
+                                    style = TextStyle(
+                                        fontSize = 14.sp,
+                                        color = SoilTextPrimary,
+                                        lineHeight = 22.sp
+                                    )
+                                )
+                            }
+                        }
+                    }
 
-                    SoilSectionTitle("Hasil Prediksi", Icons.Default.Analytics)
-                    Spacer(Modifier.height(10.dp))
-
-                    // Tab row
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(SoilGreenLight)
-                            .padding(4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    // ── Water retention advice ────────────────────────────────
+                    SoilAdviceCard(
+                        icon = Icons.Default.WaterDrop,
+                        title = "Retensi Air",
+                        accent = Color(0xFF1565C0),
+                        accentLight = Color(0xFFE3F2FD)
                     ) {
-                        SoilTab(
-                            label = "Tanah",
-                            selected = isTanahPage,
-                            onClick = { isTanahPage = true },
-                            modifier = Modifier.weight(1f)
-                        )
-                        SoilTab(
-                            label = "Geografis",
-                            selected = !isTanahPage,
-                            onClick = { isTanahPage = false },
-                            modifier = Modifier.weight(1f)
+                        MarkdownText(
+                            markdown = retention(soilType),
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                color = SoilTextPrimary,
+                                lineHeight = 22.sp
+                            )
                         )
                     }
 
-                    Spacer(Modifier.height(12.dp))
-
-                    if (isTanahPage) {
-                        val pred = soilPred * 100.0
-                        Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                            SoilDataRow("pH Tanah", (inputs.soil.pH ?: value?.soil?.pH).toString())
-                            SoilDividerLine()
-                            SoilDataRow(
-                                "Tipe Tanah",
-                                "$soilType  •  ${String.format("%.2f", pred)}%"
-                            )
-                            SoilDividerLine()
-                            SoilDataRow("Tekstur", texr.toString())
-                            SoilDividerLine()
-                            SoilDataRow("Drainase", drain.toString())
-                            SoilDividerLine()
-                            SoilDataRow("Kesuburan", ferr.toString())
-                            SoilDividerLine()
-                            SoilDataRow("Kedalaman", "$depth cm")
-                        }
-                    } else {
-                        Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                            SoilDataRow("MDPL", geo?.altitude?.round() ?: "–")
-                            SoilDividerLine()
-                            SoilDataRow("Iklim", geo?.iklim?.head ?: "–")
-                            SoilDividerLine()
-                            SoilDataRow("Min °C", geo?.min?.round() ?: "–")
-                            SoilDividerLine()
-                            SoilDataRow("Max °C", geo?.max?.round() ?: "–")
-                        }
-                    }
+                    Spacer(Modifier.height(72.dp))
                 }
-
-                // ── pH neutralisation advice ──────────────────────────────
-                val value: Response? = response
-                val pH: Float? = inputs.soil.pH ?: value?.soil?.pH
-                if (pH != null) {
-                    if (pH <= 7f) {
-                        val dosisKg = getDosis(soilType, pH, 7f, depth) * 1000
-                        SoilAdviceCard(
-                            icon = Icons.Default.LocalHospital,
-                            title = "Netralisasi pH Tanah",
-                            accent = SoilGreenDark,
-                            accentLight = SoilGreenLight
-                        ) {
-                            MarkdownText(
-                                markdown = if (pH == 7f) "pH tanah anda bagus dan netral!"
-                                else "Untuk mencapai pH netral **dari ${
-                                    inputs.soil.pH ?: (value?.soil?.pH.toString() + " (default)")
-                                } → 7**, dibutuhkan **${dosisKg.round()} kg** kapur dolomit per hektar " +
-                                        "atau **${(dosisKg / 100).round()} kg** per meter persegi.",
-                                style = TextStyle(
-                                    fontSize = 14.sp,
-                                    color = SoilTextPrimary,
-                                    lineHeight = 22.sp
-                                )
-                            )
-                        }
-                    } else {
-                        SoilAdviceCard(
-                            icon = Icons.Default.LocalHospital,
-                            title = "Netralisasi pH Tanah",
-                            accent = SoilAmber,
-                            accentLight = SoilAmberLight
-                        ) {
-                            MarkdownText(
-                                markdown = "**Tanah Anda terlalu basa (pH > 7).** Kondisi ini dapat menghambat penyerapan hara. " +
-                                        "Tambahkan kompos, pupuk kandang, atau serasah daun untuk menurunkan pH secara alami. " +
-                                        "Untuk hasil lebih cepat, tambahkan sedikit belerang (sulfur) dan jaga kelembapan tanah.",
-                                style = TextStyle(
-                                    fontSize = 14.sp,
-                                    color = SoilTextPrimary,
-                                    lineHeight = 22.sp
-                                )
-                            )
-                        }
-                    }
-                }
-
-                // ── Water retention advice ────────────────────────────────
-                SoilAdviceCard(
-                    icon = Icons.Default.WaterDrop,
-                    title = "Retensi Air",
-                    accent = Color(0xFF1565C0),
-                    accentLight = Color(0xFFE3F2FD)
-                ) {
-                    MarkdownText(
-                        markdown = retention(soilType),
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            color = SoilTextPrimary,
-                            lineHeight = 22.sp
-                        )
-                    )
-                }
-
-                Spacer(Modifier.height(72.dp))
-            }
-        }
+            })
 
         // Close button – floating top-left
         IconButton(
             onClick = click,
             modifier = Modifier
-                .padding(12.dp)
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.9f))
                 .align(Alignment.TopStart)
+                .statusBarsPadding()
+                .padding(start = 16.dp)
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.8f))
         ) {
             Icon(Icons.Default.Close, "Tutup", tint = SoilGreenDark)
         }
