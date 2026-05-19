@@ -552,17 +552,7 @@ fun Home(nav: NavController? = null) {
                             subtitle = "Scan tanahmu dan cari tanaman yang cocok di kebunmu",
                             iconBg = HomeAmberLight,
                             iconColor = HomeAmber,
-                            onClick = { nav?.navigate(Screen.inputSoil) }
-                        )
-
-                        // Search database card
-                        FeatureCard(
-                            icon = Icons.Default.Search,
-                            title = "Cek Database Tanaman",
-                            subtitle = "Cari dan temukan info lengkap ribuan jenis tanaman",
-                            iconBg = HomeAmberLight,
-                            iconColor = HomeAmber,
-                            onClick = { nav?.navigate(Screen.search) }
+                            onClick = { ScanTanahButton(context) }
                         )
 
                         // Guide card
@@ -575,8 +565,18 @@ fun Home(nav: NavController? = null) {
                             onClick = { nav?.navigate(Screen.help) }
                         )
 
+                        // Search database card
+                        FeatureCard(
+                            icon = Icons.Default.Storage,
+                            title = "Cek Database Tanaman",
+                            subtitle = "Cari dan temukan info lengkap ribuan jenis tanaman",
+                            iconBg = HomeAmberLight,
+                            iconColor = HomeAmber,
+                            onClick = { nav?.navigate(Screen.search) }
+                        )
+
                         // Soil result card (if available)
-                        if (soilHasResult) {
+                        if (false && soilHasResult) {
                             FeatureCard(
                                 icon = Icons.Default.Park,
                                 title = "Hasil Rekomendasi",
@@ -594,7 +594,10 @@ fun Home(nav: NavController? = null) {
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 20.dp)
                             .clip(RoundedCornerShape(20.dp))
-                            .background(HomeGreenLight)
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(HomeGreenDark, Color(0xFF299164), HomeGreenMid)
+                                ))
                     ) {
                         Image(
                             painter = painterResource(R.drawable.background_opsi_mainactivity_rescaled),

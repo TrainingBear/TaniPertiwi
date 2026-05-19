@@ -156,7 +156,7 @@ fun AboutUs(nav: NavController? = null) {
                                 .padding(horizontal = 16.dp, vertical = 6.dp)
                         ) {
                             Text(
-                                "v${packageInfo.versionName}  •  2025",
+                                "v${packageInfo.versionName}  •  2026",
                                 fontSize = 13.sp,
                                 color = Color.White.copy(alpha = 0.9f),
                                 fontWeight = FontWeight.Medium
