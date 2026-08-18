@@ -12,22 +12,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,7 +33,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Park
-import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
@@ -50,12 +44,9 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -66,26 +57,15 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
-import com.pseudoankit.coachmark.LocalCoachMarkScope
 import com.pseudoankit.coachmark.UnifyCoachmark
-import com.pseudoankit.coachmark.model.HighlightedViewConfig
 import com.pseudoankit.coachmark.model.ToolTipPlacement
-import com.pseudoankit.coachmark.scope.enableCoachMark
-import com.pseudoankit.coachmark.util.CoachMarkKey
 import com.trbear9.plants.Data
 import com.trbear9.plants.TFService
 import com.trbear9.ui.util.DataStore
@@ -95,11 +75,9 @@ import com.trbear9.ui.R
 import com.trbear9.ui.util.MarkKey
 import com.trbear9.ui.util.getContext
 import com.trbear9.ui.util.highlightConfig
-import com.trbear9.ui.viewmodel.ScanTanahButton
+import com.trbear9.ui.viewmodel.scanTanahButton
 import com.trbear9.ui.viewmodel.perm
-import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.*
@@ -112,7 +90,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.trbear9.ui.R.drawable.icon_app
-import com.trbear9.ui.viewmodel.inputs
+import com.trbear9.ui.viewmodel.recommendationResult
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Palette
@@ -492,7 +470,7 @@ fun Home(nav: NavController? = null) {
                     Spacer(Modifier.height(20.dp))
 
                     // ── Quick stats row ───────────────────────────────────
-                    val soilHasResult = inputs.soilResult.response != null
+                    val soilHasResult = recommendationResult.response.completed
 //                    Row(
 //                        modifier = Modifier
 //                            .fillMaxWidth()
@@ -552,7 +530,7 @@ fun Home(nav: NavController? = null) {
                             subtitle = "Scan tanahmu dan cari tanaman yang cocok di kebunmu",
                             iconBg = HomeAmberLight,
                             iconColor = HomeAmber,
-                            onClick = { ScanTanahButton(context) }
+                            onClick = { scanTanahButton(context) }
                         )
 
                         // Guide card
@@ -639,7 +617,7 @@ fun Home(nav: NavController? = null) {
 
                 // ── Scan FAB ──────────────────────────────────────────────
                 Button(
-                    onClick = { ScanTanahButton(context) },
+                    onClick = { scanTanahButton(context) },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = (padding.calculateBottomPadding().value + 16).dp)

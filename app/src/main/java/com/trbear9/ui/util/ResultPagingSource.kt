@@ -2,25 +2,26 @@ package com.trbear9.ui.util
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.trbear9.plants.parameters.blob.Plant
 import kotlinx.coroutines.delay
 import kotlin.math.min
 
 class ResultPagingSource(
-    val items: MutableList<Pair<Int, String>>
-): PagingSource<Int, Pair<Int, String>>(){
+    val items: MutableList<Pair<Int, Plant>>
+): PagingSource<Int, Pair<Int, Plant>>(){
     var size: Int = 0
     init {
         size += items.size
         "Initialized with size: $size".info("ResultPagingSource")
     }
-    override fun getRefreshKey(state: PagingState<Int, Pair<Int, String>>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, Pair<Int, Plant>>): Int? {
         return state.anchorPosition?.let { pos ->
             state.closestPageToPosition(pos)?.prevKey?.plus(1)
                 ?: state.closestPageToPosition(pos)?.nextKey?.minus(1)
         }
     }
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Pair<Int, String>> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Pair<Int, Plant>> {
         val page = params.key ?: 0
         val pageSize = 7
         "loading page: $page/${size/pageSize}".info("ResultPagingSource")

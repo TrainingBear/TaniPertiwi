@@ -1,8 +1,6 @@
 package com.trbear9.plants.parameters;
 
 import com.trbear9.plants.parameters.blob.Plant;
-import com.trbear9.plants.parameters.blob.PlantCare;
-import com.trbear9.plants.parameters.blob.ProductSystem;
 
 public class PlantDummy extends Plant {
     public PlantDummy() {

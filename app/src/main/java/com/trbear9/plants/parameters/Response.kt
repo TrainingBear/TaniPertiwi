@@ -1,7 +1,12 @@
 package com.trbear9.plants.parameters
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.plants.parameters.blob.SoilCare
+import com.trbear9.ui.viewmodel.SoilResult
 import lombok.AllArgsConstructor
 import lombok.Getter
 import lombok.NoArgsConstructor
@@ -12,28 +17,25 @@ import java.io.Serializable
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-class Response : Serializable {
-    var numericDepth: Int = 150
-    var progress: Int = 0
-    var target: Int = 0
-    var predicted = false
-    var parameterLoaded = false
-    var current = "Tanaman"
-    var loaded = false
-    var hashCode: String? = null
-    var soilName: String? = null
-    var soilCare: SoilCare? = null
+class Response(val delegate: SoilResult) : Serializable {
+    var numericDepth by mutableIntStateOf(150)
+    var progress by mutableIntStateOf(0)
+    var target by mutableIntStateOf(0)
+    var predicted by mutableStateOf(false)
+    var parameterLoaded by mutableStateOf(false)
+    var current by mutableStateOf("Tanaman")
+    var completed by mutableStateOf(false)
+    var hashCode by mutableStateOf("Tanaman")
+    var soilName by mutableStateOf("Tanaman")
+    var soilCare by mutableStateOf(SoilCare())
     var soilPrediction: List<Pair<String, Float>> = listOf()
-    var soilMax: Pair<String, Float>? = null
-    var total = 0
-    var soil: SoilParameters? = null
+    var soilMax by mutableStateOf(Pair("Belum Diketahui", 0f))
+    var total by mutableIntStateOf(0)
+    var soil by mutableStateOf(SoilParameters())
     var geo: GeoParameters? = null
-    val tanaman: MutableMap<Int, MutableSet<String>> =
-        HashMap<Int, MutableSet<String>>()
 
     fun put(score: Int, plant: Plant) {
-        tanaman.computeIfAbsent(score) { k: Int? -> mutableSetOf<String>() }
-            .add(plant.nama_ilmiah)
+        delegate.add(score, plant)
         total++
     }
 }

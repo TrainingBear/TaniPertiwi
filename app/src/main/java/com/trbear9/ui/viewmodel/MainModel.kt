@@ -25,7 +25,7 @@ fun getLocation(context: Context) {
     }
     else gps = true
 
-    val geo = GeoParameters();
+    geo = GeoParameters();
     LocationServices.getFusedLocationProviderClient(context)
         .lastLocation
         .addOnSuccessListener {
@@ -34,11 +34,10 @@ fun getLocation(context: Context) {
                 geo.longtitude = it.longitude;
             }
         }
-    inputs.geo = geo;
     "long: ${geo.longtitude} lat: ${geo.latitude} mdpl: ${geo.altitude}".debug("GETLOCATION")
 }
 
-fun ScanTanahButton(context: Context) {
+fun scanTanahButton(context: Context) {
     perm.launch(arrayOf(Manifest.permission.CAMERA))
     if (ContextCompat.checkSelfPermission(
             context,

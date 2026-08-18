@@ -1,11 +1,7 @@
 package com.trbear9.plants.parameters
 
-import com.trbear9.plants.E
-import com.trbear9.plants.E.CLIMATE
+import com.trbear9.ui.viewmodel.Climate
 import lombok.*
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
 
 @Getter
 @Setter
@@ -13,7 +9,7 @@ import kotlin.math.min
 @AllArgsConstructor
 @Builder
 class GeoParameters : Parameters {
-    var iklim: CLIMATE? = CLIMATE.tropical_wet_and_dry
+    var iklim: Climate? = Climate.TROPICAL_WET_AND_DRY
     var latitude: Double = -7.2565293 // di sekitar ambarawa (default)
     var longtitude: Double = 110.402824 // di sekitar ambarawa (default)
     var altitude: Double = 0.0

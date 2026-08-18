@@ -1,6 +1,7 @@
 package com.trbear9.plants.parameters
 
 import com.trbear9.plants.E.*
+import com.trbear9.ui.viewmodel.Depth
 import lombok.*
 
 @Getter
@@ -9,12 +10,12 @@ import lombok.*
 @NoArgsConstructor
 @AllArgsConstructor
 class SoilParameters : Parameters {
-    var numericDepth: Int = 40
-    var depth: DEPTH? = null
+    var depth: Depth = Depth.SHALLOW
     var texture: TEXTURE? = null
     var fertility: FERTILITY? = null // tingkat kesuburan
     var drainage: DRAINAGE? = null
     var pH: Float? = null
+    var numericDepth: Float? = null
 
     fun modify(soil: SoilParameters) {
         texture = soil.texture
@@ -32,7 +33,7 @@ class SoilParameters : Parameters {
             texture = (TEXTURE.medium)
             fertility = (FERTILITY.high)
             drainage = (DRAINAGE.well)
-            pH= (6f)
+            pH = (6f)
         }
 
         /** sources:

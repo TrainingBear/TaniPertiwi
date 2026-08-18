@@ -4,13 +4,14 @@ import android.graphics.Bitmap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.trbear9.ui.view.SearchResult
-import com.trbear9.ui.view.SoilResult
+import com.trbear9.ui.viewmodel.SearchResult
+import com.trbear9.ui.viewmodel.SoilResult
 import com.trbear9.plants.parameters.GeoParameters
 import com.trbear9.plants.parameters.Response
 import com.trbear9.plants.parameters.SoilParameters
 import kotlinx.coroutines.flow.Flow
 
+@Deprecated("move on", level = DeprecationLevel.ERROR)
 class Inputs {
     var response: Flow<Response>? = null
     var loaded by mutableStateOf(false)

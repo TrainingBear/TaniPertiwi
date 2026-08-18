@@ -22,11 +22,11 @@ import com.trbear9.plants.Data
 import com.trbear9.plants.parameters.blob.Plant
 import org.jetbrains.annotations.Async
 
-fun SnapshotStateMap<Int, MutableSet<String>>.flatten(order: String): MutableList<Pair<Int, String>> {
+fun SnapshotStateMap<Int, MutableSet<Plant>>.flatten(order: String): MutableList<Pair<Int, Plant>> {
     val reversedList = if (order == "Tertinggi") {
         this.toList().asReversed()
     } else this.toList()
-    val result = mutableListOf<Pair<Int, String>>()
+    val result = mutableListOf<Pair<Int, Plant>>()
     reversedList.forEach {
         it.second.forEach { plant ->
             result.add(it.first to plant)
@@ -36,31 +36,28 @@ fun SnapshotStateMap<Int, MutableSet<String>>.flatten(order: String): MutableLis
 }
 
 fun completer(query: String, holder: SnapshotStateSet<String>, limit: Int = Int.MAX_VALUE) {
-    inputs.soilResult.plants ?: return
     var i = 0
-    outer@ for (it in (inputs.soilResult.plants) ?: return) {
+    outer@ for (it in (recommendationResult.plants)) {
         outer2@ for (plant in it.value) {
-            val commonName = Data.namaIlmiahToNamaUmum[plant.lowercase()]
+            val commonName = plant.commonName
             val prefix = query.lowercase()
             if (commonName != null && (commonName.startsWith(prefix) ||
                         commonName.endsWith(prefix) || commonName.contains(prefix))
             ) {
                 holder.add(commonName)
-                if (i++ > limit) {
-                    break@outer
-                    break@outer2
-                }
+                if (i++ > limit) break@outer
             }
+            if (i++ > limit) break@outer2
         }
     }
 }
 
-fun search(query: String, order: String, category: String): MutableList<Pair<Int, String>> {
-    val plants = (inputs.soilResult.plantByCategory?.get(category) ?: return mutableListOf())
+fun search(query: String, order: String, category: String): MutableList<Pair<Int, Plant>> {
+    val plants = (recommendationResult.plantByCategory[category] ?: return mutableListOf())
         .flatten(order)
-    val result = mutableListOf<Pair<Int, String>>()
+    val result = mutableListOf<Pair<Int, Plant>>()
     for (plant in plants) {
-        val name = Data.namaIlmiahToNamaUmum[plant.second.lowercase()]
+        val name = plant.second.commonName
         val prefix = query.lowercase()
         if (name != null && (name.startsWith(prefix) ||
                     name.endsWith(prefix) || name.contains(prefix))

@@ -37,10 +37,15 @@ import com.trbear9.ui.view.InputSoil
 import com.trbear9.ui.view.LoadingScreen
 import com.trbear9.ui.view.MainActivity
 import com.trbear9.ui.util.Util
+import com.trbear9.ui.viewmodel.depth
+import com.trbear9.ui.viewmodel.geo
 import com.trbear9.ui.viewmodel.getLocation
 import com.trbear9.ui.viewmodel.gps
-import com.trbear9.ui.viewmodel.inputs
+import com.trbear9.ui.viewmodel.image
+import com.trbear9.ui.viewmodel.pH
 import com.trbear9.ui.viewmodel.perm
+import com.trbear9.ui.viewmodel.recommendationResult
+import com.trbear9.ui.viewmodel.soil
 
 object LocalNav {
     var current: NavController? = null
@@ -186,7 +191,7 @@ fun App(app: MainActivity, isReady: Boolean) {
             popEnterTransition = popEnterSlideFromLeft,
             popExitTransition = popExitSlideToRight,
         ) {
-            InputSoil(nav, onClick = { pH: Float?, depth: Int? ->
+            InputSoil(nav, nextCallback = {
                 perm.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION))
                 if (ContextCompat.checkSelfPermission(
                         context,
@@ -202,16 +207,14 @@ fun App(app: MainActivity, isReady: Boolean) {
                     getLocation(context)
                     gps = true
                     val variable = UserVariable()
-                    val soil = SoilParameters()
-                    if (pH != null) soil.pH = pH.coerceAtMost(14f)
-                    if (depth != null) soil.numericDepth = depth
-                    inputs.soil = soil
-                    variable.geo = inputs.geo
-                    variable.image = inputs.image
+                    soil = SoilParameters()
+                    if (pH >= 0f) soil.pH = pH.coerceAtMost(14f)
+                    soil.numericDepth = depth
+                    variable.geo = geo
+                    variable.image = image
                     variable.soil = soil
-                    inputs.soilResult.collected = false
-                    inputs.response = Data.process(variable, inputs.soilResult)
-                    inputs.soilResult.res = inputs.response
+                    recommendationResult.collected = false
+                    recommendationResult.flow = Data.process(variable)
                     Util.debug("Job has been finished!")
 
                     if (!isNetworkAvailable(app)) {

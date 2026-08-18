@@ -21,10 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -43,18 +39,17 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.trbear9.ui.R
 import com.trbear9.ui.util.Screen
+import com.trbear9.ui.viewmodel.depth
+import com.trbear9.ui.viewmodel.pH
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
 fun InputSoil(
     nav: NavController? = null,
-    onClick: (pH: Float?, depth: Int?) -> Unit? = { a, b -> }
+    nextCallback: () -> Unit? = {}
 ) {
     LocalContext.current
-    var pH by remember { mutableStateOf("") }
-    var depth by remember { mutableStateOf("20") }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -120,10 +115,10 @@ fun InputSoil(
                     modifier = Modifier.padding(vertical = 10.dp, horizontal = 32.dp)
                 )
                 OutlinedTextField(
-                    value = pH,
+                    value = pH.toString(),
                     onValueChange = { input ->
                         if (input.all { it.isDigit() || (it == ',' || it == '.') }) {
-                            pH = input
+                            pH = input.toFloat()
                         }
                     },
                     label = { Text("pH tanah") },
@@ -136,14 +131,14 @@ fun InputSoil(
                         .padding(horizontal = 32.dp)
                 )
                 OutlinedTextField(
-                    value = depth,
+                    value = depth.toString(),
                     onValueChange = { input ->
                         if (input.all { it.isDigit() || (it == ',' || it == '.') }) {
-                            depth = input
+                            depth = input.toFloat()
                         }
                     },
                     label = { Text("Kedalaman tanah (cm)") },
-                    placeholder = { Text("20") },
+                    placeholder = { Text("$depth") },
                     keyboardOptions = KeyboardOptions.Default.copy(
                         keyboardType = KeyboardType.Number
                     ),
@@ -153,11 +148,9 @@ fun InputSoil(
                         .padding(horizontal = 32.dp)
                 )
 
-                val pH = pH.replace(",", ".").toFloatOrNull()
-                val depth = depth.replace(",", ".").toFloatOrNull()?.toInt()
                 Button(
                     onClick = {
-                        onClick(pH, depth)
+                        nextCallback()
                         Log.d("SOIL", "pH = $pH and depth = $depth")
 //                        Toast.makeText(context, "pH: $pH, depth: $depth", Toast.LENGTH_SHORT).show()
                     },

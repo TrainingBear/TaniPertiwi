@@ -105,11 +105,15 @@ import com.patrykandpatrick.vico.core.common.component.Shadow
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.trbear9.plants.TFService
 import com.trbear9.plants.parameters.Response
+import com.trbear9.ui.viewmodel.Depth
 import com.trbear9.ui.viewmodel.getDosis
-import com.trbear9.ui.viewmodel.inputs
+import com.trbear9.ui.viewmodel.image
+import com.trbear9.ui.viewmodel.recommendationResult
 import com.trbear9.ui.viewmodel.retention
 import com.trbear9.ui.viewmodel.round
+import com.trbear9.ui.viewmodel.soil
 import dev.jeziellago.compose.markdowntext.MarkdownText
+import java.util.Locale
 import kotlin.random.Random
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -145,22 +149,17 @@ class SoilStatsActivity : ComponentActivity() {
 @Composable
 fun SoilStats(click: () -> Unit = {}) {
     val scroll = rememberScrollState()
-    val response by remember { mutableStateOf(inputs.soilResult.response) }
-    val collected by remember { mutableStateOf(inputs.soilResult.collected) }
-    val soilType by remember { mutableStateOf(response?.soilMax?.first ?: "Belum diketahui") }
-    val soilPred by remember { mutableFloatStateOf(response?.soilMax?.second ?: 0f) }
-    val ferr by remember { mutableStateOf(response?.soil?.fertility ?: "Belum diketahui") }
-    val texr by remember { mutableStateOf(response?.soil?.texture ?: "Belum diketahui") }
-    val drain by remember { mutableStateOf(response?.soil?.drainage ?: "Belum diketahui") }
-    val depth by remember { mutableIntStateOf(inputs.soil.numericDepth) }
-    val geo by remember { mutableStateOf(response?.geo) }
     val modelProducer = remember { CartesianChartModelProducer() }
     val list = remember { mutableStateListOf<Float>() }
+    val value: Response = recommendationResult.response
+    val pH: Float? = soil.pH ?: value.soil.pH
+    val depth: Depth =
+        if (soil.numericDepth != null) Depth.scaleFrom(soil.numericDepth!!) else value.soil.depth
 
     LaunchedEffect(Unit) {
         modelProducer.runTransaction {
             columnSeries {
-                response?.soilPrediction?.forEach { pair -> list.add(pair.second) }
+                recommendationResult.response.soilPrediction.forEach { pair -> list.add(pair.second) }
                 series(
                     if (list.isEmpty()) List(6) { Random.nextFloat() } else list
                 )
@@ -228,8 +227,8 @@ fun SoilStats(click: () -> Unit = {}) {
                                 .background(SoilGreenLight)
                         ) {
                             Image(
-                                painter = if (inputs.image != null)
-                                    BitmapPainter(inputs.image!!.asImageBitmap())
+                                painter = if (image != null)
+                                    BitmapPainter(image!!.asImageBitmap())
                                 else rememberVectorPainter(Icons.Default.Image),
                                 contentDescription = "Foto tanah",
                                 contentScale = ContentScale.Crop,
@@ -245,7 +244,7 @@ fun SoilStats(click: () -> Unit = {}) {
                                     .padding(horizontal = 10.dp, vertical = 5.dp)
                             ) {
                                 Text(
-                                    text = soilType,
+                                    text = recommendationResult.response.soilMax.first,
                                     color = Color.White,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold
@@ -260,7 +259,13 @@ fun SoilStats(click: () -> Unit = {}) {
                                     .padding(horizontal = 10.dp, vertical = 5.dp)
                             ) {
                                 Text(
-                                    text = "${String.format("%.1f", soilPred * 100)}%",
+                                    text = "${
+                                        String.format(
+                                            Locale.US,
+                                            "%.1f",
+                                            recommendationResult.response.soilMax.second * 100
+                                        )
+                                    }%",
                                     color = Color.White,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold
@@ -288,8 +293,6 @@ fun SoilStats(click: () -> Unit = {}) {
                     // ── Prediction results with tab ───────────────────────────
                     SoilCard {
                         var isTanahPage by remember { mutableStateOf(true) }
-                        val value: Response? = response
-                        val pH: Float? = inputs.soil.pH ?: value?.soil?.pH
 
                         SoilSectionTitle("Hasil Prediksi", Icons.Default.Analytics)
                         Spacer(Modifier.height(10.dp))
@@ -320,45 +323,49 @@ fun SoilStats(click: () -> Unit = {}) {
                         Spacer(Modifier.height(12.dp))
 
                         if (isTanahPage) {
-                            val pred = soilPred * 100.0
+                            val pred = recommendationResult.response.soilMax.second * 100.0
                             Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                                SoilDataRow(
-                                    "pH Tanah",
-                                    (inputs.soil.pH ?: value?.soil?.pH).toString()
-                                )
+                                SoilDataRow("pH Tanah", (pH).toString())
                                 SoilDividerLine()
                                 SoilDataRow(
                                     "Tipe Tanah",
-                                    "$soilType  •  ${String.format("%.2f", pred)}%"
+                                    "${value.soilMax.first}  •  ${String.format("%.2f", pred)}%"
                                 )
                                 SoilDividerLine()
-                                SoilDataRow("Tekstur", texr.toString())
+                                SoilDataRow(
+                                    "Tekstur",
+                                    value.soil.texture?.toString() ?: "Belum Diketahui"
+                                )
                                 SoilDividerLine()
-                                SoilDataRow("Drainase", drain.toString())
+                                SoilDataRow(
+                                    "Drainase",
+                                    value.soil.drainage?.toString() ?: "Belum Diketahui"
+                                )
                                 SoilDividerLine()
-                                SoilDataRow("Kesuburan", ferr.toString())
+                                SoilDataRow(
+                                    "Kesuburan",
+                                    value.soil.fertility?.toString() ?: "Belum Diketahui"
+                                )
                                 SoilDividerLine()
-                                SoilDataRow("Kedalaman", "$depth cm")
+                                SoilDataRow("Kedalaman", depth.translation)
                             }
                         } else {
                             Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                                SoilDataRow("MDPL", geo?.altitude?.round() ?: "–")
+                                SoilDataRow("MDPL", value.geo?.altitude?.round() ?: "–")
                                 SoilDividerLine()
-                                SoilDataRow("Iklim", geo?.iklim?.head ?: "–")
+                                SoilDataRow("Iklim", value.geo?.iklim?.head ?: "–")
                                 SoilDividerLine()
-                                SoilDataRow("Min °C", geo?.min?.round() ?: "–")
+                                SoilDataRow("Min °C", value.geo?.min?.round() ?: "–")
                                 SoilDividerLine()
-                                SoilDataRow("Max °C", geo?.max?.round() ?: "–")
+                                SoilDataRow("Max °C", value.geo?.max?.round() ?: "–")
                             }
                         }
                     }
 
                     // ── pH neutralisation advice ──────────────────────────────
-                    val value: Response? = response
-                    val pH: Float? = inputs.soil.pH ?: value?.soil?.pH
                     if (pH != null) {
                         if (pH <= 7f) {
-                            val dosisKg = getDosis(soilType, pH, 7f, depth) * 1000
+                            val dosisKg = getDosis(value.soilMax.first, pH, 7f, depth.value) * 1000
                             SoilAdviceCard(
                                 icon = Icons.Default.LocalHospital,
                                 title = "Netralisasi pH Tanah",
@@ -368,7 +375,7 @@ fun SoilStats(click: () -> Unit = {}) {
                                 MarkdownText(
                                     markdown = if (pH == 7f) "pH tanah anda bagus dan netral!"
                                     else "Untuk mencapai pH netral **dari ${
-                                        inputs.soil.pH ?: (value?.soil?.pH.toString() + " (default)")
+                                        soil.pH ?: (value.soil.pH.toString() + " (default)")
                                     } → 7**, dibutuhkan **${dosisKg.round()} kg** kapur dolomit per hektar " +
                                             "atau **${(dosisKg / 100).round()} kg** per meter persegi.",
                                     style = TextStyle(
@@ -407,7 +414,7 @@ fun SoilStats(click: () -> Unit = {}) {
                         accentLight = Color(0xFFE3F2FD)
                     ) {
                         MarkdownText(
-                            markdown = retention(soilType),
+                            markdown = retention(value.soilMax.first),
                             style = TextStyle(
                                 fontSize = 14.sp,
                                 color = SoilTextPrimary,

@@ -50,7 +50,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.trbear9.ui.util.Screen
-import com.trbear9.ui.viewmodel.inputs
+import com.trbear9.ui.viewmodel.image
 
 
 private val imgCapture = ImageCapture.Builder().build()
@@ -62,10 +62,10 @@ private fun takePhoto(context: Context, onFinish: () -> Unit) {
                 exc.printStackTrace()
             }
 
-            override fun onCaptureSuccess(image: ImageProxy) {
-                inputs.image = image.toBitmap()
+            override fun onCaptureSuccess(proxy: ImageProxy) {
+                image = proxy.toBitmap()
                 onFinish()
-                image.close()
+                proxy.close()
             }
         }
     )
@@ -74,7 +74,7 @@ private fun takePhoto(context: Context, onFinish: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
-fun CameraActivity(nav: NavController? = null,onClick: () -> Unit = {}) {
+fun CameraActivity(nav: NavController? = null, onClick: () -> Unit = {}) {
     val context = LocalContext.current
     Scaffold(
         topBar = {

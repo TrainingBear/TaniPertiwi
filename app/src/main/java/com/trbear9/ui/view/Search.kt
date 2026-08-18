@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -42,11 +41,11 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.pseudoankit.coachmark.UnifyCoachmark
 import com.trbear9.plants.Data
+import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.ui.fragment.PlantCardDisplayer
-import com.trbear9.ui.util.Util
-import com.trbear9.ui.util.debug
+import com.trbear9.ui.model.Searcher
 import com.trbear9.ui.util.error
-import com.trbear9.ui.viewmodel.inputs
+import com.trbear9.ui.viewmodel.databaseSearchResult
 import kotlinx.coroutines.delay
 import kotlin.math.min
 
@@ -58,7 +57,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
     var selected by rememberSaveable { mutableStateOf("All") }
     var query by rememberSaveable { mutableStateOf("") }
     var finalQuery by rememberSaveable { mutableStateOf("") }
-    var completer = rememberSaveable { mutableListOf<String>() }
+    val completer = rememberSaveable { mutableListOf<Plant>() }
     val focusRequester = remember { FocusRequester() }
 
     var focus by rememberSaveable { mutableStateOf(false) }
@@ -66,36 +65,9 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
 
     fun search() {
         if (query.isEmpty()) return
-        inputs.searchResult.plantByCategory = mutableStateMapOf()
-        inputs.searchResult.plants = mutableSetOf()
-        Data.searchByScienceName(9999, query = query) {
-            inputs.searchResult.plants!!.add(it)
-            Data.plant[it]?.category?.forEach { cat ->
-                inputs.searchResult.plantByCategory?.computeIfAbsent(Util.translateCategory(cat)) {
-                    mutableSetOf()
-                }?.add(Data.normalize[it] ?: "null")
-            }
-            inputs.searchResult.plantByCategory?.computeIfAbsent("All") {
-                mutableSetOf()
-            }?.add(Data.normalize[it] ?: "null")
-//            "Found $it".debug("PlantSearch")
-        }
-        Data.searchByCommonName(9999, query = query) {
-            val name = Data.namaUmumToNamaIlmiah[it]!!
-            inputs.searchResult.plants!!.add(name)
-            Data.plant[it]?.category?.forEach { cat ->
-                inputs.searchResult.plantByCategory?.computeIfAbsent(Util.translateCategory(cat)) {
-                    mutableSetOf()
-                }?.add(Data.normalize[name] ?: "null")
-            }
-            inputs.searchResult.plantByCategory?.computeIfAbsent("All") {
-                mutableSetOf()
-            }?.add(Data.normalize[name] ?: "null")
-//            "Found $name".debug("PlantSearch")
-        }
-        Util.getCategory().forEach {
-            "$it loaded ${inputs.searchResult.plantByCategory!![it]?.size} items".debug("PlantSearch")
-        }
+        databaseSearchResult.reset()
+        Searcher.searchByScienceName(9999, query = query, output = databaseSearchResult)
+        Searcher.searchByCommonName(9999, query = query, output = databaseSearchResult)
         keyboard?.hide()
         finalQuery = query
         focus = false
@@ -112,12 +84,8 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
         completer.clear()
         focus = true
         if (query.isNotEmpty()) {
-            Data.searchByCommonName(9999, query = query) {
-                completer.add(it)
-            }
-            Data.searchByScienceName(9999, query = query) {
-                completer.add(it)
-            }
+            Data.plant.values.filter { it.nama_ilmiah.contains(query) }.forEach { completer.add(it) }
+            Data.plant.values.filter { it.nama_umum.contains(query) }.forEach { completer.add(it) }
         }
     }
     val source = CompleterSearchSource(completer)
@@ -151,8 +119,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
             )
         }
     ) { padding ->
-        val pagerFlow =
-            if (finalQuery.isEmpty())
+        val pagerFlow = if (finalQuery.isEmpty())
                 remember(selected) {
                     Pager(PagingConfig(pageSize = 7)) {
                         CompleterSearchSource(
@@ -164,12 +131,12 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
                 remember(finalQuery, selected) {
                     Pager(PagingConfig(pageSize = 7)) {
                         CompleterSearchSource(
-                            inputs.searchResult.plantByCategory?.get(selected)?.toMutableList()
+                            databaseSearchResult.plantByCategory.get(selected)?.toMutableList()
                                 ?: mutableListOf()
                         )
                     }.flow
                 }
-        val plants: LazyPagingItems<String> =
+        val plants: LazyPagingItems<Plant> =
             pagerFlow.collectAsLazyPagingItems()
 
         UnifyCoachmark {
@@ -180,7 +147,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 items(plants.itemCount) { i ->
-                    val plant = Data.plant[plants[i]!!]
+                    val plant = plants[i]
                     if (plant != null) PlantCardDisplayer(0, plant, true)
                 }
 
@@ -222,12 +189,12 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
                     ) {
                         items(items.itemCount) { i ->
                             Text(
-                                text = items[i]!!,
+                                text = items[i]!!.commonName,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Medium,
                                 modifier = Modifier
                                     .clickable {
-                                        query = items[i]!!
+                                        query = items[i]!!.commonName
                                     }
                                     .padding(start = 16.dp)
                                     .fillMaxWidth()
@@ -240,15 +207,15 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
     }
 }
 
-class CompleterSearchSource(val completer: MutableList<String>) : PagingSource<Int, String>() {
-    override fun getRefreshKey(state: PagingState<Int, String>): Int? {
+class CompleterSearchSource(val completer: MutableList<Plant>) : PagingSource<Int, Plant>() {
+    override fun getRefreshKey(state: PagingState<Int, Plant>): Int? {
         return state.anchorPosition?.let { pos ->
             state.closestPageToPosition(pos)?.prevKey?.plus(1)
                 ?: state.closestPageToPosition(pos)?.nextKey?.minus(1)
         }
     }
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, String> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Plant> {
         val page = params.key ?: 0
         val pageSize = 20
 

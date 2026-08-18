@@ -35,7 +35,6 @@ import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,7 +53,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.pseudoankit.coachmark.UnifyCoachmark
 import com.trbear9.plants.Data
-import com.trbear9.plants.parameters.Response
+import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.ui.LocalNav
 import com.trbear9.ui.fragment.NavigateSoilStats
 import com.trbear9.ui.fragment.PlantCardDisplayer
@@ -65,23 +64,9 @@ import com.trbear9.ui.util.debug
 import com.trbear9.ui.util.info
 import com.trbear9.ui.viewmodel.completer
 import com.trbear9.ui.viewmodel.flatten
-import com.trbear9.ui.viewmodel.inputs
+import com.trbear9.ui.viewmodel.recommendationResult
 import com.trbear9.ui.viewmodel.search
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onCompletion
-
-class SoilResult {
-    var plants: SnapshotStateMap<Int, MutableSet<String>>? = null
-    var plantByCategory: SnapshotStateMap<String, SnapshotStateMap<Int, MutableSet<String>>>? = null
-    var res: Flow<Response>? = null
-    var collected: Boolean = false
-    var response: Response? = null
-}
-
-class SearchResult {
-    var plants: MutableSet<String>? = null
-    var plantByCategory: SnapshotStateMap<String, MutableSet<String>>? = null
-}
 
 var coachStep = 0
 
@@ -101,63 +86,20 @@ fun SoilResultScreen() {
     var scroll = rememberScrollState()
     var completerScroll = rememberScrollState()
 
-    var loaded by rememberSaveable {
-        mutableStateOf<Boolean>(
-            if (inputs.soilResult == null) true
-            else inputs.soilResult.response?.loaded == true
-        )
-    }
-    var collected by rememberSaveable {
-        mutableStateOf<Boolean>(
-            inputs.soilResult.collected ?: true
-        )
-    }
-    var current by rememberSaveable {
-        mutableStateOf<String>(
-            inputs.soilResult?.response?.current ?: "Tanduran"
-        )
-    }
-    var progress by rememberSaveable {
-        mutableIntStateOf(
-            inputs.soilResult?.response?.progress?.toInt() ?: 0
-        )
-    }
-    var target by rememberSaveable {
-        mutableIntStateOf(
-            inputs.soilResult?.response?.target?.toInt() ?: 0
-        )
-    }
-    var predicted by rememberSaveable { mutableStateOf<Boolean>(inputs.soilResult?.response?.predicted == true) }
-    var parameterLoaded by rememberSaveable { mutableStateOf<Boolean>(inputs.soilResult?.response?.parameterLoaded == true) }
-    var noResponse by rememberSaveable { mutableStateOf<Boolean>(inputs.soilResult.response == null) }
-    var hasil by rememberSaveable {
-        mutableIntStateOf(
-            inputs.soilResult?.response?.total ?: 0
-        )
-    }
-
     var search = remember { mutableStateSetOf<String>() }
     var focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
-        collected = inputs.soilResult?.collected != false
-        Util.debug("It is already collected? $collected")
-        if (inputs.soilResult != null && !collected) {
+        var result = recommendationResult
+        Util.debug("It is already collected? ${result.collected}")
+        if (!result.collected) {
             Util.debug("Collecting")
-            inputs.soilResult.res?.onCompletion {
-                inputs.soilResult.collected = true
-                inputs.soilResult.res = null
+            result.flow?.onCompletion {
+                result.collected = true
+                result.flow = null
                 Util.debug("Collected")
             }?.collect {
-                inputs.soilResult.response = it
-                noResponse = inputs.soilResult.response == null
-                loaded = it.loaded
-                current = it.current
-                progress = it.progress
-                target = it.target
-                predicted = it.predicted
-                parameterLoaded = it.parameterLoaded
-                hasil = it.total
+                // TODO
             }
         }
     }
@@ -185,7 +127,7 @@ fun SoilResultScreen() {
                     focusRequester = focusRequester,
                     keyboard = keyboard,
                     scroll = scroll,
-                    hasil = hasil
+                    hasil = recommendationResult.response.total
                 )
         },
         bottomBar = {
@@ -218,7 +160,7 @@ fun SoilResultScreen() {
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                if (noResponse) {
+                if (recommendationResult.response.completed) {
                     Column(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -251,7 +193,7 @@ fun SoilResultScreen() {
                         }
                     }
                     return@Box
-                } else if (!loaded) {
+                } else if (!recommendationResult.response.completed) {
                     Column(
                         modifier = Modifier.align(Alignment.Center),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -259,9 +201,9 @@ fun SoilResultScreen() {
                         CircularProgressIndicator()
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = if (!predicted) "Menganalisa tanahmu.."
-                            else if (!parameterLoaded) "Mencari riwayat suhu 6 hari terakhir di daerah mu...\nPastikan koneksimu terhubung ke internet\nUntuk hasil yang lebih akurat!"
-                            else "Mencari data $current",
+                            text = if (!recommendationResult.response.predicted) "Menganalisa tanahmu.."
+                            else if (!recommendationResult.response.parameterLoaded) "Mencari riwayat suhu 6 hari terakhir di daerah mu...\nPastikan koneksimu terhubung ke internet\nUntuk hasil yang lebih akurat!"
+                            else "Mencari data ${recommendationResult.response.current}",
                             fontSize = 16.sp,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(20.dp)
@@ -274,8 +216,7 @@ fun SoilResultScreen() {
                         remember(selected, order) {
                             Pager(PagingConfig(pageSize = 7)) {
                                 ResultPagingSource(
-                                    items = inputs.soilResult.plantByCategory?.get(selected)
-                                        ?.flatten(order) ?: mutableListOf<Pair<Int, String>>()
+                                    items = recommendationResult.plantByCategory[selected]?.flatten(order) ?: mutableListOf()
                                 )
                             }.flow
                         }
@@ -285,16 +226,15 @@ fun SoilResultScreen() {
                                 ResultPagingSource(items = search(query, order, selected))
                             }.flow
                         }
-                val plants: LazyPagingItems<Pair<Int, String>> =
-                    pagerFlow.collectAsLazyPagingItems()
-                if (inputs.soilResult.plants?.isNotEmpty() == true) {
+                val plants: LazyPagingItems<Pair<Int, Plant>> = pagerFlow.collectAsLazyPagingItems()
+                if (recommendationResult.plants.isNotEmpty()) {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         items(plants.itemCount) { i ->
-                            PlantCardDisplayer(plants[i]!!.first, Data.plant[plants[i]!!.second])
-                            "Displaying ${Data.plant[plants[i]!!.second]?.commonName}".info("SoilResultScreen")
+                            PlantCardDisplayer(plants[i]!!.first, plants[i]!!.second)
+                            "Displaying ${plants[i]!!.second}".info("SoilResultScreen")
                         }
 
 //                        if(plants.itemCount >= 1) item {
@@ -327,7 +267,7 @@ fun SoilResultScreen() {
                         modifier = Modifier.align(Alignment.Center)
                     )
             }
-            if (loaded) NavigateSoilStats(
+            if (recommendationResult.response.completed) NavigateSoilStats(
                 Modifier
                     .fillMaxSize()
                     .padding(padding)

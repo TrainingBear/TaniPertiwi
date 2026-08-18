@@ -1,6 +1,7 @@
 package com.trbear9.plants
 
 import android.content.Context
+import com.trbear9.plants.E.Science_name
 import com.trbear9.ui.util.error
 import com.trbear9.plants.parameters.Parameters
 import com.trbear9.plants.parameters.UserVariable
@@ -15,7 +16,7 @@ import java.util.*
 import kotlin.math.abs
 import kotlin.math.absoluteValue
 
-private val dir = File("serialized").also{it.mkdirs()}
+private val dir = File("serialized").also { it.mkdirs() }
 fun save(name: String): File = File(dir, name)
 
 object CsvHandler {
@@ -24,17 +25,17 @@ object CsvHandler {
     var ecocropcsv: MutableList<CSVRecord>? = null
     var perawatan: MutableList<CSVRecord>? = null
 
-    fun preload(){
+    fun preload() {
         try {
             File("EcoCrop_DB.csv").inputStream().use { `is` ->
-                InputStreamReader(`is`).use {
-                        reader -> ecocropcsv = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader).records
+                InputStreamReader(`is`).use { reader ->
+                    ecocropcsv = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader).records
                 }
             }
 
             File("Perawatan.csv").inputStream().use { `is` ->
-                InputStreamReader(`is`).use {
-                        reader -> perawatan = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader).records
+                InputStreamReader(`is`).use { reader ->
+                    perawatan = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader).records
                 }
             }
         } catch (e: IOException) {
@@ -44,7 +45,7 @@ object CsvHandler {
         ObjectOutputStream(save("ecocropcsv.ser").outputStream()).use {
             it.writeObject(ecocropcsv)
         }
-        ObjectOutputStream(save("perawatan.ser").outputStream()).use{
+        ObjectOutputStream(save("perawatan.ser").outputStream()).use {
             it.writeObject(perawatan)
         }
     }
@@ -62,20 +63,26 @@ object CsvHandler {
 //        }
         try {
             context.assets.open("EcoCrop_DB.csv").use { `is` ->
-                InputStreamReader(`is`).use {
-                        reader -> ecocropcsv = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader).records
+                InputStreamReader(`is`).use { reader ->
+                    ecocropcsv = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader).records
                 }
             }
 
             context.assets.open("Perawatan.csv").use { `is` ->
-                InputStreamReader(`is`).use {
-                        reader -> perawatan = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader).records
+                InputStreamReader(`is`).use { reader ->
+                    perawatan = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader).records
                 }
             }
         } catch (e: IOException) {
             e.printStackTrace()
             throw RuntimeException(e)
         }
+        var cnt = 0
+        CsvHandler.ecocropcsv?.forEach {
+            Data.ecocrop[it[Science_name]] = it
+            cnt++;
+        }
+        "Loaded $cnt total plants on ECOCROP.Csv".info("Data Processor")
     }
 
     fun isAuthored(record: CSVRecord): Boolean {
@@ -86,24 +93,24 @@ object CsvHandler {
     fun process(data: UserVariable): MutableMap<Int, MutableSet<CSVRecord>> {
         val map: MutableMap<Int, MutableSet<CSVRecord>> =
             TreeMap<Int, MutableSet<CSVRecord>>()
-        if(ecocropcsv==null){
+        if (ecocropcsv == null) {
             throw Exception("EcoCrop_DB.csv not found, coba untuk load()")
         }
 
         for (record in ecocropcsv) {
             explored_fields++
             val score = evaluateAll(record, data)
-            if(score < 0) "${record.get(E.Science_name)} score: $score".info("Csv")
+            if (score < 0) "${record.get(E.Science_name)} score: $score".info("Csv")
 
             if (isAuthored(record) && score > 0)
                 map.computeIfAbsent(score) { k: Int? -> HashSet<CSVRecord>() }
-                .add(record)
+                    .add(record)
         }
         return map
     }
 
     fun perawatan(record: CSVRecord): CSVRecord? {
-        if(perawatan==null){
+        if (perawatan == null) {
             throw Exception("Perawatan.csv is not loaded! tolong load() sebelum digunakan")
         }
         for (i in perawatan) {
@@ -123,7 +130,7 @@ object CsvHandler {
 
     @JvmStatic
     fun getRecord(query: String, column: String?): CSVRecord? {
-        if(ecocropcsv==null){
+        if (ecocropcsv == null) {
             throw Exception("Ecocrop.csv is not loaded! tolong load() sebelum digunakan")
         }
         for (i in ecocropcsv) {
@@ -135,9 +142,11 @@ object CsvHandler {
         return null
     }
 
-    private val science_perawatancsv: MutableMap<String?, CSVRecord?> = HashMap<String?, CSVRecord?>()
+    private val science_perawatancsv: MutableMap<String?, CSVRecord?> =
+        HashMap<String?, CSVRecord?>()
+
     fun perawatanCsv(ecocropcsv: CSVRecord): CSVRecord? {
-        if(perawatan==null){
+        if (perawatan == null) {
             throw Exception("Perawatan.csv is not loaded! tolong load() sebelum digunakan")
         }
         if (science_perawatancsv.containsKey(ecocropcsv.get(E.Science_name)))

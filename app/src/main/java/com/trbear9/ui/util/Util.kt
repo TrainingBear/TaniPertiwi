@@ -17,6 +17,7 @@ import com.trbear9.plants.E.CATEGORY.other
 import com.trbear9.plants.E.CATEGORY.roots_tubers
 import com.trbear9.plants.E.CATEGORY.vegetables
 import com.trbear9.plants.E.CATEGORY.weed
+import com.trbear9.ui.viewmodel.Category
 import com.trbear9.ui.viewmodel.perm
 import java.io.FileInputStream
 import java.io.IOException
@@ -103,6 +104,7 @@ object Util {
         }
         return ans;
     }
+
     fun bulkClimateTranslate(climates: String?): String?{
         climates?:return null;
         var ans = "";
@@ -111,6 +113,8 @@ object Util {
         }
         return ans;
     }
+
+    @Deprecated("use Category translation constant instead", level = DeprecationLevel.WARNING)
     fun translateCategory(category: String): String {
         when (category) {
             other.head -> return "Lainnya"
@@ -130,6 +134,7 @@ object Util {
         return "Lainnya"
     }
 
+    @Deprecated("use Category translation constant instead", level = DeprecationLevel.WARNING)
     fun translateClimate(climate: String): String {
         return when (climate) {
             "tropical wet & dry (Aw)" -> "tropis basah & kering (Aw)"
@@ -149,9 +154,6 @@ object Util {
         }
     }
     fun getCategory(): List<String>{
-        return listOf("Lainya", "Sayur", "Pseudocereal", "Akar/Umbi", "Pakan ternak",
-            "Buah & kacang", "Bahan", "Rumput hias", "Obat & aromatik", "Hutan/Kayu",
-            "Tanaman penutup", "Lingkungan", "Gulma"
-            )
+        return Category.entries.map { it.translation }
     }
 }

@@ -2,7 +2,6 @@ package com.trbear9.plants
 
 import android.content.Context
 import android.util.Log
-import androidx.compose.runtime.mutableStateMapOf
 import com.fasterxml.jackson.core.StreamReadConstraints
 import com.fasterxml.jackson.core.StreamWriteConstraints
 import com.fasterxml.jackson.core.type.TypeReference
@@ -13,7 +12,6 @@ import com.openmeteo.api.OpenMeteo
 import com.openmeteo.api.common.time.Date
 import com.openmeteo.api.common.units.TemperatureUnit
 import com.trbear9.ui.util.Util
-import com.trbear9.ui.view.SoilResult
 import com.trbear9.ui.util.debug
 import com.trbear9.ui.util.info
 import com.trbear9.plants.E.Category
@@ -25,6 +23,7 @@ import com.trbear9.plants.parameters.UserVariable
 import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.ui.util.error
 import com.trbear9.ui.util.warn
+import com.trbear9.ui.viewmodel.recommendationResult
 //import com.trbear9.plants.save
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -64,49 +63,7 @@ object Data {
                 """.trimIndent()
     }
 
-    fun searchByCommonName(
-        max: Int = Int.MAX_VALUE,
-        query: String,
-        consumer: (String) -> Unit = {}
-    ): Set<String> {
-        val result = mutableSetOf<String>()
-        var i = 0
-        for (tag in namaUmumToNamaIlmiah.keys) {
-            val prefix = query.lowercase()
-            val target = tag.lowercase()
-            if (target != null && (target.startsWith(prefix) ||
-                        target.contains(prefix))
-                ) {
-                result.add(tag)
-                consumer(tag)
-                i++
-                if (i >= max) break
-            }
-        }
-        return result
-    }
 
-    fun searchByScienceName(
-        max: Int = Int.MAX_VALUE,
-        query: String,
-        consumer: (String) -> Unit = {}
-    ): Set<String> {
-        val result = mutableSetOf<String>()
-        var i = 0
-        for (tag in namaIlmiahToNamaUmum.keys){
-            val prefix = query.lowercase()
-            val target = tag.lowercase()
-            if (target != null && (target.startsWith(prefix) ||
-                        target.contains(prefix))
-                ) {
-                result.add(tag)
-                consumer(tag)
-                i++
-                if (i >= max) break
-            }
-        }
-        return result
-    }
 
     val tags = mutableSetOf<String>()
     var kew = mutableMapOf<String, JsonNode?>()
@@ -114,17 +71,10 @@ object Data {
     val namaIlmiahToNamaUmum = mutableMapOf<String, String>()
 
     val plant = mutableMapOf<String, Plant>()
-    val normalize = mutableMapOf<String, String>()
-    var plantByTag = mutableMapOf<String, MutableSet<String>>()
+    var plantByTag = mutableMapOf<String, MutableSet<Plant>>()
     val ecocrop = mutableMapOf<String, CSVRecord>()
     fun load(context: Context) {
         CsvHandler.load(context)
-        var cnt = 0;
-        CsvHandler.ecocropcsv?.forEach {
-            ecocrop[it[Science_name]] = it
-            cnt++;
-        }
-        "Loaded $cnt total plants on ECOCROP.Csv".info("Data Processor")
         TFService.load(context)
         context.assets.list("serialized")?.forEach {
             if(it!="CSV" && it!="ecocrop.ser") {
@@ -187,7 +137,7 @@ object Data {
     }
 
     fun loadPlant(record: CSVRecord, load: Boolean = false): Plant {
-        val ilmiah = record[Science_name]
+        val ilmiah = record[Science_name].lowercase()
         if (plant.containsKey(ilmiah) && !load) return plant[ilmiah]!!
 
         val plant = if (plant[ilmiah] == null) {
@@ -201,39 +151,40 @@ object Data {
         record[Common_names]?.split(", ")?.forEach {
             plant.nama_umum.add(it)
             plantByTag.computeIfAbsent(it) { key ->
-                mutableSetOf<String>()
-            }.add(ilmiah)
+                mutableSetOf()
+            }.add(plant)
         }
         record[Category]?.split(", ")?.forEach {
             plant.category.add(it)
             tags += it.lowercase()
             plantByTag.computeIfAbsent(it) { key ->
-                mutableSetOf<String>()
-            }.add(ilmiah)
+                mutableSetOf()
+            }.add(plant)
             plantByTag.computeIfAbsent(Util.translateCategory(it)) { key ->
-                mutableSetOf<String>()
-            }.add(ilmiah)
+                mutableSetOf()
+            }.add(plant)
             plantByTag.computeIfAbsent("All") { key ->
-                mutableSetOf<String>()
-            }.add(ilmiah)
+                mutableSetOf()
+            }.add(plant)
         }
         writeTaxonomy(plant)
-        tags += ilmiah.lowercase()
+        tags += ilmiah
         val commonname = plant.commonName?.lowercase() ?: ilmiah
         tags += commonname
 
-        namaUmumToNamaIlmiah[commonname.lowercase()] = ilmiah.lowercase()
-        namaIlmiahToNamaUmum[ilmiah.lowercase()] = commonname
+        namaUmumToNamaIlmiah[commonname.lowercase()] = ilmiah
+        namaIlmiahToNamaUmum[ilmiah] = commonname
 
         this.plant[ilmiah] = plant
-        normalize[ilmiah.lowercase()] = ilmiah
 //        Log.d("Data Processor", "Loaded ${plant.commonName} plants")
         return plant
     }
 
     @Throws(IOException::class)
-    fun process(data: UserVariable, soilResult: SoilResult): Flow<Response> = flow {
-        val response = Response()
+    fun process(data: UserVariable): Flow<Response> = flow {
+        recommendationResult.response = Response(recommendationResult)
+        recommendationResult.reset()
+        val response = recommendationResult.response
         val prediction = TFService.predict(data.image!!)
 
         val max = TFService.argmax(prediction)
@@ -277,34 +228,7 @@ object Data {
                 emit(response)
             }
         }
-        response.loaded = true
-        soilResult.plants = mutableStateMapOf()
-        soilResult.plantByCategory = mutableStateMapOf()
-        for (score in response.tanaman.keys) {
-            Log.d("Data Processor", "Loaded $score with size ${response.tanaman[score]!!.size}")
-            soilResult.plants!![score] = response.tanaman[score] ?: mutableSetOf()
-        }
-        soilResult.plantByCategory!!["All"] = soilResult.plants!!
-        soilResult.plants!!.forEach { (score, list) ->
-            list.forEach { name ->
-                plant[name]?.category
-                    ?.forEach { kat ->
-                        soilResult.plantByCategory!!.computeIfAbsent(
-                            Util.translateCategory(
-                                kat
-                            )
-                        ) { mutableStateMapOf() }
-                            .computeIfAbsent(score) { mutableSetOf<String>() }
-                            .add(name)
-                    }
-            }
-        }
-        Util.getCategory().forEach { kat ->
-            soilResult.plantByCategory!![kat]?.let {
-                Log.d("Data Processor", "Adding $kat with size ${it.size}")
-            } ?: Log.d("Data Processor", "$kat is null")
-        }
-        Log.d("Data Processor", "DONE with result of ${response.target} tanaman")
+        response.completed = true
         emit(response)
     }.flowOn(Dispatchers.IO)
 

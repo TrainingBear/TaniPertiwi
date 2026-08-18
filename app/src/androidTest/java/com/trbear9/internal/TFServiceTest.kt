@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider
-import com.trbear9.ui.view.SoilResult
+import com.trbear9.ui.viewmodel.SoilResult
 import com.trbear9.plants.CsvHandler
 import com.trbear9.plants.parameters.GeoParameters
 import com.trbear9.plants.parameters.SoilParameters

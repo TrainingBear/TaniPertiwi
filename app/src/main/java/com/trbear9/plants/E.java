@@ -182,27 +182,6 @@ public final class E {
          }
     }
 
-    public enum CLIMATE{
-        tropical_wet_and_dry("tropical wet & dry (Aw)"),
-        tropical_wet("tropical wet (Ar)"),
-        desert_or_arid("desert or arid (Bw)"),
-        steppe_or_semiarid("steppe or semiarid (Bs)"),
-        subtropical_dry_summer("subtropical dry summer (Cs)"),
-        subtropical_dry_winter("subtropical dry winter (Cw)"),
-        temperate_oceanic("temperate oceanic (Do)"),
-        temperate_continental("temperate continental (Dc)"),
-        temperate_with_humid_winters("temperate with humid winters (Df)"),
-        temperate_with_dry_winters("temperate with dry winters (Dw)"),
-        boreal("boreal (E)"),
-        polar("polar (F)"),
-        ;
-        public static final String optimal = Climate_zone;
-        public final String head;
-        CLIMATE(String string){
-             this.head = string;
-         }
-    }
-
     public enum PHOTOPERIOD{
         short_day("short day"),
         long_day("long day"),
