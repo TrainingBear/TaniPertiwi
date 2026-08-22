@@ -11,7 +11,6 @@ import com.trbear9.ui.fragment.translateCategory
 import com.trbear9.ui.util.Util
 import com.trbear9.ui.util.info
 import kotlinx.coroutines.flow.Flow
-import java.util.Collections.emptySet
 
 class SoilResult {
     var plants: SnapshotStateMap<Int, MutableSet<Plant>> = mutableStateMapOf()
@@ -21,6 +20,7 @@ class SoilResult {
     var flow: Flow<Response>? = null
     var response by mutableStateOf(Response(this))
     var collected by mutableStateOf(false)
+    var collecting by mutableStateOf(false)
 
     fun add(score: Int, plant: Plant) {
         "Loaded ${plant.nama_ilmiah} with score $score".info("Data Processor")
@@ -58,7 +58,7 @@ class SearchResult : AbstractPlantResult() {
 }
 
 abstract class AbstractPlantResult() : PlantResult {
-    var plants: MutableSet<Plant> = emptySet()
+    var plants: MutableSet<Plant> = mutableSetOf()
     var plantByCategory: SnapshotStateMap<String, MutableSet<Plant>> = mutableStateMapOf()
     fun reset() {
         plants.clear()

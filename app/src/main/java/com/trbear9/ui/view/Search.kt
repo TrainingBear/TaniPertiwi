@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -40,10 +41,10 @@ import androidx.paging.PagingState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.pseudoankit.coachmark.UnifyCoachmark
-import com.trbear9.plants.Data
 import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.ui.fragment.PlantCardDisplayer
 import com.trbear9.ui.model.Searcher
+import com.trbear9.ui.model.plantRepository
 import com.trbear9.ui.util.error
 import com.trbear9.ui.viewmodel.databaseSearchResult
 import kotlinx.coroutines.delay
@@ -57,7 +58,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
     var selected by rememberSaveable { mutableStateOf("All") }
     var query by rememberSaveable { mutableStateOf("") }
     var finalQuery by rememberSaveable { mutableStateOf("") }
-    val completer = rememberSaveable { mutableListOf<Plant>() }
+    val completer = remember { mutableStateListOf<Plant>() }
     val focusRequester = remember { FocusRequester() }
 
     var focus by rememberSaveable { mutableStateOf(false) }
@@ -84,8 +85,13 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
         completer.clear()
         focus = true
         if (query.isNotEmpty()) {
-            Data.plant.values.filter { it.nama_ilmiah.contains(query) }.forEach { completer.add(it) }
-            Data.plant.values.filter { it.nama_umum.contains(query) }.forEach { completer.add(it) }
+            val addedIlmiah = mutableSetOf<String>()
+            plantRepository.plant.values.filter { it.nama_ilmiah.contains(query, ignoreCase = true) }.forEach {
+                if (addedIlmiah.add(it.nama_ilmiah)) completer.add(it)
+            }
+            plantRepository.plant.values.filter { it.nama_umum.any { name -> name.contains(query, ignoreCase = true) } }.forEach {
+                if (addedIlmiah.add(it.nama_ilmiah)) completer.add(it)
+            }
         }
     }
     val source = CompleterSearchSource(completer)
@@ -123,7 +129,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
                 remember(selected) {
                     Pager(PagingConfig(pageSize = 7)) {
                         CompleterSearchSource(
-                            Data.plantByTag[selected]?.toMutableList() ?: mutableListOf()
+                            plantRepository.plantByTag[selected]?.filterIsInstance<Plant>()?.toMutableList() ?: mutableListOf()
                         )
                     }.flow
                 }
@@ -131,7 +137,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
                 remember(finalQuery, selected) {
                     Pager(PagingConfig(pageSize = 7)) {
                         CompleterSearchSource(
-                            databaseSearchResult.plantByCategory.get(selected)?.toMutableList()
+                            databaseSearchResult.plantByCategory.get(selected)?.filterIsInstance<Plant>()?.toMutableList()
                                 ?: mutableListOf()
                         )
                     }.flow
@@ -188,17 +194,20 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
                         horizontalAlignment = Alignment.Start
                     ) {
                         items(items.itemCount) { i ->
-                            Text(
-                                text = items[i]!!.commonName,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier
-                                    .clickable {
-                                        query = items[i]!!.commonName
-                                    }
-                                    .padding(start = 16.dp)
-                                    .fillMaxWidth()
-                            )
+                            val plant = items[i]
+                            if (plant != null) {
+                                Text(
+                                    text = plant.commonName,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier
+                                        .clickable {
+                                            query = plant.commonName
+                                        }
+                                        .padding(start = 16.dp)
+                                        .fillMaxWidth()
+                                )
+                            }
                         }
                     }
                 }

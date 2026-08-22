@@ -1,54 +1,140 @@
-package com.trbear9.plants.parameters.blob;
+package com.trbear9.plants.parameters.blob
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
+import com.fasterxml.jackson.databind.JsonNode
+import com.trbear9.plants.E
+import com.trbear9.ui.util.Util
+import lombok.AllArgsConstructor
+import lombok.Getter
+import lombok.NoArgsConstructor
+import lombok.Setter
+import org.apache.commons.csv.CSVRecord
+import java.io.Serializable
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Plant implements Serializable {
-    public JsonNode full_taxon;
-    public Set<String> nama_umum = new HashSet<>();
-    public Set<String> category = new HashSet<>();
+open class Plant(
+    var record: CSVRecord? = null
+) : Serializable {
+    var full_taxon: JsonNode? = null
 
-    public String fullsize, thumbnail;
+    @JvmField
+    var nama_umum: MutableSet<String> = HashSet()
+
+    @JvmField
+    var category: MutableSet<String> = HashSet()
+
+    @JsonSetter(nulls = Nulls.SKIP)
+    var fullsize: String = "Unknown"
+    @JsonSetter(nulls = Nulls.SKIP)
+    var thumbnail: String = "Unknown"
+
+    @JvmField
+    @JsonSetter(nulls = Nulls.SKIP)
     @JsonProperty("nama_ilmiah")
-    public String nama_ilmiah;
+    var nama_ilmiah: String = "Unknown"
+
+    @JvmField
+    @JsonSetter(nulls = Nulls.SKIP)
     @JsonProperty("common_names")
-    public String common_names;
-    public String family;
-    public String ph, temp;
-    public String genus;
-    public String kingdom;
-    public String taxon;
-    public String kategori;
+    var common_names: String = "Unknown"
+
+    @JvmField
+    @JsonSetter(nulls = Nulls.SKIP)
+    var family: String = "Unknown"
+    @JsonSetter(nulls = Nulls.SKIP)
+    var ph: String = "Unknown"
+    @JsonSetter(nulls = Nulls.SKIP)
+    var temp: String = "Unknown"
+
+    @JvmField
+    @JsonSetter(nulls = Nulls.SKIP)
+    var genus: String = "Unknown"
+
+    @JsonSetter(nulls = Nulls.SKIP)
+    @JvmField
+    var kingdom: String = "Unknown"
+
+    @JsonSetter(nulls = Nulls.SKIP)
+    @JvmField
+    var taxon: String = "Unknown"
+
+    @JvmField
+    @JsonSetter(nulls = Nulls.SKIP)
+    var kategori: String = "Unknown"
+
+    @JvmField
+    @JsonSetter(nulls = Nulls.SKIP)
     @JsonProperty("min_panen")
-    public int min_panen;
+    var min_panen: Int = 0
+
+    @JvmField
+    @JsonSetter(nulls = Nulls.SKIP)
     @JsonProperty("max_panen")
-    public int max_panen;
+    var max_panen: Int = 0
+
+    @JvmField
+    @JsonSetter(nulls = Nulls.SKIP)
     @JsonProperty("plant_care")
-    public PlantCare plantCare;
+    var plantCare: PlantCare = PlantCare()
 
-    public String difficulty = "?";
-    public String description = "Tidak tersedia untuk tanaman ini";
+    @JvmField
+    @JsonSetter(nulls = Nulls.SKIP)
+    var difficulty: String = "?"
+    @JvmField
+    @JsonSetter(nulls = Nulls.SKIP)
+    var description: String = "Tidak tersedia untuk tanaman ini"
 
+    @JvmField
+    @JsonSetter(nulls = Nulls.SKIP)
     @JsonProperty("product_system")
-    public ProductSystem productSystem;
+    var productSystem: ProductSystem = ProductSystem()
 
+    @JvmField
+    @JsonSetter(nulls = Nulls.SKIP)
     @JsonProperty("common_name")
-    public String commonName;
+    var commonName: String = "Unknown"
 
+    @JvmField
     @JsonProperty("prune_guide")
-    public String pruneGuide;
+    @JsonSetter(nulls = Nulls.SKIP)
+    var pruneGuide: String = "Unknown"
+
+    @JsonIgnore var minTemperature = record?.get(E.O_minimum_temperature)?:"Unknown"
+    @JsonIgnore var maxTemperature = record?.get(E.O_minimum_temperature)?:"Unknown"
+    @JsonIgnore var minPH = record?.get(E.O_minimum_ph)?:"Unknown"
+    @JsonIgnore var maxPH = record?.get(E.O_minimum_ph)?:"Unknown"
+    @JsonIgnore var minCycle = record?.get(E.MIN_crop_cycle)?:"Unknown"
+    @JsonIgnore var maxCycle = record?.get(E.MAX_crop_cycle)?:"Unknown"
+    @JsonIgnore var salinity = record?.get(E.A_soil_salinity)?:"Unknown"
+    @JsonIgnore var photoperiod = record?.get(E.Photoperiod)?:"Unknown"
+    @JsonIgnore var resiko = record?.get(E.Introduction_risk)?:"Unknown"
+    @JsonIgnore var skalaProduksi = record?.get(E.Production_system)?:"Unknown"
+    @JsonIgnore var author = record?.get(E.Authority)?:"Unknown"
+    @JsonIgnore var sinonim = record?.get(E.Synonyms)?:"Unknown"
+    @JsonIgnore var takson = taxon?:"Unknown"
+    @JsonIgnore var iklim = Util.bulkClimateTranslate(record?.get(E.Climate_zone)) ?:"Unknown"
+
+    fun load(record:  CSVRecord){
+        minTemperature = record.get(E.O_minimum_temperature);
+        maxTemperature = record.get(E.O_minimum_temperature);
+        minPH = record.get(E.O_minimum_ph);
+        maxPH = record.get(E.O_minimum_ph);
+        minCycle = record.get(E.MIN_crop_cycle);
+        maxCycle = record.get(E.MAX_crop_cycle);
+        salinity = record.get(E.A_soil_salinity);
+        photoperiod = record.get(E.Photoperiod);
+        resiko = record.get(E.Introduction_risk);
+        skalaProduksi = record.get(E.Production_system)
+        author = record.get(E.Authority)
+        sinonim = record.get(E.Synonyms)
+        takson = taxon
+        iklim = Util.bulkClimateTranslate(record.get(E.Climate_zone))?:"Unknown"
+    }
 }
 

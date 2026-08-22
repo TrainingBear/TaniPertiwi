@@ -24,18 +24,41 @@ import java.io.IOException
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 
-fun String.info(tag: String) = Log.i(tag, this)
-fun String.debug(tag: String) = Log.d(tag, this)
-fun String.warn(tag: String) = Log.w(tag, this)
-fun String.error(tag: String) = Log.e(tag, this)
+fun String.info(tag: Any) = info(tag::class.java.simpleName)
+fun String.info(tag: String) = try {
+    Log.i(tag, this)
+} catch (_: Exception) {
+    println(this)
+}
+
+fun String.debug(tag: Any) = debug(tag::class.java.simpleName)
+fun String.debug(tag: String) = try {
+    Log.d(tag, this)
+} catch (_: Exception) {
+    println(this)
+}
+
+fun String.warn(tag: Any) = warn(tag::class.java.simpleName)
+fun String.warn(tag: String) = try {
+    Log.w(tag, this)
+} catch (_: Exception) {
+    println(this)
+}
+
+fun String.error(tag: Any) = error(tag::class.java.simpleName)
+fun String.error(tag: String) = try {
+    Log.e(tag, this)
+} catch (_: Exception) {
+    println(this)
+}
 
 @Composable
 fun getContext(): Context = LocalContext.current
 
-fun String.splitCommas() : List<String>{
+fun String.splitCommas(): List<String> {
     val list = mutableListOf<String>()
     this.split(", ").forEach {
-        it.split(",").forEach { final->list+=final }
+        it.split(",").forEach { final -> list += final }
     }
     return list
 }
@@ -88,7 +111,7 @@ object Util {
         }
     }
 
-    fun bulkCategoryTranslate(categories: Set<String>): String?{
+    fun bulkCategoryTranslate(categories: Set<String>): String? {
         var ans = "";
         categories.forEach {
             ans += translateCategory(it) + ", "
@@ -96,8 +119,9 @@ object Util {
         ans.trimEnd { it == ',' }
         return ans
     }
-    fun bulkCategoryTranslate(categories: String?): String?{
-        categories?:return null;
+
+    fun bulkCategoryTranslate(categories: String?): String? {
+        categories ?: return null;
         var ans = "";
         categories.splitCommas().forEach {
             ans += translateCategory(it) + ", "
@@ -105,8 +129,8 @@ object Util {
         return ans;
     }
 
-    fun bulkClimateTranslate(climates: String?): String?{
-        climates?:return null;
+    fun bulkClimateTranslate(climates: String?): String? {
+        climates ?: return null;
         var ans = "";
         climates.splitCommas().forEach {
             ans += translateClimate(it) + ", "
@@ -153,7 +177,8 @@ object Util {
             else -> ""
         }
     }
-    fun getCategory(): List<String>{
+
+    fun getCategory(): List<String> {
         return Category.entries.map { it.translation }
     }
 }

@@ -90,7 +90,6 @@ import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.ui.fragment.CONS
 import com.trbear9.ui.fragment.ImageAsset
 import com.trbear9.ui.fragment.NavigateSoilStats
-import com.trbear9.ui.viewmodel.DataModelAcces
 import com.trbear9.ui.viewmodel.getDetailedImage
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.Dispatchers
@@ -122,14 +121,14 @@ private val TextMuted = Color(0xFF6B7B6E)
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit = {}) {
+fun PlantDetail(score: Int = 0, ref: Plant = PlantDummy(), onExit: () -> Unit = {}) {
     val context = LocalContext.current
     val scroll = rememberScrollState()
     var image by remember { mutableStateOf<Bitmap?>(null) }
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
-            if (ref != null) image = ImageAsset.getImage(context, ref.fullsize)
+            image = ImageAsset.getImage(context, ref.fullsize)
         }
     }
 
@@ -250,9 +249,9 @@ fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit =
                             .align(Alignment.BottomStart)
                             .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
                     ) {
-                        val plant = DataModelAcces(ref)
+                        val plant = ref
                         Text(
-                            text = plant.namaUmum ?: "Tidak diketahui",
+                            text = plant.commonName ?: "Tidak diketahui",
                             fontSize = 26.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = Color.White,
@@ -272,7 +271,7 @@ fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit =
 
             // ── Body ──────────────────────────────────────────────────────
             if (ref != null) {
-                val plant = DataModelAcces(ref)
+                val plant = ref
 
                 Column(
                     modifier = Modifier
@@ -284,7 +283,7 @@ fun PlantDetail(score: Int = 0, ref: Plant? = PlantDummy(), onExit: () -> Unit =
                     // Description card
                     SectionCard {
                         Text(
-                            text = plant.deskripsi ?: "Deskripsi untuk tanaman ini belum tersedia.",
+                            text = plant.description ?: "Deskripsi untuk tanaman ini belum tersedia.",
                             fontSize = 15.sp,
                             color = TextPrimary,
                             lineHeight = 24.sp

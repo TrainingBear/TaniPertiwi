@@ -1,8 +1,5 @@
 package com.trbear9.ui.model
 
-import com.trbear9.plants.Data
-import com.trbear9.plants.Data.namaIlmiahToNamaUmum
-import com.trbear9.plants.Data.namaUmumToNamaIlmiah
 import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.ui.viewmodel.AbstractPlantResult
 
@@ -15,10 +12,10 @@ object Searcher {
     ): Set<Plant> {
         val result = mutableSetOf<Plant>()
         var i = 0
-        for ((namaUmum, namaIlmah) in namaUmumToNamaIlmiah) {
+        for ((namaUmum, namaIlmah) in plantRepository.namaUmumToNamaIlmiah) {
             val prefix = query.lowercase()
             val target = namaUmum.lowercase()
-            val plant = Data.plant[namaIlmah]!!
+            val plant = plantRepository.plant[namaIlmah]!!
             if (target.contains(prefix)) {
                 result.add(plant)
                 consumer(plant)
@@ -38,10 +35,10 @@ object Searcher {
     ): Set<Plant> {
         val result = mutableSetOf<Plant>()
         var i = 0
-        for (tag in Data.plant.keys) {
+        for (tag in plantRepository.plant.keys) {
             val prefix = query.lowercase()
             val target = tag.lowercase()
-            val plant = Data.plant[tag]!!
+            val plant = plantRepository.plant[tag]!!
             if (target.contains(prefix)) {
                 result.add(plant)
                 consumer(plant)

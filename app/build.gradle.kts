@@ -113,6 +113,7 @@ android {
 dependencies {
 //    implementation("com.mohamedrejeb.richeditor:richeditor-compose:1.0.0-rc13")
     implementation("io.github.pseudoankit:coachmark:3.0.1")
+    implementation(libs.androidx.compiler)
 //    implementation ("androidx.room:room-runtime:2.6.1")
     implementation(libs.androidx.foundation.layout)
 //    kapt("androidx.room:room-compiler:2.6.1")

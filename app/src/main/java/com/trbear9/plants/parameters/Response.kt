@@ -25,7 +25,6 @@ class Response(val delegate: SoilResult) : Serializable {
     var parameterLoaded by mutableStateOf(false)
     var current by mutableStateOf("Tanaman")
     var completed by mutableStateOf(false)
-    var hashCode by mutableStateOf("Tanaman")
     var soilName by mutableStateOf("Tanaman")
     var soilCare by mutableStateOf(SoilCare())
     var soilPrediction: List<Pair<String, Float>> = listOf()

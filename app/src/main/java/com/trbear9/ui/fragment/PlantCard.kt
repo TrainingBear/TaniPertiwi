@@ -51,7 +51,6 @@ import coil.compose.AsyncImage
 import com.google.accompanist.flowlayout.FlowRow
 import com.pseudoankit.coachmark.model.ToolTipPlacement
 import com.pseudoankit.coachmark.scope.CoachMarkScope
-import com.trbear9.plants.Data
 import com.trbear9.ui.util.MarkKey
 import com.trbear9.ui.util.highlightConfig
 import com.trbear9.ui.util.info
@@ -71,6 +70,7 @@ import com.trbear9.plants.E.CATEGORY.roots_tubers
 import com.trbear9.plants.E.CATEGORY.vegetables
 import com.trbear9.plants.E.CATEGORY.weed
 import com.trbear9.plants.parameters.blob.Plant
+import com.trbear9.ui.model.plantRepository
 import com.trbear9.ui.view.PlantDetail
 import com.trbear9.ui.viewmodel.getPlantImage
 import kotlinx.coroutines.delay
@@ -268,8 +268,8 @@ fun CoachMarkScope.PlantCardDisplayer(
                         Color.Black,
                         diffToColor(ref.difficulty?.toString() ?: "UNKNOWN")
                     )
-                    val panen_min = Data.ecocrop[ref.nama_ilmiah]?.get(E.MIN_crop_cycle)
-                    val panen_max = Data.ecocrop[ref.nama_ilmiah]?.get(E.MAX_crop_cycle)
+                    val panen_min = plantRepository.ecocrop[ref.nama_ilmiah]?.get(E.MIN_crop_cycle)
+                    val panen_max = plantRepository.ecocrop[ref.nama_ilmiah]?.get(E.MAX_crop_cycle)
                     Kat(
                         if (panen_min != panen_max) "$panen_min-$panen_max hari"
                         else if (panen_min == "0") ""

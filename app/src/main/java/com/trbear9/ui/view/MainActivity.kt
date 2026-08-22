@@ -66,7 +66,6 @@ import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.pseudoankit.coachmark.UnifyCoachmark
 import com.pseudoankit.coachmark.model.ToolTipPlacement
-import com.trbear9.plants.Data
 import com.trbear9.plants.TFService
 import com.trbear9.ui.util.DataStore
 import com.trbear9.ui.util.Screen
@@ -90,6 +89,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.trbear9.ui.R.drawable.icon_app
+import com.trbear9.ui.model.loadPlantRepository
 import com.trbear9.ui.viewmodel.recommendationResult
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -117,7 +117,7 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 withContext(Dispatchers.IO) {
                     DataStore.init(this@MainActivity)
-                    Data.load(this@MainActivity)
+                    loadPlantRepository(this@MainActivity)
                 }
                 isReady = true
             }

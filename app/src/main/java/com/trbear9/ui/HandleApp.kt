@@ -21,7 +21,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.trbear9.plants.Data
 import com.trbear9.ui.view.AboutUs
 import com.trbear9.ui.view.Guide
 import com.trbear9.ui.view.PointDetail
@@ -31,12 +30,15 @@ import com.trbear9.ui.view.SoilStatsActivity
 import com.trbear9.ui.util.Screen
 import com.trbear9.plants.parameters.SoilParameters
 import com.trbear9.plants.parameters.UserVariable
+import com.trbear9.ui.model.PlantRepository
+import com.trbear9.ui.model.plantRepository
 import com.trbear9.ui.view.CameraActivity
 import com.trbear9.ui.view.Home
 import com.trbear9.ui.view.InputSoil
 import com.trbear9.ui.view.LoadingScreen
 import com.trbear9.ui.view.MainActivity
 import com.trbear9.ui.util.Util
+import com.trbear9.ui.viewmodel.PlantResult
 import com.trbear9.ui.viewmodel.depth
 import com.trbear9.ui.viewmodel.geo
 import com.trbear9.ui.viewmodel.getLocation
@@ -208,13 +210,13 @@ fun App(app: MainActivity, isReady: Boolean) {
                     gps = true
                     val variable = UserVariable()
                     soil = SoilParameters()
-                    if (pH >= 0f) soil.pH = pH.coerceAtMost(14f)
+                    if (pH != null) soil.pH = pH!!.coerceAtMost(14f)
                     soil.numericDepth = depth
                     variable.geo = geo
                     variable.image = image
                     variable.soil = soil
                     recommendationResult.collected = false
-                    recommendationResult.flow = Data.process(variable)
+                    recommendationResult.flow = plantRepository.process(variable)
                     Util.debug("Job has been finished!")
 
                     if (!isNetworkAvailable(app)) {

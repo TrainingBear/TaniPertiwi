@@ -21,6 +21,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -41,6 +45,7 @@ import com.trbear9.ui.R
 import com.trbear9.ui.util.Screen
 import com.trbear9.ui.viewmodel.depth
 import com.trbear9.ui.viewmodel.pH
+import java.text.NumberFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,6 +54,8 @@ fun InputSoil(
     nav: NavController? = null,
     nextCallback: () -> Unit? = {}
 ) {
+    var phText by remember { mutableStateOf(pH?.toString()?:"?") }
+    var depthText by remember { mutableStateOf(depth?.toString()?:"?") }
     LocalContext.current
     Box(
         modifier = Modifier
@@ -115,10 +122,11 @@ fun InputSoil(
                     modifier = Modifier.padding(vertical = 10.dp, horizontal = 32.dp)
                 )
                 OutlinedTextField(
-                    value = pH.toString(),
+                    value = phText,
                     onValueChange = { input ->
                         if (input.all { it.isDigit() || (it == ',' || it == '.') }) {
-                            pH = input.toFloat()
+                            phText = input
+                            pH = input.toFloatOrNull()
                         }
                     },
                     label = { Text("pH tanah") },
@@ -131,10 +139,11 @@ fun InputSoil(
                         .padding(horizontal = 32.dp)
                 )
                 OutlinedTextField(
-                    value = depth.toString(),
+                    value = depthText,
                     onValueChange = { input ->
                         if (input.all { it.isDigit() || (it == ',' || it == '.') }) {
-                            depth = input.toFloat()
+                            depthText = input
+                            depth = input.toFloatOrNull()
                         }
                     },
                     label = { Text("Kedalaman tanah (cm)") },

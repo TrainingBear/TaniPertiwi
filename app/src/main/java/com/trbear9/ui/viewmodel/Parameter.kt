@@ -11,8 +11,8 @@ import com.trbear9.plants.parameters.Response
 import com.trbear9.plants.parameters.SoilParameters
 import kotlinx.coroutines.flow.Flow
 
-var pH by mutableFloatStateOf(-1f)
-var depth by mutableFloatStateOf(20f)
+var pH by mutableStateOf<Float?>(null)
+var depth by mutableStateOf<Float?>(null)
 var response: Flow<Response>? = null
 var loaded by mutableStateOf(false)
 var geo by mutableStateOf(GeoParameters())

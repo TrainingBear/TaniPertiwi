@@ -52,7 +52,6 @@ import androidx.paging.PagingConfig
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.pseudoankit.coachmark.UnifyCoachmark
-import com.trbear9.plants.Data
 import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.ui.LocalNav
 import com.trbear9.ui.fragment.NavigateSoilStats
@@ -90,45 +89,45 @@ fun SoilResultScreen() {
     var focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
-        var result = recommendationResult
-        Util.debug("It is already collected? ${result.collected}")
+        val result = recommendationResult
+        "It is already collected? ${result.collected}".debug(this)
         if (!result.collected) {
-            Util.debug("Collecting")
+            "Collecting".info(this)
             result.flow?.onCompletion {
                 result.collected = true
                 result.flow = null
-                Util.debug("Collected")
+                "Collected".info(this)
             }?.collect {
                 // TODO
             }
         }
     }
-    var completer = rememberSaveable { mutableStateSetOf<String>() }
+    val completer = rememberSaveable { mutableStateSetOf<String>() }
     LaunchedEffect(query) {
         completer.clear()
         completer(query, completer, 5)
-        "updated ${completer.size} items".debug("PlantResult")
+        "Updated ${completer.size} items".debug(this)
     }
 
     Scaffold(
         topBar = {
-                SoilResultTopBar(
-                    query = query,
-                    onQueryChange = { query = it; search.clear() },
-                    onSearch = { finalQuery = query },
-                    selected = selected,
-                    onSelectedChange = { selected = it },
-                    order = order,
-                    onOrderChange = { order = it },
-                    hasFocus = hasFocus,
-                    onFocusChange = { hasFocus = it },
-                    expandedSearch = expandedSearch,
-                    onExpandedSearchChange = { expandedSearch = it },
-                    focusRequester = focusRequester,
-                    keyboard = keyboard,
-                    scroll = scroll,
-                    hasil = recommendationResult.response.total
-                )
+            SoilResultTopBar(
+                query = query,
+                onQueryChange = { query = it; search.clear() },
+                onSearch = { finalQuery = query },
+                selected = selected,
+                onSelectedChange = { selected = it },
+                order = order,
+                onOrderChange = { order = it },
+                hasFocus = hasFocus,
+                onFocusChange = { hasFocus = it },
+                expandedSearch = expandedSearch,
+                onExpandedSearchChange = { expandedSearch = it },
+                focusRequester = focusRequester,
+                keyboard = keyboard,
+                scroll = scroll,
+                hasil = recommendationResult.response.total
+            )
         },
         bottomBar = {
             var selected by rememberSaveable { mutableIntStateOf(1) }
@@ -160,7 +159,24 @@ fun SoilResultScreen() {
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                if (recommendationResult.response.completed) {
+                if (recommendationResult.collecting) {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = if (!recommendationResult.response.predicted) "Menganalisa tanahmu.."
+                            else if (!recommendationResult.response.parameterLoaded) "Mencari riwayat suhu 6 hari terakhir di daerah mu...\nPastikan koneksimu terhubung ke internet\nUntuk hasil yang lebih akurat!"
+                            else "Mencari data ${recommendationResult.response.current}",
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(20.dp)
+                        )
+                    }
+                    return@Box
+                } else if (!recommendationResult.collected) {
                     Column(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -193,30 +209,15 @@ fun SoilResultScreen() {
                         }
                     }
                     return@Box
-                } else if (!recommendationResult.response.completed) {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator()
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = if (!recommendationResult.response.predicted) "Menganalisa tanahmu.."
-                            else if (!recommendationResult.response.parameterLoaded) "Mencari riwayat suhu 6 hari terakhir di daerah mu...\nPastikan koneksimu terhubung ke internet\nUntuk hasil yang lebih akurat!"
-                            else "Mencari data ${recommendationResult.response.current}",
-                            fontSize = 16.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(20.dp)
-                        )
-                    }
-                    return@Box
                 }
                 val pagerFlow =
                     if (finalQuery.isEmpty())
                         remember(selected, order) {
                             Pager(PagingConfig(pageSize = 7)) {
                                 ResultPagingSource(
-                                    items = recommendationResult.plantByCategory[selected]?.flatten(order) ?: mutableListOf()
+                                    items = recommendationResult.plantByCategory[selected]?.flatten(
+                                        order
+                                    ) ?: mutableListOf()
                                 )
                             }.flow
                         }
