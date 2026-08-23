@@ -1,4 +1,6 @@
 import com.android.build.api.dsl.AndroidResources
+import java.util.Properties
+import java.io.FileInputStream
 
 plugins {
     alias(libs.plugins.android.application)
@@ -37,11 +39,17 @@ android {
     }
 
     signingConfigs {
+        val keystorePropertiesFile = rootProject.file("local.properties")
+        val keystoreProperties = Properties()
+        if (keystorePropertiesFile.exists()) {
+            keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+        }
+
         create("release") {
-            storeFile = file("/home/kujatic/Desktop/openfarm.jks")
-            storePassword = "12x;13y?23~z!"
-            keyAlias = "Jasper"
-            keyPassword = "12x;13y?23~z!"
+            storeFile = keystoreProperties["signing.storeFile"]?.let { file(it.toString()) }
+            storePassword = keystoreProperties["signing.storePassword"]?.toString()
+            keyAlias = keystoreProperties["signing.keyAlias"]?.toString()
+            keyPassword = keystoreProperties["signing.keyPassword"]?.toString()
         }
     }
 

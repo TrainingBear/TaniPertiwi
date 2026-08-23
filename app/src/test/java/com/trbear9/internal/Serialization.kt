@@ -2,7 +2,7 @@ package com.trbear9.internal
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.trbear9.ui.model.PlantRepository
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.io.File
 
 class Serialization {

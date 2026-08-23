@@ -15,10 +15,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import com.trbear9.ui.R
+import com.trbear9.ui.model.plantRepository
 import com.trbear9.ui.util.DataStore
+import com.trbear9.ui.util.info
 import com.trbear9.ui.view.MainActivity
 import com.trbear9.ui.viewmodel.image
 import com.trbear9.ui.viewmodel.recommendationResult
+import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -49,6 +52,17 @@ class PlantRecommendationFlowTest {
         DataStore.completeFirstTime()
     }
 
+    @Test
+    fun checkPlants(){
+        wait("Scan Tanahmu!")
+        var cnt = 0
+        for ((name, plant) in plantRepository.plant) {
+            if(plant.isAvaiable) cnt++;
+        }
+        "Loaded $cnt verified plants".info(this)
+        assert(cnt != 0)
+    }
+
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun flow() {
@@ -77,15 +91,20 @@ class PlantRecommendationFlowTest {
         compose.onNodeWithText("Kedalaman tanah (cm)").performTextReplacement("30")
 
         compose.onNodeWithText("Next", ignoreCase = true).performClick()
+        ("Collecting..").info(this)
         compose.waitUntil(10_000) { recommendationResult.collected }
-        wait("Analisa tanahmu")
+        ("Collected").info(this)
+        var cnt = 0
         for ((score, pack) in recommendationResult.plants) {
             for (plant in pack) {
-                println("certified state of ${plant.commonName}($score): ${plant.isAvaiable}")
+//                "certified state of ${plant.commonName}($score): ${plant.isAvaiable}".info(this)
+                if(plant.isAvaiable) cnt++;
             }
         }
+        "Loaded $cnt plants that are certified".info(this)
 
-        wait("don't finish yet")
+//        wait("don't finish yet")
+//        wait("done")
     }
 
     @OptIn(ExperimentalTestApi::class)

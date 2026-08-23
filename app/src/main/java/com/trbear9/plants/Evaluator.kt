@@ -1,34 +1,42 @@
 package com.trbear9.plants
 
 import com.trbear9.plants.parameters.UserVariable
+import com.trbear9.ui.model.plantRepository
+import com.trbear9.ui.util.debug
 import com.trbear9.ui.util.splitCommas
 import org.apache.commons.csv.CSVRecord
 import kotlin.math.absoluteValue
 import kotlin.math.max
 
-fun evaluateAll(record: CSVRecord, input: UserVariable): Int {
-    val constraints = listOf(
-        RainEval,
-        TemperatureEval,
-        CycleEval,
-        TextureEval,
-        PhEval,
-        DrainageEval,
-        AltitudeEval,
-        ClimateEval,
-        LatitudeEval
-    )
-    var score = 0;
-    for (constraint in constraints) {
-        try {
-            val temp = constraint.evaluate(record, input)
+object Evaluator {
+    fun evaluateAll(record: CSVRecord, input: UserVariable): Int {
+        val constraints = listOf(
+            RainEval,
+            TemperatureEval,
+            CycleEval,
+            TextureEval,
+            PhEval,
+            DrainageEval,
+            AltitudeEval,
+            ClimateEval,
+            LatitudeEval
+        )
+        var score = 0;
+        for (constraint in constraints) {
+            try {
+                val temp = constraint.evaluate(record, input)
 //            "    ${constraint::class.simpleName}: $temp".info("Csv");
-            score += temp;
-        } catch (e: Exception) {
+                score += temp;
+            } catch (e: Exception) {
 //            "Can't evaluate ${record.get(E.Science_name)} with constraint of ${constraint::class.simpleName}".warn("CsvHandler")
+            }
         }
+        val plant = plantRepository.plant[record.get(E.Science_name) ?: "Unknown"]
+        if (score <= 0 && plant?.isAvaiable == true) {
+            "Couldnt evaluate ${plant.commonName} with score $score".debug(this)
+        }
+        return score;
     }
-    return score;
 }
 
 object RainEval : Constraint {
