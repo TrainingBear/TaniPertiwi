@@ -63,6 +63,13 @@ fun String.splitCommas(): List<String> {
     return list
 }
 
+fun <T: Any> estimate(source: Any, message: String = "", task: () -> T) : T{
+    val start = System.currentTimeMillis()
+    val result = task()
+    "Executing $task took ${(System.currentTimeMillis()-start)/1_000} ms!".info(source)
+    return result
+}
+
 object Util {
     fun debug(message: String) {
         Log.d("OpenFarm", message)

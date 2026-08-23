@@ -6,14 +6,17 @@ import androidx.test.core.app.ApplicationProvider
 import com.fasterxml.jackson.core.StreamReadConstraints
 import com.fasterxml.jackson.core.StreamWriteConstraints
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.trbear9.plants.PlantClient
 import com.trbear9.plants.E.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Test
 
+/**
+ * OBSOLETE
+ * IT IS NOW USING BUILTIN RECOMMENDATION MACHINE!!!!
+ */
 class PlantClientTest {
-    val client = PlantClient("TrainingBear/84d0e105aaabce26c8dfbaff74b2280e", size = 200_000)
+/*    val client = PlantClient("TrainingBear/84d0e105aaabce26c8dfbaff74b2280e", size = 200_000)
     val objectMapper = ObjectMapper()
     init {
             objectMapper.factory.setStreamReadConstraints(
@@ -49,5 +52,5 @@ class PlantClientTest {
         runBlocking {
             client.GET()
         }
-    }
+    }*/
 }

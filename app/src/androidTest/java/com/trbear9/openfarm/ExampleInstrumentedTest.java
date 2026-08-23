@@ -1,4 +1,4 @@
-package com.trbear9.ui;
+package com.trbear9.openfarm;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.TBear9.openfarm", appContext.getPackageName());
+        assertEquals("com.tbear9.openfarm", appContext.getPackageName());
     }
 }

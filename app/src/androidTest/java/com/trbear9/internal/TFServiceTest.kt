@@ -4,11 +4,13 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider
+import com.trbear9.plants.TFService
 import com.trbear9.ui.viewmodel.SoilResult
-import com.trbear9.plants.CsvHandler
 import com.trbear9.plants.parameters.GeoParameters
 import com.trbear9.plants.parameters.SoilParameters
 import com.trbear9.plants.parameters.UserVariable
+import com.trbear9.ui.model.loadPlantRepository
+import com.trbear9.ui.model.plantRepository
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
@@ -41,13 +43,13 @@ class TFServiceTest {
 
     @Test
     fun process(){
-        CsvHandler.load(context)
+        loadPlantRepository(context)
         val bit = BitmapFactory.decodeStream(context.assets.open("dataset/Aluvial/aluvial-004.jpg"))
         val variable = UserVariable()
         variable.image = bit
         variable.soil = SoilParameters.ALLUVIAL
         variable.geo = GeoParameters()
-        val res = Data.process(variable, soilResult = SoilResult())
+        val res = plantRepository.process(variable)
 
         runBlocking {
             res.collect {

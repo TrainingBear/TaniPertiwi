@@ -2,14 +2,23 @@ import com.android.build.api.dsl.AndroidResources
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     id("org.jetbrains.kotlin.plugin.compose")
-    id("kotlin-kapt")
 }
+
+
+/*buildscript {
+    dependencies {
+        // For KGP
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:KGP_VERSION")
+
+        // For KSP
+        classpath("com.google.devtools.ksp:symbol-processing-gradle-plugin:KSP_VERSION")
+    }
+}*/
 
 android {
     namespace = "com.trbear9.ui"
-    compileSdk = 36
+    compileSdk = 37
 
     lint {
         baseline = file("lint-baseline.xml")
@@ -21,32 +30,11 @@ android {
 //        }
         applicationId = "com.trbear9.ui"
         minSdk = 25
-        targetSdk = 35
+        targetSdk = 37
         versionCode = 7
         versionName = "1.0.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
-//    splits {
-//        abi {
-//// Detect app bundle and conditionally disable split abis
-//            // This is needed due to a "Sequence contains more than one matching element" error
-//            // present since AGP 8.9.0, for more info see:
-//            // https://issuetracker.google.com/issues/402800800
-//
-//            // AppBundle tasks usually contain "bundle" in their name
-//            val isBuildingBundle = gradle.startParameter.taskNames.any { it.lowercase().contains("bundle") }
-//
-//            // Disable split abis when building appBundle
-//            isEnable = !isBuildingBundle
-//
-//            reset()
-//            //noinspection ChromeOsAbiSupport
-//            include("armeabi-v7a", "arm64-v8a", "x86_64", "x86")
-//
-//            isUniversalApk = true
-//        }
-//    }
 
     signingConfigs {
         create("release") {
@@ -74,21 +62,18 @@ android {
 
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         mlModelBinding = true
         viewBinding = true
         compose = true
     }
-    buildToolsVersion = "35.0.0"
+//    buildToolsVersion = "35.0.0"
     dependenciesInfo {
         includeInApk = true
         includeInBundle = true
-    }
-    kotlinOptions {
-        jvmTarget = "11"
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.3"
@@ -101,33 +86,22 @@ android {
             pickFirsts += "DebugProbesKt.bin"
             pickFirsts += "META-INF/**"
             pickFirsts += "mozilla/public-suffix-list.txt"
-//            pickFirsts += listOf(
-//                "lib/armeabi-v7a/liblitert_jni.so",
-//                "lib/arm64-v8a/liblitert_jni.so"
-//            )
         }
     }
 }
 
 
 dependencies {
-//    implementation("com.mohamedrejeb.richeditor:richeditor-compose:1.0.0-rc13")
     implementation("io.github.pseudoankit:coachmark:3.0.1")
     implementation(libs.androidx.compiler)
-//    implementation ("androidx.room:room-runtime:2.6.1")
     implementation(libs.androidx.foundation.layout)
-//    kapt("androidx.room:room-compiler:2.6.1")
-//    implementation ("androidx.room:room-ktx:2.6.1")
     implementation("com.github.jeziellago:compose-markdown:0.4.1")
-
-    // https://mvnrepository.com/artifact/com.google.ai.edge.litert/litert-support
-    implementation("com.google.ai.edge.litert:litert-support:1.4.0")
-//     https://mvnrepository.com/artifact/com.google.ai.edge.litert/litert
-    implementation("com.google.ai.edge.litert:litert:2.0.2")
-//    implementation("org.tensorflow:tensorflow-lite-task-vision:0.4.4")
+//    implementation("com.google.ai.edge.litert:litert-support-api:2.2.0")
+//    implementation("com.google.ai.edge.litert:litert-support:1.4.0")
+    implementation("com.google.ai.edge.litert:litert:2.2.0")
     implementation("com.open-meteo:open-meteo-api-kotlin:0.7.1-beta.1")
+    implementation(libs.androidx.ui.test.junit4)
     implementation("org.apache.commons:commons-csv:1.10.0")
-    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
 //    implementation("org.slf4j:slf4j-api:2.0.17")
     implementation ("androidx.paging:paging-runtime:3.3.6")
     implementation ("androidx.paging:paging-compose:3.3.6")
@@ -148,31 +122,17 @@ dependencies {
 //        exclude(group = "org.jetbrains")
 //        exclude("messages/JavaOptionBundle.properties")
 //    }
-    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
-//    implementation("org.apache.commons:commons-lang3:3.18.0")
-    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
     implementation("com.fasterxml.jackson.core:jackson-databind:2.20.0")
-    // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
-//    implementation("org.apache.httpcomponents:httpclient:4.5.14")
-    /* https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp */
-//    implementation("com.google.guava:guava:31.0.1-android")
     implementation("androidx.viewpager2:viewpager2:1.1.0")
-//    implementation("com.google.android.material:material:1.12.0")
-//    implementation("com.tbuonomo:dotsindicator:5.0")
-
-//    implementation(libs.okhttp)
-//    implementation(libs.linkfirebase)
-//    implementation(libs.appcompat)
-//    implementation(libs.material)
     implementation(libs.constraintlayout)
     implementation(libs.lifecycle.livedata.ktx)
-//    implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.leanback)
     implementation(libs.glide)
     implementation(libs.activity)
     implementation(libs.mediarouter)
+    testImplementation(libs.junit.jupiter)
     testImplementation(libs.room.compiler.processing.testing){
         exclude(group = "org.checkerframework", module = "checker-qual")
         exclude(group = "com.google.auto.value", module = "auto-value")
@@ -190,7 +150,6 @@ dependencies {
     implementation(libs.androidx.foundation.android)
     implementation(libs.androidx.material3.android)
     implementation(libs.firebase.crashlytics.buildtools)
-    testImplementation(libs.junit)
 
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

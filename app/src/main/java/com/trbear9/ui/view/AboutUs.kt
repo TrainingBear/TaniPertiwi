@@ -200,12 +200,16 @@ fun AboutUs(nav: NavController? = null) {
                             modifier = Modifier
                                 .clip(RoundedCornerShape(12.dp))
                                 .clickable {
-                                    context.startActivity(
-                                        Intent(
-                                            Intent.ACTION_VIEW,
-                                            "https://sman1ambarawa.sch.id/".toUri()
+                                    try {
+                                        context.startActivity(
+                                            Intent(
+                                                Intent.ACTION_VIEW,
+                                                "https://sman1ambarawa.sch.id/".toUri()
+                                            )
                                         )
-                                    )
+                                    } catch (e: Exception) {
+                                        // Silent fail or log
+                                    }
                                 }
                                 .padding(12.dp)) {
                             Box(

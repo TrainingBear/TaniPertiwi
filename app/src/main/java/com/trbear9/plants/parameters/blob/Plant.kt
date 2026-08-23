@@ -105,6 +105,7 @@ open class Plant(
     @JsonSetter(nulls = Nulls.SKIP)
     var pruneGuide: String = "Unknown"
 
+    @JsonIgnore var isAvaiable = false
     @JsonIgnore var minTemperature = record?.get(E.O_minimum_temperature)?:"Unknown"
     @JsonIgnore var maxTemperature = record?.get(E.O_minimum_temperature)?:"Unknown"
     @JsonIgnore var minPH = record?.get(E.O_minimum_ph)?:"Unknown"

@@ -1,13 +1,16 @@
 package com.trbear9.ui.view;
 
-import com.trbear9.plants.PlantClient;
+//import com.trbear9.plants.PlantClient;
 
 import junit.framework.TestCase;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+//import org.apache.commons.logging.Log;
+//import org.apache.commons.logging.LogFactory;
+/**
+ * OBSOLETE
+ * IT IS NOW USING BUILTIN RECOMMENDATION MACHINE!!!!
+ */
 public class PostActivityTest extends TestCase {
-    private static final Log log = LogFactory.getLog(PostActivityTest.class);
+/*    private static final Log log = LogFactory.getLog(PostActivityTest.class);
 
     public void testGetGistUrl(){
         PlantClient client = new PlantClient(new String[]{"aiusdasndhais"}, 192399);
@@ -20,5 +23,5 @@ public class PostActivityTest extends TestCase {
     }
 
     public void testGetResponse() {
-    }
+    }*/
 }

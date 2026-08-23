@@ -91,6 +91,7 @@ import com.trbear9.ui.fragment.CONS
 import com.trbear9.ui.fragment.ImageAsset
 import com.trbear9.ui.fragment.NavigateSoilStats
 import com.trbear9.ui.viewmodel.getDetailedImage
+import com.trbear9.ui.util.error
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -386,11 +387,16 @@ fun PlantDetail(score: Int = 0, ref: Plant = PlantDummy(), onExit: () -> Unit = 
                     }
 
                     // Taxonomy button
-                    plant.takson?.let { url ->
+                    val taksonUrl = plant.takson
+                    if (taksonUrl.isNotBlank() && taksonUrl != "Unknown" && (taksonUrl.startsWith("http://") || taksonUrl.startsWith("https://"))) {
                         Button(
                             onClick = {
-                                val intent = Intent(Intent.ACTION_VIEW, url.toString().toUri())
-                                context.startActivity(intent)
+                                try {
+                                    val intent = Intent(Intent.ACTION_VIEW, taksonUrl.toUri())
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    "Failed to open taxonomy URL: ${e.message}".error("PlantDetail")
+                                }
                             },
                             modifier = Modifier
                                 .fillMaxWidth()

@@ -33,4 +33,4 @@ object DataSerializer {
 }
 
 private val dir = File("serialized").also { it.mkdirs() }
-fun save(name: String): File = File(dir, name)
+fun save(name: String): File = File(name)

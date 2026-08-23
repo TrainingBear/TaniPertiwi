@@ -63,7 +63,20 @@ const val REPOSITORY = "plantrepository.ser"
 lateinit var plantRepository: PlantRepository
 fun loadPlantRepository(context: Context) {
     TFService.load(context)
-    plantRepository = DataSerializer.read(context.assets.open("serialized/$REPOSITORY"))
+    plantRepository = DataSerializer.read(context.assets.open(REPOSITORY))
+    context.assets.open("EcoCrop_DB.csv").use { `is` ->
+        InputStreamReader(`is`).use { reader ->
+            for (record in CSVFormat.DEFAULT.builder()
+                .setHeader()
+                .setSkipHeaderRecord(true)
+                .build()
+                .parse(reader)
+                .records
+            ) {
+                plantRepository.ecocrop[record[Science_name]] = record
+            }
+        }
+    }
 }
 
 class PlantRepository private constructor() : Serializable {
@@ -103,6 +116,7 @@ class PlantRepository private constructor() : Serializable {
             e.printStackTrace()
             throw RuntimeException(e)
         }
+
         val plants = File("plants.json").inputStream().use {
             objectMapper.readValue(it, Array<Plant>::class.java)
         }
@@ -113,6 +127,8 @@ class PlantRepository private constructor() : Serializable {
             }
             it.load(record)
             it.record = record
+            it.isAvaiable = true
+            "Loaded ${it.nama_ilmiah}".info(this)
         }
         File("KEW.json").inputStream().use {
             val type = object : TypeReference<Map<String, JsonNode>>() {}
@@ -130,7 +146,8 @@ class PlantRepository private constructor() : Serializable {
         "Loaded ${namaIlmiahToNamaUmum.size} namaIlmiahToNamaUmum".debug(this)
         "Loaded ${tags.size} Tags size".debug(this)
 
-        DataSerializer.write(save(REPOSITORY), this)
+        ecocrop.clear()
+        DataSerializer.write(save("src/main/assets/$REPOSITORY"), this)
     }
 
     fun isAuthored(record: CSVRecord): Boolean {
@@ -224,7 +241,7 @@ class PlantRepository private constructor() : Serializable {
 
         for ((name, record) in ecocrop) {
             val score = evaluateAll(record, data)
-            if (score < 0) "${record.get(E.Science_name)} score: $score".info("Csv")
+            if (score < 0) "evaluated '${record.get(E.Science_name)}' with score: $score".info(this)
 
             if (isAuthored(record) && score > 0)
                 processedData.computeIfAbsent(score) { k: Int? -> HashSet<CSVRecord>() }
@@ -328,6 +345,8 @@ class PlantRepository private constructor() : Serializable {
         }
         return ecocrop[nama]!!
     }
+
+    fun getPlants() = plant.values
 
     companion object {
         private const val serialVersionUID = 3642316207630701856L
