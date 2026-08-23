@@ -93,14 +93,13 @@ android {
 
 dependencies {
     implementation("io.github.pseudoankit:coachmark:3.0.1")
-    implementation(libs.androidx.compiler)
     implementation(libs.androidx.foundation.layout)
     implementation("com.github.jeziellago:compose-markdown:0.4.1")
 //    implementation("com.google.ai.edge.litert:litert-support-api:2.2.0")
-//    implementation("com.google.ai.edge.litert:litert-support:1.4.0")
+    implementation("com.google.ai.edge.litert:litert-support:1.4.0")
     implementation("com.google.ai.edge.litert:litert:2.2.0")
     implementation("com.open-meteo:open-meteo-api-kotlin:0.7.1-beta.1")
-    implementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.androidx.ui.test.junit4)
     implementation("org.apache.commons:commons-csv:1.10.0")
 //    implementation("org.slf4j:slf4j-api:2.0.17")
     implementation ("androidx.paging:paging-runtime:3.3.6")
@@ -153,6 +152,7 @@ dependencies {
 
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(libs.androidx.test.rules)
 
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)

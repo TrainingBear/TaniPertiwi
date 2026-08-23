@@ -18,6 +18,8 @@ var loaded by mutableStateOf(false)
 var geo by mutableStateOf(GeoParameters())
 var soil by mutableStateOf(SoilParameters())
 var image: Bitmap? = null
+
+// output
 var recommendationResult = SoilResult()
 var databaseSearchResult = SearchResult()
 

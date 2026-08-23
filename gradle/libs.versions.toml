@@ -91,6 +91,7 @@ androidx-foundation-layout = { group = "androidx.compose.foundation", name = "fo
 androidx-compiler = { group = "androidx.databinding", name = "compiler", version.ref = "compiler" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "uiTestJunit4" }
+androidx-test-rules = { group = "androidx.test", name = "rules", version = "1.7.0" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
