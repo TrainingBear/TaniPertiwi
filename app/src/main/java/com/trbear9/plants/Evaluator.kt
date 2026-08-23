@@ -4,16 +4,19 @@ import com.trbear9.plants.parameters.UserVariable
 import com.trbear9.ui.model.plantRepository
 import com.trbear9.ui.util.debug
 import com.trbear9.ui.util.splitCommas
+import com.trbear9.ui.viewmodel.custom
+import com.trbear9.ui.viewmodel.geo
+import com.trbear9.ui.viewmodel.soil
 import org.apache.commons.csv.CSVRecord
 import kotlin.math.absoluteValue
 import kotlin.math.max
 
 object Evaluator {
-    fun evaluateAll(record: CSVRecord, input: UserVariable): Int {
+    fun evaluateAll(record: CSVRecord): Int {
         val constraints = listOf(
             RainEval,
             TemperatureEval,
-            CycleEval,
+//            CycleEval,
             TextureEval,
             PhEval,
             DrainageEval,
@@ -21,19 +24,31 @@ object Evaluator {
             ClimateEval,
             LatitudeEval
         )
+        val result = IntArray(constraints.size)
         var score = 0;
-        for (constraint in constraints) {
+        val obsoleteInput = UserVariable()
+        for (i in constraints.indices) {
+            val constraint = constraints[i]
             try {
-                val temp = constraint.evaluate(record, input)
+                val d = constraint.evaluate(record)
+                result[i] = d
 //            "    ${constraint::class.simpleName}: $temp".info("Csv");
-                score += temp;
+                score += d;
             } catch (e: Exception) {
 //            "Can't evaluate ${record.get(E.Science_name)} with constraint of ${constraint::class.simpleName}".warn("CsvHandler")
             }
         }
         val plant = plantRepository.plant[record.get(E.Science_name) ?: "Unknown"]
         if (score <= 0 && plant?.isAvaiable == true) {
-            "Couldnt evaluate ${plant.commonName} with score $score".debug(this)
+            "Couldnt evaluate ${plant.commonName} with total score $score. heres what missing:".debug(
+                this
+            )
+            for (i in result.indices) {
+                val d = result[i]
+                val constraint = constraints[i]
+                if (d <= 0)
+                    " - ${constraint::class.qualifiedName} -> $d".debug(this)
+            }
         }
         return score;
     }
@@ -41,13 +56,12 @@ object Evaluator {
 
 object RainEval : Constraint {
     override fun evaluate(
-        record: CSVRecord,
-        input: UserVariable
+        record: CSVRecord
     ): Int {
         val min = record.get(E.A_minimum_rainfall).toFloat()
         val max = record.get(E.A_maximum_rainfall).toFloat()
-        return if (input.geo.rainfall in min..max) 1 else {
-            input.geo.rainfall.coerceIn(
+        return if (geo.rainfall in min..max) 1 else {
+            geo.rainfall.coerceIn(
                 Math.min(min, max),
                 Math.max(min, max)
             ).absoluteValue.toInt() * -1 / 100;
@@ -57,26 +71,24 @@ object RainEval : Constraint {
 
 object TemperatureEval : Constraint {
     override fun evaluate(
-        record: CSVRecord,
-        input: UserVariable
+        record: CSVRecord
     ): Int {
         val mn = record.get(E.A_minimum_temperature).toFloat()
         val mx = record.get(E.A_maximum_temperature).toFloat()
-        return if (input.geo.min >= mn && input.geo.max <= mx) 2 else {
-            (max(0f, mn - input.geo.min) + max(input.geo.max - mx, 0f)).toInt() * -1 / 2;
+        return if (geo.min >= mn && geo.max <= mx) 2 else {
+            (max(0f, mn - geo.min) + max(geo.max - mx, 0f)).toInt() * -1 / 2;
         }
     }
 }
 
 object CycleEval : Constraint {
     override fun evaluate(
-        record: CSVRecord,
-        input: UserVariable
+        record: CSVRecord
     ): Int {
-        input.custom ?: return 0;
+        custom ?: return 0;
         val mn = record.get(E.MIN_crop_cycle).toInt()
         val mx = record.get(E.MAX_crop_cycle).toInt()
-        return if (input.custom?.panen in mn..mx) 100 else {
+        return if (custom?.panen in mn..mx) 100 else {
             -100
         }
     }
@@ -84,21 +96,20 @@ object CycleEval : Constraint {
 
 object TextureEval : Constraint {
     override fun evaluate(
-        record: CSVRecord,
-        input: UserVariable
+        record: CSVRecord
     ): Int {
         var score = 0;
 
-        if (input.soil.texture == E.TEXTURE.wide) score += 2;
+        if (soil.texture == E.TEXTURE.wide) score += 2;
         else {
             var flag = false;
-            if (record.get(E.A_soil_texture).splitCommas().contains(input.soil.texture?.head)) {
+            if (record.get(E.A_soil_texture).splitCommas().contains(soil.texture?.head)) {
                 score++
                 flag = true;
             };
             if (!flag) {
                 if (record.get(E.O_soil_texture).splitCommas()
-                        .contains(input.soil.texture?.head)
+                        .contains(soil.texture?.head)
                 ) {
                     score++
                     flag = true;
@@ -112,14 +123,13 @@ object TextureEval : Constraint {
 
 object PhEval : Constraint {
     override fun evaluate(
-        record: CSVRecord,
-        input: UserVariable
+        record: CSVRecord
     ): Int {
         val mnPh = record.get(E.A_minimum_ph).toFloat()
         val mxPh = record.get(E.A_maximum_ph).toFloat()
-        return if ((input.soil.pH ?: 0f) in mnPh..mxPh) 1;
+        return if ((soil.pH ?: 0f) in mnPh..mxPh) 1;
         else {
-            val absoluteValue = input.soil.pH?.coerceIn(
+            val absoluteValue = soil.pH?.coerceIn(
                 Math.min(mnPh, mxPh),
                 Math.max(mnPh, mxPh)
             )?.absoluteValue ?: 2f;
@@ -130,11 +140,10 @@ object PhEval : Constraint {
 
 object DrainageEval : Constraint {
     override fun evaluate(
-        record: CSVRecord,
-        input: UserVariable
+        record: CSVRecord
     ): Int {
         return if (record.get(E.A_soil_drainage).splitCommas()
-                .contains(input.soil.drainage?.head)
+                .contains(soil.drainage?.head)
         ) 1
         else -2
     }
@@ -142,22 +151,20 @@ object DrainageEval : Constraint {
 
 object AltitudeEval : Constraint {
     override fun evaluate(
-        record: CSVRecord,
-        input: UserVariable
+        record: CSVRecord
     ): Int {
         val mxAlt = record.get(E.O_maximum_altitude).toFloat()
-        return if (input.geo.altitude <= mxAlt) 1;
+        return if (geo.altitude <= mxAlt) 1;
         else -1;
     }
 }
 
 object ClimateEval : Constraint {
     override fun evaluate(
-        record: CSVRecord,
-        input: UserVariable
+        record: CSVRecord
     ): Int {
         var score = 0;
-        if (record.get(E.Climate_zone).splitCommas().contains(input.geo.iklim?.head)) score++;
+        if (record.get(E.Climate_zone).splitCommas().contains(geo.iklim?.head)) score++;
         else score -= 354
         return score
     }
@@ -165,8 +172,7 @@ object ClimateEval : Constraint {
 
 object LatitudeEval : Constraint {
     override fun evaluate(
-        record: CSVRecord,
-        input: UserVariable
+        record: CSVRecord
     ): Int {
 
         val mnRaw = record.get(E.A_minimum_latitude)
@@ -181,7 +187,7 @@ object LatitudeEval : Constraint {
         val min = minOf(mnLat, mxLat)
         val max = maxOf(mnLat, mxLat)
 
-        val userLat = input.geo.latitude.absoluteValue.toFloat()
+        val userLat = geo.latitude.absoluteValue.toFloat()
 
         return if (userLat in min..max) {
             1

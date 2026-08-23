@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.trbear9.plants.E
 import com.trbear9.plants.E.Science_name
 import com.trbear9.plants.TFService
-import com.trbear9.plants.parameters.UserVariable
 import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.ui.util.debug
 import com.trbear9.ui.util.info
@@ -28,7 +27,11 @@ import com.trbear9.plants.parameters.Response
 import com.trbear9.ui.util.DataSerializer
 import com.trbear9.ui.util.Util
 import com.trbear9.ui.util.warn
+import com.trbear9.ui.viewmodel.Parameter
+import com.trbear9.ui.viewmodel.geo
+import com.trbear9.ui.viewmodel.image
 import com.trbear9.ui.viewmodel.recommendationResult
+import com.trbear9.ui.viewmodel.soil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -201,12 +204,13 @@ class PlantRepository private constructor() : Serializable {
     }
 
     @Throws(IOException::class)
-    fun process(data: UserVariable): Flow<Response> = flow {
+    fun process(): Flow<Response> = flow {
+        Parameter.start2info2Process()
         recommendationResult.response = Response(recommendationResult)
         recommendationResult.reset()
         recommendationResult.collecting = true
         val response = recommendationResult.response
-        val prediction = TFService.predict(data.image!!)
+        val prediction = TFService.predict(image!!)
 
         val max = TFService.argmax(prediction)
         val resultSoil = TFService.soils[max.first]
@@ -216,31 +220,24 @@ class PlantRepository private constructor() : Serializable {
         emit(response)
         "Soil has been predicted!".info(this)
 
-        data.geo.let {
+        try {
             "Getting temperature".info(this)
-            try {
-                meteo(it)
-            } catch (e: Exception) {
-                "Failed to get temperature".error(this)
-            }
-            response.geo = it
-            response.parameterLoaded = true
-            emit(response)
-            "Successfully loaded geo parameter!".info(this)
-        }
-        data.soil.let {
+            meteo(geo)
+        } catch (_: Exception) { "Failed to get temperature".error(this) }
+        response.geoParameterLoaded = true
+        emit(response)
+        "Successfully loaded geo parameter!".info(this)
+        soil.let {
             it.texture = resultSoil!!.texture
             it.fertility = resultSoil.fertility
             it.drainage = resultSoil.drainage
             it.pH = it.pH ?: resultSoil.pH
-
-            response.soil = it
         }
         val processedData = TreeMap<Int, MutableSet<CSVRecord>>()
         if (ecocrop.isEmpty()) throw Exception("EcoCrop_DB.csv not found, coba untuk load()")
 
         for ((name, record) in ecocrop) {
-            val score = evaluateAll(record, data)
+            val score = evaluateAll(record)
             if (score < 0) "evaluated '${record.get(E.Science_name)}' with score: $score".info(this)
 
             if (isAuthored(record) && score > 0)

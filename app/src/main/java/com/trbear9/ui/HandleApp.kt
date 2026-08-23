@@ -208,15 +208,11 @@ fun App(app: MainActivity, isReady: Boolean) {
                 } else {
                     getLocation(context)
                     gps = true
-                    val variable = UserVariable()
                     soil = SoilParameters()
                     if (pH != null) soil.pH = pH!!.coerceAtMost(14f)
                     soil.numericDepth = depth
-                    variable.geo = geo
-                    variable.image = image
-                    variable.soil = soil
                     recommendationResult.collected = false
-                    recommendationResult.flow = plantRepository.process(variable)
+                    recommendationResult.flow = plantRepository.process()
                     Util.debug("Job has been finished!")
 
                     if (!isNetworkAvailable(app)) {

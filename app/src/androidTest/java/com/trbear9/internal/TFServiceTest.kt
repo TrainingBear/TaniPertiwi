@@ -11,6 +11,9 @@ import com.trbear9.plants.parameters.SoilParameters
 import com.trbear9.plants.parameters.UserVariable
 import com.trbear9.ui.model.loadPlantRepository
 import com.trbear9.ui.model.plantRepository
+import com.trbear9.ui.viewmodel.geo
+import com.trbear9.ui.viewmodel.image
+import com.trbear9.ui.viewmodel.soil
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
@@ -46,10 +49,10 @@ class TFServiceTest {
         loadPlantRepository(context)
         val bit = BitmapFactory.decodeStream(context.assets.open("dataset/Aluvial/aluvial-004.jpg"))
         val variable = UserVariable()
-        variable.image = bit
-        variable.soil = SoilParameters.ALLUVIAL
-        variable.geo = GeoParameters()
-        val res = plantRepository.process(variable)
+        image = bit
+        soil = SoilParameters.ALLUVIAL
+        geo = GeoParameters()
+        val res = plantRepository.process()
 
         runBlocking {
             res.collect {

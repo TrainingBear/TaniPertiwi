@@ -106,6 +106,7 @@ import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.trbear9.plants.TFService
 import com.trbear9.plants.parameters.Response
 import com.trbear9.ui.viewmodel.Depth
+import com.trbear9.ui.viewmodel.geo
 import com.trbear9.ui.viewmodel.getDosis
 import com.trbear9.ui.viewmodel.image
 import com.trbear9.ui.viewmodel.recommendationResult
@@ -152,9 +153,9 @@ fun SoilStats(click: () -> Unit = {}) {
     val modelProducer = remember { CartesianChartModelProducer() }
     val list = remember { mutableStateListOf<Float>() }
     val value: Response = recommendationResult.response
-    val pH: Float? = soil.pH ?: value.soil.pH
+    val pH: Float? = soil.pH ?: soil.pH
     val depth: Depth =
-        if (soil.numericDepth != null) Depth.scaleFrom(soil.numericDepth!!) else value.soil.depth
+        if (soil.numericDepth != null) Depth.scaleFrom(soil.numericDepth!!) else soil.depth
 
     LaunchedEffect(Unit) {
         modelProducer.runTransaction {
@@ -334,30 +335,30 @@ fun SoilStats(click: () -> Unit = {}) {
                                 SoilDividerLine()
                                 SoilDataRow(
                                     "Tekstur",
-                                    value.soil.texture?.toString() ?: "Belum Diketahui"
+                                    soil.texture?.toString() ?: "Belum Diketahui"
                                 )
                                 SoilDividerLine()
                                 SoilDataRow(
                                     "Drainase",
-                                    value.soil.drainage?.toString() ?: "Belum Diketahui"
+                                    soil.drainage?.toString() ?: "Belum Diketahui"
                                 )
                                 SoilDividerLine()
                                 SoilDataRow(
                                     "Kesuburan",
-                                    value.soil.fertility?.toString() ?: "Belum Diketahui"
+                                    soil.fertility?.toString() ?: "Belum Diketahui"
                                 )
                                 SoilDividerLine()
                                 SoilDataRow("Kedalaman", depth.translation)
                             }
                         } else {
                             Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                                SoilDataRow("MDPL", value.geo?.altitude?.round() ?: "–")
+                                SoilDataRow("MDPL", geo?.altitude?.round() ?: "–")
                                 SoilDividerLine()
-                                SoilDataRow("Iklim", value.geo?.iklim?.head ?: "–")
+                                SoilDataRow("Iklim", geo?.iklim?.head ?: "–")
                                 SoilDividerLine()
-                                SoilDataRow("Min °C", value.geo?.min?.round() ?: "–")
+                                SoilDataRow("Min °C", geo?.min?.round() ?: "–")
                                 SoilDividerLine()
-                                SoilDataRow("Max °C", value.geo?.max?.round() ?: "–")
+                                SoilDataRow("Max °C", geo?.max?.round() ?: "–")
                             }
                         }
                     }
@@ -375,7 +376,7 @@ fun SoilStats(click: () -> Unit = {}) {
                                 MarkdownText(
                                     markdown = if (pH == 7f) "pH tanah anda bagus dan netral!"
                                     else "Untuk mencapai pH netral **dari ${
-                                        soil.pH ?: (value.soil.pH.toString() + " (default)")
+                                        soil.pH ?: (soil.pH.toString() + " (default)")
                                     } → 7**, dibutuhkan **${dosisKg.round()} kg** kapur dolomit per hektar " +
                                             "atau **${(dosisKg / 100).round()} kg** per meter persegi.",
                                     style = TextStyle(

@@ -22,7 +22,7 @@ class Response(val delegate: SoilResult) : Serializable {
     var progress by mutableIntStateOf(0)
     var target by mutableIntStateOf(0)
     var predicted by mutableStateOf(false)
-    var parameterLoaded by mutableStateOf(false)
+    var geoParameterLoaded by mutableStateOf(false)
     var current by mutableStateOf("Tanaman")
     var completed by mutableStateOf(false)
     var soilName by mutableStateOf("Tanaman")
@@ -30,8 +30,6 @@ class Response(val delegate: SoilResult) : Serializable {
     var soilPrediction: List<Pair<String, Float>> = listOf()
     var soilMax by mutableStateOf(Pair("Belum Diketahui", 0f))
     var total by mutableIntStateOf(0)
-    var soil by mutableStateOf(SoilParameters())
-    var geo: GeoParameters? = null
 
     fun put(score: Int, plant: Plant) {
         delegate.add(score, plant)

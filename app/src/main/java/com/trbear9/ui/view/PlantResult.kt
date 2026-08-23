@@ -58,7 +58,6 @@ import com.trbear9.ui.fragment.NavigateSoilStats
 import com.trbear9.ui.fragment.PlantCardDisplayer
 import com.trbear9.ui.util.ResultPagingSource
 import com.trbear9.ui.util.Screen
-import com.trbear9.ui.util.Util
 import com.trbear9.ui.util.debug
 import com.trbear9.ui.util.info
 import com.trbear9.ui.viewmodel.completer
@@ -168,7 +167,7 @@ fun SoilResultScreen() {
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = if (!recommendationResult.response.predicted) "Menganalisa tanahmu.."
-                            else if (!recommendationResult.response.parameterLoaded) "Mencari riwayat suhu 6 hari terakhir di daerah mu...\nPastikan koneksimu terhubung ke internet\nUntuk hasil yang lebih akurat!"
+                            else if (!recommendationResult.response.geoParameterLoaded) "Mencari riwayat suhu 6 hari terakhir di daerah mu...\nPastikan koneksimu terhubung ke internet\nUntuk hasil yang lebih akurat!"
                             else "Mencari data ${recommendationResult.response.current}",
                             fontSize = 16.sp,
                             textAlign = TextAlign.Center,
