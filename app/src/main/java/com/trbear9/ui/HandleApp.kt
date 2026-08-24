@@ -47,6 +47,7 @@ import com.trbear9.ui.viewmodel.image
 import com.trbear9.ui.viewmodel.pH
 import com.trbear9.ui.viewmodel.perm
 import com.trbear9.ui.viewmodel.recommendationResult
+import com.trbear9.ui.viewmodel.resetParameter
 import com.trbear9.ui.viewmodel.soil
 
 object LocalNav {
@@ -206,6 +207,7 @@ fun App(app: MainActivity, isReady: Boolean) {
                         Toast.LENGTH_SHORT
                     ).show()
                 } else {
+                    resetParameter()
                     getLocation(context)
                     gps = true
                     soil = SoilParameters()

@@ -28,13 +28,15 @@ class SoilParameters : Parameters {
         /** sources:
          * - https://www.sciencedirect.com/topics/agricultural-and-biological-sciences/alluvial-soilStats
          * - https://amoghavarshaiaskas.in/alluvial-soilStats/ */
-        @JvmField
-        val ALLUVIAL = SoilParameters().apply {
-            texture = (TEXTURE.medium)
-            fertility = (FERTILITY.high)
-            drainage = (DRAINAGE.well)
-            pH = (6f)
-        }
+        val ALLUVIAL: SoilParameters
+            get() {
+                return SoilParameters().apply {
+                    texture = (TEXTURE.medium)
+                    fertility = (FERTILITY.high)
+                    drainage = (DRAINAGE.well)
+                    pH = (6f)
+                }
+            }
 
         /** sources:
          * - [wikipedia](https://en.wikipedia.org/wiki/Laterite#Agriculture)
@@ -42,26 +44,30 @@ class SoilParameters : Parameters {
          * Volume 9 No 2, Agustus, 2023, 131-137
          * https://journal.student.uny.ac.id/
          */
-        @JvmField
-        val LATERITE: SoilParameters? = SoilParameters().apply {
-            fertility = (FERTILITY.low)
-            texture = (TEXTURE.heavy)
-            drainage = (DRAINAGE.well)
-            pH = (5.5f)
-        }
+        val LATERITE: SoilParameters
+            get() {
+                return SoilParameters().apply {
+                    fertility = (FERTILITY.low)
+                    texture = (TEXTURE.heavy)
+                    drainage = (DRAINAGE.well)
+                    pH = (5.5f)
+                }
+            }
 
         //        Humus
         //        ph Tanah: pH berkisar 6-7
         //        tekstur tanah: Tekstur gembur dan tidak padat
         //        kesuburan: Tergantung keasaman pH nak berkisar 6-7 berarti masih subur dan ideal
         //        Drainase: Baik (Well)
-        @JvmField
-        val HUMUS: SoilParameters? = SoilParameters().apply {
-            fertility = (FERTILITY.moderate)
-            texture = (TEXTURE.organic)
-            drainage = (DRAINAGE.well)
-            pH = (6f)
-        }
+        val HUMUS: SoilParameters
+            get() {
+                return SoilParameters().apply {
+                    fertility = (FERTILITY.moderate)
+                    texture = (TEXTURE.organic)
+                    drainage = (DRAINAGE.well)
+                    pH = (6f)
+                }
+            }
 
         //        Inceptisol
         //        ph Tanah: pH normal berkisar 5,0-7,0
@@ -69,26 +75,30 @@ class SoilParameters : Parameters {
         //        Tekstur tanah: debu, berdebu, lempung, lempung berdebu
         //        Kesuburan: Sedang hingga tinggi (sedang)
         //        Drainase: Karena termasuk tanah muda, drainase alamiahnya tergolong jelek
-        @JvmField
-        val INCEPTISOL: SoilParameters? = SoilParameters().apply {
-            fertility = (FERTILITY.moderate)
-            texture = (TEXTURE.heavy)
-            drainage = (DRAINAGE.poorly)
-            pH = (5.9f)
-        }
+        val INCEPTISOL: SoilParameters
+            get() {
+                return SoilParameters().apply {
+                    fertility = (FERTILITY.moderate)
+                    texture = (TEXTURE.heavy)
+                    drainage = (DRAINAGE.poorly)
+                    pH = (5.9f)
+                }
+            }
 
         //        Tanah kapur (rendzina)
         //        pH tanah: sangat basa bisa berkisar 6,0-8,0 bahkan bisa sampai 8,4
         //        Tekstur tanah: Tekstur lempung seperti vertisol, (bisa juga lempung berdebu)
         //        Kesuburan: Rendah
         //        Drainase: Tidak terlalu baik
-        @JvmField
-        val KAPUR: SoilParameters? = SoilParameters().apply {
-            fertility = (FERTILITY.low)
-            texture = (TEXTURE.light)
-            drainage = (DRAINAGE.poorly)
-            pH = (7f)
-        }
+        val KAPUR: SoilParameters
+            get() {
+                return SoilParameters().apply {
+                    fertility = (FERTILITY.low)
+                    texture = (TEXTURE.light)
+                    drainage = (DRAINAGE.poorly)
+                    pH = (7f)
+                }
+            }
 
         //        Tanah Pasir (Berpasir)
         //        pH tanah: Normalnya pH = 7
@@ -97,37 +107,43 @@ class SoilParameters : Parameters {
         //        Kesuburan: Kurang Subur
         //        Drainase: Tanah yang lebih banyak pasir mempunyai drainase yang baik
         //        Tekstur: Kasar
-        @JvmField
-        val PASIR: SoilParameters? = SoilParameters().apply {
-            fertility = (FERTILITY.low)
-            texture = (TEXTURE.light)
-            drainage = (DRAINAGE.excessive)
-            pH = (7f)
-        }
+        val PASIR: SoilParameters
+            get() {
+                return SoilParameters().apply {
+                    fertility = (FERTILITY.low)
+                    texture = (TEXTURE.light)
+                    drainage = (DRAINAGE.excessive)
+                    pH = (7f)
+                }
+            }
 
         //        Andosol
         //        ph Tanah: pH =  5.4
         //        Drainase tanah andisol secara umum cenderung baik
         //        Tekstur Tanah Andosol:  tekstur tanah sedang
-        @JvmField
-        val ANDOSOL: SoilParameters? = SoilParameters().apply {
-            fertility = (FERTILITY.high)
-            texture = (TEXTURE.wide)
-            drainage = (DRAINAGE.well)
-            pH = (5.4f)
-        }
+        val ANDOSOL: SoilParameters
+            get() {
+                return SoilParameters().apply {
+                    fertility = (FERTILITY.high)
+                    texture = (TEXTURE.wide)
+                    drainage = (DRAINAGE.well)
+                    pH = (5.4f)
+                }
+            }
 
         //        Entisol
         //        ph Tanah: 6,36-7,41
         //        texture: Kasar
         //        drainage: Well (baik)
         //        kesuburan: tergolong rendah
-        @JvmField
-        val ENTISOL: SoilParameters? = SoilParameters().apply {
-            fertility = (FERTILITY.high)
-            texture = (TEXTURE.medium)
-            drainage = (DRAINAGE.well)
-            pH = (5.4f)
-        }
+        val ENTISOL: SoilParameters
+            get() {
+                return SoilParameters().apply {
+                    fertility = (FERTILITY.high)
+                    texture = (TEXTURE.medium)
+                    drainage = (DRAINAGE.well)
+                    pH = (5.4f)
+                }
+            }
     }
 }

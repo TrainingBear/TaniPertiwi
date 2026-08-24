@@ -5,7 +5,7 @@ import com.trbear9.ui.model.PlantRepository
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class Serialization {
+object Serialization {
     private val objectMapper = ObjectMapper()
 
     @Test

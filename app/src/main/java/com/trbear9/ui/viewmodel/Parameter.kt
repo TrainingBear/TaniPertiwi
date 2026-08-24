@@ -27,6 +27,18 @@ var custom by mutableStateOf(CustomParameters())
 var recommendationResult = SoilResult()
 var databaseSearchResult = SearchResult()
 
+fun resetParameter(){
+    pH = null
+    depth = null
+    response = null
+    loaded = false
+    geo = GeoParameters()
+    soil = SoilParameters()
+    custom = CustomParameters()
+    recommendationResult.reset()
+    databaseSearchResult.reset()
+}
+
 object Parameter : ViewModel() {
     fun start2info2Process() {
         "Starting to process user variable:".info(this)
