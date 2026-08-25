@@ -1,18 +1,62 @@
 package com.trbear9.plants
 
-import com.trbear9.plants.parameters.UserVariable
+import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.ui.model.plantRepository
 import com.trbear9.ui.util.debug
+import com.trbear9.ui.util.info
 import com.trbear9.ui.util.splitCommas
 import com.trbear9.ui.viewmodel.custom
 import com.trbear9.ui.viewmodel.geo
 import com.trbear9.ui.viewmodel.soil
 import org.apache.commons.csv.CSVRecord
+import java.util.TreeMap
 import kotlin.math.absoluteValue
 import kotlin.math.max
 
 object Evaluator {
-    fun evaluateAll(record: CSVRecord): Int {
+    fun evaluateAllPerfectPlants(): TreeMap<Int, MutableSet<Plant>> {
+        if (plantRepository.plant.isEmpty()) throw Exception("Cant find any plants. this is a bug, please contact kukuhsudrajad354@gmail.com for resolve")
+        val processedData = TreeMap<Int, MutableSet<Plant>>()
+
+        var cnt = 0
+        var scanned = 0;
+        for ((_, plant) in plantRepository.plant) {
+            scanned++;
+            val score = evaluate(plant)
+//            if (score < 0) "evaluated '${record.get(E.Science_name)}' with score: $score".info(this)
+            if (plantRepository.isAuthored(plant.record!!) && score > 0) {
+                processedData.computeIfAbsent(score) { HashSet() }
+                    .add(plant)
+                if (plant.isAvaiable) cnt++;
+            }
+        }
+        "$scanned plants successfully filtered with $cnt plants are accepted!".info(this)
+        return processedData
+    }
+
+    fun evaluateAllEcoCropPlants(): TreeMap<Int, MutableSet<Plant>> {
+        if (plantRepository.ecocrop.isEmpty()) throw Exception("EcoCrop_DB.csv not found, coba untuk load()")
+        val processedData = TreeMap<Int, MutableSet<Plant>>()
+
+        var cnt = 0
+        var scanned = 0;
+        for ((name, record) in plantRepository.ecocrop) {
+            val plant = plantRepository.loadPlant(record)
+            scanned++;
+            val score = evaluate(plant)
+//            if (score < 0) "evaluated '${record.get(E.Science_name)}' with score: $score".info(this)
+            if (plantRepository.isAuthored(record) && score > 0) {
+                processedData.computeIfAbsent(score) { HashSet() }
+                    .add(plant)
+                if (plant.isAvaiable) cnt++;
+            }
+        }
+        "$scanned plants successfully filtered with $cnt plants are accepted!".info(this)
+        return processedData
+    }
+
+    fun evaluate(plant: Plant): Int {
+        val record = plant.record!!
         val constraints = listOf(
             RainEval,
             TemperatureEval,
@@ -26,7 +70,6 @@ object Evaluator {
         )
         val result = IntArray(constraints.size)
         var score = 0;
-        val obsoleteInput = UserVariable()
         for (i in constraints.indices) {
             val constraint = constraints[i]
             try {

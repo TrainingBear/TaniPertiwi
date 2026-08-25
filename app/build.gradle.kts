@@ -69,6 +69,12 @@ android {
     }
 
 
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -140,6 +146,7 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.mediarouter)
     testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junitPlatformLauncher)
     testImplementation(libs.room.compiler.processing.testing){
         exclude(group = "org.checkerframework", module = "checker-qual")
         exclude(group = "com.google.auto.value", module = "auto-value")

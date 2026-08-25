@@ -103,8 +103,7 @@ class PlantRecommendationFlowTest {
         }
         "Loaded $cnt plants that are certified".info(this)
 
-//        wait("don't finish yet")
-//        wait("done")
+        wait("don't finish yet")
     }
 
     @OptIn(ExperimentalTestApi::class)

@@ -1,6 +1,7 @@
 package com.trbear9.ui;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -10,5 +11,6 @@ import org.junit.Test;
 public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() {
+        assert true;
     }
 }

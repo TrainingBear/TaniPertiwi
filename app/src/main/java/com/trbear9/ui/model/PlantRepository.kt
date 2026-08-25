@@ -10,8 +10,8 @@ import com.trbear9.ui.util.debug
 import com.trbear9.ui.util.info
 import com.trbear9.ui.util.save
 import java.io.Serializable
-import java.util.TreeMap
 import android.content.Context
+import androidx.compose.ui.text.toLowerCase
 import com.fasterxml.jackson.core.StreamReadConstraints
 import com.fasterxml.jackson.core.StreamWriteConstraints
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -20,7 +20,7 @@ import com.openmeteo.api.OpenMeteo
 import com.openmeteo.api.common.units.TemperatureUnit
 import com.trbear9.plants.E.Category
 import com.trbear9.plants.E.Common_names
-import com.trbear9.plants.Evaluator.evaluateAll
+import com.trbear9.plants.Evaluator.evaluateAllEcoCropPlants
 import com.trbear9.plants.parameters.GeoParameters
 import com.trbear9.ui.util.error
 import com.trbear9.plants.parameters.Response
@@ -42,6 +42,8 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 import java.util.*
+import java.util.Locale
+import java.util.Locale.getDefault
 import kotlin.math.min
 
 private val objectMapper = ObjectMapper().also {
@@ -76,11 +78,31 @@ fun loadPlantRepository(context: Context) {
                 .parse(reader)
                 .records
             ) {
-                plantRepository.ecocrop[record[Science_name]] = record
+                val scienceName = record[Science_name].lowercase(getDefault())
+                plantRepository.ecocrop[scienceName] = record
+                plantRepository.plant[scienceName]?.record = record
             }
         }
     }
+    "Successfully Loaded ${plantRepository.ecocrop.size} plants".info("loadPlantRepository()")
 }
+
+
+fun streamEcoCrop(init: (CSVRecord)->Unit){
+        File("EcoCrop_DB.csv").inputStream().use { `is` ->
+            InputStreamReader(`is`).use { reader ->
+                for (record in CSVFormat.DEFAULT.builder()
+                    .setHeader()
+                    .setSkipHeaderRecord(true)
+                    .build()
+                    .parse(reader)
+                    .records
+                ) {
+                    init(record)
+                }
+            }
+        }
+    }
 
 class PlantRepository private constructor() : Serializable {
     val tags = HashSet<String>()
@@ -104,7 +126,7 @@ class PlantRepository private constructor() : Serializable {
                         .parse(reader)
                         .records
                     ) {
-                        ecocrop[record[Science_name]] = record
+                        ecocrop[record[Science_name].lowercase(getDefault())] = record
                     }
                 }
             }
@@ -123,8 +145,8 @@ class PlantRepository private constructor() : Serializable {
         val plants = File("plants.json").inputStream().use {
             objectMapper.readValue(it, Array<Plant>::class.java)
         }
-        for (item in plants) plant[item.nama_ilmiah] = item.also {
-            val record = ecocrop[it.nama_ilmiah] ?: run {
+        for (item in plants) plant[item.nama_ilmiah.lowercase(getDefault())] = item.also {
+            val record = ecocrop[it.nama_ilmiah.lowercase(getDefault())] ?: run {
                 "Cant find any related data about ${it.nama_ilmiah}".error(this)
                 return@also
             }
@@ -157,9 +179,9 @@ class PlantRepository private constructor() : Serializable {
         return record.get(E.Authority) != null || !record.get(E.Authority).isEmpty()
     }
 
-    fun loadPlant(record: CSVRecord, load: Boolean = false): Plant {
+    fun loadPlant(record: CSVRecord): Plant {
         val ilmiah = record[Science_name].lowercase()
-        if (plant.containsKey(ilmiah) && !load) return plant[ilmiah]!!
+        if (plant.containsKey(ilmiah)) return plant[ilmiah]!!
 
         val plant = if (plant[ilmiah] == null) {
             "Full plant version of $ilmiah not found".warn(this)
@@ -196,10 +218,10 @@ class PlantRepository private constructor() : Serializable {
         namaUmumToNamaIlmiah[commonname.lowercase()] = ilmiah
         namaIlmiahToNamaUmum[ilmiah] = commonname
 
-        this.plant[ilmiah] = plant
 //        Log.d(this, "Loaded ${plant.commonName} plants")
         plant.load(record)
         plant.record = record
+        this.plant[ilmiah] = plant
         return plant
     }
 
@@ -233,27 +255,18 @@ class PlantRepository private constructor() : Serializable {
             it.drainage = resultSoil.drainage
             it.pH = it.pH ?: resultSoil.pH
         }
-        val processedData = TreeMap<Int, MutableSet<CSVRecord>>()
-        if (ecocrop.isEmpty()) throw Exception("EcoCrop_DB.csv not found, coba untuk load()")
-
-        for ((name, record) in ecocrop) {
-            val score = evaluateAll(record)
-            if (score < 0) "evaluated '${record.get(E.Science_name)}' with score: $score".info(this)
-
-            if (isAuthored(record) && score > 0)
-                processedData.computeIfAbsent(score) { k: Int? -> HashSet<CSVRecord>() }
-                    .add(record)
-        }
+        val processedData = evaluateAllEcoCropPlants()
         for (i in processedData.keys)
             response.target += processedData[i]!!.size
+        emit(response)
         for (i in processedData.keys) {
-            for (ecorecord in processedData[i]!!) {
-                val namaIlmiah = ecorecord.get(Science_name)
-                response.current = namaIlmiah
-                emit(response)
+            for (plant in processedData[i]!!) {
+                val namaIlmiah = plant.commonName
                 "Loaded $namaIlmiah with score: $i".info(this)
-                response.put(i, loadPlant(ecorecord))
+
+                response.put(i, plant)
                 response.progress++
+                response.current = namaIlmiah
                 emit(response)
             }
         }
