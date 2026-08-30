@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSetter
 import com.fasterxml.jackson.annotation.Nulls
 import com.fasterxml.jackson.databind.JsonNode
-import com.trbear9.plants.E
+import com.trbear9.plants.Constants
 import com.trbear9.ui.util.Util
 import lombok.AllArgsConstructor
 import lombok.Getter
@@ -106,36 +106,36 @@ open class Plant(
     var pruneGuide: String = "Unknown"
 
     @JsonIgnore var isAvaiable = false
-    @JsonIgnore var minTemperature = record?.get(E.O_minimum_temperature)?:"Unknown"
-    @JsonIgnore var maxTemperature = record?.get(E.O_minimum_temperature)?:"Unknown"
-    @JsonIgnore var minPH = record?.get(E.O_minimum_ph)?:"Unknown"
-    @JsonIgnore var maxPH = record?.get(E.O_minimum_ph)?:"Unknown"
-    @JsonIgnore var minCycle = record?.get(E.MIN_crop_cycle)?:"Unknown"
-    @JsonIgnore var maxCycle = record?.get(E.MAX_crop_cycle)?:"Unknown"
-    @JsonIgnore var salinity = record?.get(E.A_soil_salinity)?:"Unknown"
-    @JsonIgnore var photoperiod = record?.get(E.Photoperiod)?:"Unknown"
-    @JsonIgnore var resiko = record?.get(E.Introduction_risk)?:"Unknown"
-    @JsonIgnore var skalaProduksi = record?.get(E.Production_system)?:"Unknown"
-    @JsonIgnore var author = record?.get(E.Authority)?:"Unknown"
-    @JsonIgnore var sinonim = record?.get(E.Synonyms)?:"Unknown"
+    @JsonIgnore var minTemperature = record?.get(Constants.O_minimum_temperature)?:"Unknown"
+    @JsonIgnore var maxTemperature = record?.get(Constants.O_minimum_temperature)?:"Unknown"
+    @JsonIgnore var minPH = record?.get(Constants.O_minimum_ph)?:"Unknown"
+    @JsonIgnore var maxPH = record?.get(Constants.O_minimum_ph)?:"Unknown"
+    @JsonIgnore var minCycle = record?.get(Constants.MIN_crop_cycle)?:"Unknown"
+    @JsonIgnore var maxCycle = record?.get(Constants.MAX_crop_cycle)?:"Unknown"
+    @JsonIgnore var salinity = record?.get(Constants.A_soil_salinity)?:"Unknown"
+    @JsonIgnore var photoperiod = record?.get(Constants.Photoperiod)?:"Unknown"
+    @JsonIgnore var resiko = record?.get(Constants.Introduction_risk)?:"Unknown"
+    @JsonIgnore var skalaProduksi = record?.get(Constants.Production_system)?:"Unknown"
+    @JsonIgnore var author = record?.get(Constants.Authority)?:"Unknown"
+    @JsonIgnore var sinonim = record?.get(Constants.Synonyms)?:"Unknown"
     @JsonIgnore var takson = taxon?:"Unknown"
-    @JsonIgnore var iklim = Util.bulkClimateTranslate(record?.get(E.Climate_zone)) ?:"Unknown"
+    @JsonIgnore var iklim = Util.bulkClimateTranslate(record?.get(Constants.Climate_zone)) ?:"Unknown"
 
     fun load(record:  CSVRecord){
-        minTemperature = record.get(E.O_minimum_temperature);
-        maxTemperature = record.get(E.O_minimum_temperature);
-        minPH = record.get(E.O_minimum_ph);
-        maxPH = record.get(E.O_minimum_ph);
-        minCycle = record.get(E.MIN_crop_cycle);
-        maxCycle = record.get(E.MAX_crop_cycle);
-        salinity = record.get(E.A_soil_salinity);
-        photoperiod = record.get(E.Photoperiod);
-        resiko = record.get(E.Introduction_risk);
-        skalaProduksi = record.get(E.Production_system)
-        author = record.get(E.Authority)
-        sinonim = record.get(E.Synonyms)
+        minTemperature = record.get(Constants.O_minimum_temperature);
+        maxTemperature = record.get(Constants.O_minimum_temperature);
+        minPH = record.get(Constants.O_minimum_ph);
+        maxPH = record.get(Constants.O_minimum_ph);
+        minCycle = record.get(Constants.MIN_crop_cycle);
+        maxCycle = record.get(Constants.MAX_crop_cycle);
+        salinity = record.get(Constants.A_soil_salinity);
+        photoperiod = record.get(Constants.Photoperiod);
+        resiko = record.get(Constants.Introduction_risk);
+        skalaProduksi = record.get(Constants.Production_system)
+        author = record.get(Constants.Authority)
+        sinonim = record.get(Constants.Synonyms)
         takson = taxon
-        iklim = Util.bulkClimateTranslate(record.get(E.Climate_zone))?:"Unknown"
+        iklim = Util.bulkClimateTranslate(record.get(Constants.Climate_zone))?:"Unknown"
     }
 }
 

@@ -1,6 +1,6 @@
 package com.trbear9.internal
 
-import com.trbear9.plants.E.Science_name
+import com.trbear9.plants.Constants.Science_name
 import com.trbear9.plants.Evaluator
 import com.trbear9.plants.parameters.SoilParameters
 import com.trbear9.ui.model.PlantRepository
@@ -14,29 +14,28 @@ import org.junit.jupiter.api.Test
 import java.io.File
 import java.io.InputStreamReader
 
-class FilteringSystemTest {
-
-    fun streamLocalEcoCrop(init: (CSVRecord)->Unit){
-        File("EcoCrop_DB.csv").inputStream().use { `is` ->
-            InputStreamReader(`is`).use { reader ->
-                for (record in CSVFormat.DEFAULT.builder()
-                    .setHeader()
-                    .setSkipHeaderRecord(true)
-                    .build()
-                    .parse(reader)
-                    .records
-                ) {
-                    init(record)
-                }
+fun streamLocalEcoCrop(init: (CSVRecord) -> Unit) {
+    File("EcoCrop_DB.csv").inputStream().use { `is` ->
+        InputStreamReader(`is`).use { reader ->
+            for (record in CSVFormat.DEFAULT.builder()
+                .setHeader()
+                .setSkipHeaderRecord(true)
+                .build()
+                .parse(reader)
+                .records
+            ) {
+                init(record)
             }
         }
     }
+}
 
+class FilteringSystemTest {
     @Test
     fun check() {
         val plant = PlantRepository.newInstance()
         plant.serialize()
-        streamLocalEcoCrop { record -> plant.ecocrop[record[Science_name]] = record}
+        streamLocalEcoCrop { record -> plant.ecocrop[record[Science_name]] = record }
         "Loaded ${plant.ecocrop.size} ecocrop plants".info(this)
         "Loaded ${plant.plant.size} identified plants".info(this)
         "Loaded ${plant.kew.size} plants taxonomies".info(this)
@@ -46,7 +45,7 @@ class FilteringSystemTest {
     fun filter() {
         plantRepository = PlantRepository.newInstance()
         plantRepository.serialize()
-        streamLocalEcoCrop { record -> plantRepository.ecocrop[record[Science_name]] = record}
+        streamLocalEcoCrop { record -> plantRepository.ecocrop[record[Science_name]] = record }
         resetParameter()
         soil = SoilParameters.ALLUVIAL
 //        var cnt = 0

@@ -1,7 +1,9 @@
 package com.trbear9.plants.parameters
 
-import com.trbear9.plants.E.*
-import com.trbear9.ui.viewmodel.Depth
+import com.trbear9.plants.metadata_enumerates.Drainase
+import com.trbear9.plants.metadata_enumerates.Kesuburan
+import com.trbear9.plants.metadata_enumerates.Texture
+import com.trbear9.plants.metadata_enumerates.Depth
 import lombok.*
 
 @Getter
@@ -11,9 +13,9 @@ import lombok.*
 @AllArgsConstructor
 class SoilParameters : Parameters {
     var depth: Depth = Depth.SHALLOW
-    var texture: TEXTURE? = null
-    var fertility: FERTILITY? = null // tingkat kesuburan
-    var drainage: DRAINAGE? = null
+    var texture: Texture? = null
+    var fertility: Kesuburan? = null // tingkat kesuburan
+    var drainage: Drainase? = null
     var pH: Float? = null
     var numericDepth: Float? = null
 
@@ -31,9 +33,9 @@ class SoilParameters : Parameters {
         val ALLUVIAL: SoilParameters
             get() {
                 return SoilParameters().apply {
-                    texture = (TEXTURE.medium)
-                    fertility = (FERTILITY.high)
-                    drainage = (DRAINAGE.well)
+                    texture = (Texture.medium)
+                    fertility = (Kesuburan.high)
+                    drainage = (Drainase.well)
                     pH = (6f)
                 }
             }
@@ -47,9 +49,9 @@ class SoilParameters : Parameters {
         val LATERITE: SoilParameters
             get() {
                 return SoilParameters().apply {
-                    fertility = (FERTILITY.low)
-                    texture = (TEXTURE.heavy)
-                    drainage = (DRAINAGE.well)
+                    fertility = (Kesuburan.low)
+                    texture = (Texture.heavy)
+                    drainage = (Drainase.well)
                     pH = (5.5f)
                 }
             }
@@ -62,9 +64,9 @@ class SoilParameters : Parameters {
         val HUMUS: SoilParameters
             get() {
                 return SoilParameters().apply {
-                    fertility = (FERTILITY.moderate)
-                    texture = (TEXTURE.organic)
-                    drainage = (DRAINAGE.well)
+                    fertility = (Kesuburan.moderate)
+                    texture = (Texture.organic)
+                    drainage = (Drainase.well)
                     pH = (6f)
                 }
             }
@@ -78,9 +80,9 @@ class SoilParameters : Parameters {
         val INCEPTISOL: SoilParameters
             get() {
                 return SoilParameters().apply {
-                    fertility = (FERTILITY.moderate)
-                    texture = (TEXTURE.heavy)
-                    drainage = (DRAINAGE.poorly)
+                    fertility = (Kesuburan.moderate)
+                    texture = (Texture.heavy)
+                    drainage = (Drainase.poorly)
                     pH = (5.9f)
                 }
             }
@@ -93,9 +95,9 @@ class SoilParameters : Parameters {
         val KAPUR: SoilParameters
             get() {
                 return SoilParameters().apply {
-                    fertility = (FERTILITY.low)
-                    texture = (TEXTURE.light)
-                    drainage = (DRAINAGE.poorly)
+                    fertility = (Kesuburan.low)
+                    texture = (Texture.light)
+                    drainage = (Drainase.poorly)
                     pH = (7f)
                 }
             }
@@ -110,9 +112,9 @@ class SoilParameters : Parameters {
         val PASIR: SoilParameters
             get() {
                 return SoilParameters().apply {
-                    fertility = (FERTILITY.low)
-                    texture = (TEXTURE.light)
-                    drainage = (DRAINAGE.excessive)
+                    fertility = (Kesuburan.low)
+                    texture = (Texture.light)
+                    drainage = (Drainase.excessive)
                     pH = (7f)
                 }
             }
@@ -124,9 +126,9 @@ class SoilParameters : Parameters {
         val ANDOSOL: SoilParameters
             get() {
                 return SoilParameters().apply {
-                    fertility = (FERTILITY.high)
-                    texture = (TEXTURE.wide)
-                    drainage = (DRAINAGE.well)
+                    fertility = (Kesuburan.high)
+                    texture = (Texture.wide)
+                    drainage = (Drainase.well)
                     pH = (5.4f)
                 }
             }
@@ -139,9 +141,9 @@ class SoilParameters : Parameters {
         val ENTISOL: SoilParameters
             get() {
                 return SoilParameters().apply {
-                    fertility = (FERTILITY.high)
-                    texture = (TEXTURE.medium)
-                    drainage = (DRAINAGE.well)
+                    fertility = (Kesuburan.high)
+                    texture = (Texture.medium)
+                    drainage = (Drainase.well)
                     pH = (5.4f)
                 }
             }

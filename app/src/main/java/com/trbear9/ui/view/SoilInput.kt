@@ -54,8 +54,8 @@ fun InputSoil(
     nav: NavController? = null,
     nextCallback: () -> Unit? = {}
 ) {
-    var phText by remember { mutableStateOf(pH?.toString()?:"?") }
-    var depthText by remember { mutableStateOf(depth?.toString()?:"?") }
+    var phText by remember { mutableStateOf(pH?.toString()?:"") }
+    var depthText by remember { mutableStateOf(depth?.toString()?:"") }
     LocalContext.current
     Box(
         modifier = Modifier
@@ -129,7 +129,7 @@ fun InputSoil(
                             pH = input.toFloatOrNull()
                         }
                     },
-                    label = { Text("pH tanah") },
+                    label = { Text("pH tanah (opsional)") },
 //                    placeholder = { Text("5.6") },
                     keyboardOptions = KeyboardOptions.Default.copy(
                         keyboardType = KeyboardType.Number
@@ -147,7 +147,7 @@ fun InputSoil(
                         }
                     },
                     label = { Text("Kedalaman tanah (cm)") },
-                    placeholder = { Text("$depth") },
+                    placeholder = { Text("${depth?:"30cm (default)"}") },
                     keyboardOptions = KeyboardOptions.Default.copy(
                         keyboardType = KeyboardType.Number
                     ),

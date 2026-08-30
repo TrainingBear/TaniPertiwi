@@ -1,6 +1,6 @@
 package com.trbear9.plants.parameters
 
-import com.trbear9.ui.viewmodel.Climate
+import com.trbear9.plants.metadata_enumerates.Climate
 import lombok.*
 
 @Getter

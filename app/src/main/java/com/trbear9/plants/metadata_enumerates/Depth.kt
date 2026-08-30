@@ -1,10 +1,10 @@
-package com.trbear9.ui.viewmodel
+package com.trbear9.plants.metadata_enumerates
 
 enum class Depth(
-    val original: String,
-    val translation: String,
+    override val origin: String,
+    override val translation: String,
     val value: Int
-) {
+): TranslatableEnum {
     VERY_SHALLOW(
         "verry shallow",
         "Sangat dangkal (< 30cm)",
@@ -34,7 +34,7 @@ enum class Depth(
         const val optimal = "O_soil_depth"
 
         fun fromOriginal(value: String): Depth? =
-            entries.find { it.original == value }
+            entries.find { it.origin == value }
 
         fun scaleFrom(value: Float): Depth {
             return if (value >= 120f) DEEP

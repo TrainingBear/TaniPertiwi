@@ -57,8 +57,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -105,7 +103,7 @@ import com.patrykandpatrick.vico.core.common.component.Shadow
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.trbear9.plants.TFService
 import com.trbear9.plants.parameters.Response
-import com.trbear9.ui.viewmodel.Depth
+import com.trbear9.plants.metadata_enumerates.Depth
 import com.trbear9.ui.viewmodel.geo
 import com.trbear9.ui.viewmodel.getDosis
 import com.trbear9.ui.viewmodel.image
@@ -354,7 +352,7 @@ fun SoilStats(click: () -> Unit = {}) {
                             Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
                                 SoilDataRow("MDPL", geo?.altitude?.round() ?: "–")
                                 SoilDividerLine()
-                                SoilDataRow("Iklim", geo?.iklim?.head ?: "–")
+                                SoilDataRow("Iklim", geo?.iklim?.origin ?: "–")
                                 SoilDividerLine()
                                 SoilDataRow("Min °C", geo?.min?.round() ?: "–")
                                 SoilDividerLine()

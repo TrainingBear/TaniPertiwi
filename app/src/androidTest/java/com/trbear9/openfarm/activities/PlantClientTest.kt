@@ -1,16 +1,5 @@
 package com.trbear9.ui.view
 
-import android.content.Context
-import android.util.Log
-import androidx.test.core.app.ApplicationProvider
-import com.fasterxml.jackson.core.StreamReadConstraints
-import com.fasterxml.jackson.core.StreamWriteConstraints
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.trbear9.plants.E.*
-import kotlinx.coroutines.runBlocking
-import org.junit.Assert.*
-import org.junit.Test
-
 /**
  * OBSOLETE
  * IT IS NOW USING BUILTIN RECOMMENDATION MACHINE!!!!

@@ -1,9 +1,9 @@
-package com.trbear9.ui.viewmodel
+package com.trbear9.plants.metadata_enumerates
 
 enum class Category(
-    val head: String,
-    val translation: String
-) {
+    override val origin: String,
+    override val translation: String
+): TranslatableEnum {
     OTHER("other", "Lainnya"),
     CEREALS_PSEUDOCEREALS("cereals & pseudocereals", "Pseudocereal"),
     PULLS("pulses (grain legumes)", "Kacang-Kacangan"),
@@ -14,16 +14,16 @@ enum class Category(
     MATERIALS("materials", "Bahan"),
     ORNAMENTALS_TURF("ornamentals/turf", "Rumput hias"),
     MEDICINALS_AND_ARMOATIC("medicinals & aromatic", "Obat & aromatik"),
-    FOREST_OR_WOOD("forest/wood", "Obat & aromatik"),
-    COVER_CROP("cover crop", "Obat & aromatik"),
-    ENVIRONMENTAL("environmental", "Obat & aromatik"),
+    FOREST_OR_WOOD("forest/wood", "Hutan/Kayu"),
+    COVER_CROP("cover crop", "Tanaman Penutup Tanah"),
+    ENVIRONMENTAL("environmental", "Lingkungan"),
     WEED("weed", "Gulma");
 }
 
 enum class Climate(
-    val head: String,
-    val translation: String
-) {
+    override val origin: String,
+    override val translation: String
+): TranslatableEnum {
     TROPICAL_WET_AND_DRY(
         "tropical wet & dry (Aw)",
         "tropis basah & kering (Aw)"
@@ -41,7 +41,7 @@ enum class Climate(
 
     STEPPE_OR_SEMIARID(
         "steppe or semiarid (Bs)",
-        "steppe or semiarid (Bs)"
+        "Stepa/Semi-kering"
     ),
 
     SUBTROPICAL_HUMID(
@@ -66,12 +66,12 @@ enum class Climate(
 
     TEMPERATE_CONTINENTAL(
         "temperate continental (Dc)",
-        "temperate continental (Dc)"
+        "Kontinental Sedang"
     ),
 
     TEMPERATE_WITH_HUMID_WINTERS(
         "temperate with humid winters (Df)",
-        "temperate with humid winters (Df)"
+        "Sedang dengan Musim Dingin Lembab"
     ),
 
     TEMPERATE_WITH_DRY_WINTERS(
@@ -93,6 +93,6 @@ enum class Climate(
         const val optimal = "Climate_zone"
 
         fun fromHead(head: String): Climate? =
-            entries.find { it.head == head }
+            entries.find { it.origin == head }
     }
 }

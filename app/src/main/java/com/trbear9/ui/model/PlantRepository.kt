@@ -2,8 +2,8 @@ package com.trbear9.ui.model
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
-import com.trbear9.plants.E
-import com.trbear9.plants.E.Science_name
+import com.trbear9.plants.Constants
+import com.trbear9.plants.Constants.Science_name
 import com.trbear9.plants.TFService
 import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.ui.util.debug
@@ -11,15 +11,14 @@ import com.trbear9.ui.util.info
 import com.trbear9.ui.util.save
 import java.io.Serializable
 import android.content.Context
-import androidx.compose.ui.text.toLowerCase
 import com.fasterxml.jackson.core.StreamReadConstraints
 import com.fasterxml.jackson.core.StreamWriteConstraints
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.openmeteo.api.Forecast
 import com.openmeteo.api.OpenMeteo
 import com.openmeteo.api.common.units.TemperatureUnit
-import com.trbear9.plants.E.Category
-import com.trbear9.plants.E.Common_names
+import com.trbear9.plants.Constants.Category
+import com.trbear9.plants.Constants.Common_names
 import com.trbear9.plants.Evaluator.evaluateAllEcoCropPlants
 import com.trbear9.plants.parameters.GeoParameters
 import com.trbear9.ui.util.error
@@ -42,7 +41,6 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 import java.util.*
-import java.util.Locale
 import java.util.Locale.getDefault
 import kotlin.math.min
 
@@ -87,6 +85,10 @@ fun loadPlantRepository(context: Context) {
     "Successfully Loaded ${plantRepository.ecocrop.size} plants".info("loadPlantRepository()")
 }
 
+fun log(plant: Plant){
+    "Logging ${plant.commonName} (${plant.nama_ilmiah})".debug("PlantRepository")
+    "   pH: ${plant.ph}"
+}
 
 fun streamEcoCrop(init: (CSVRecord)->Unit){
         File("EcoCrop_DB.csv").inputStream().use { `is` ->
@@ -176,7 +178,7 @@ class PlantRepository private constructor() : Serializable {
     }
 
     fun isAuthored(record: CSVRecord): Boolean {
-        return record.get(E.Authority) != null || !record.get(E.Authority).isEmpty()
+        return record.get(Constants.Authority) != null || !record.get(Constants.Authority).isEmpty()
     }
 
     fun loadPlant(record: CSVRecord): Plant {

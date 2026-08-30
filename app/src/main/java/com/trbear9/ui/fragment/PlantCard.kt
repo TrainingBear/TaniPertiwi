@@ -55,23 +55,11 @@ import com.trbear9.ui.util.MarkKey
 import com.trbear9.ui.util.highlightConfig
 import com.trbear9.ui.util.info
 import com.trbear9.ui.util.DataStore
-import com.trbear9.plants.E
-import com.trbear9.plants.E.CATEGORY.cereals_pseudocereals
-import com.trbear9.plants.E.CATEGORY.cover_crop
-import com.trbear9.plants.E.CATEGORY.environmental
-import com.trbear9.plants.E.CATEGORY.forage_pastures
-import com.trbear9.plants.E.CATEGORY.forest_or_wood
-import com.trbear9.plants.E.CATEGORY.fruit_nut
-import com.trbear9.plants.E.CATEGORY.materials
-import com.trbear9.plants.E.CATEGORY.medicinals_and_armoatic
-import com.trbear9.plants.E.CATEGORY.ornamentals_turf
-import com.trbear9.plants.E.CATEGORY.other
-import com.trbear9.plants.E.CATEGORY.roots_tubers
-import com.trbear9.plants.E.CATEGORY.vegetables
-import com.trbear9.plants.E.CATEGORY.weed
+import com.trbear9.plants.Constants
 import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.ui.model.plantRepository
 import com.trbear9.ui.view.PlantDetail
+import com.trbear9.plants.metadata_enumerates.Category
 import com.trbear9.ui.viewmodel.getPlantImage
 import kotlinx.coroutines.delay
 
@@ -268,8 +256,8 @@ fun CoachMarkScope.PlantCardDisplayer(
                         Color.Black,
                         diffToColor(ref.difficulty?.toString() ?: "UNKNOWN")
                     )
-                    val panen_min = plantRepository.ecocrop[ref.nama_ilmiah]?.get(E.MIN_crop_cycle)
-                    val panen_max = plantRepository.ecocrop[ref.nama_ilmiah]?.get(E.MAX_crop_cycle)
+                    val panen_min = plantRepository.ecocrop[ref.nama_ilmiah]?.get(Constants.MIN_crop_cycle)
+                    val panen_max = plantRepository.ecocrop[ref.nama_ilmiah]?.get(Constants.MAX_crop_cycle)
                     Kat(
                         if (panen_min != panen_max) "$panen_min-$panen_max hari"
                         else if (panen_min == "0") ""
@@ -364,34 +352,34 @@ fun scoreToColor(score: Int): Color {
 
 fun categoryToColor(category: String): Color {
     return when (category) {
-        other.head -> Color.Gray
-        vegetables.head -> Color.Green
-        cereals_pseudocereals.head -> Color(0xFF4CAF50)
-        roots_tubers.head -> Color.Red
-        forage_pastures.head -> Color.Blue
-        fruit_nut.head -> Color(0xFF9C27B0)
-        materials.head -> Color(0xFFFF9100)
-        ornamentals_turf.head -> Color(0xFFE91E63)
-        medicinals_and_armoatic.head -> Color(0xFF936123)
+        Category.OTHER.origin -> Color.Gray
+        Category.VEGETABLES.origin -> Color.Green
+        Category.CEREALS_PSEUDOCEREALS.origin -> Color(0xFF4CAF50)
+        Category.ROOTS_TUBERS.origin -> Color.Red
+        Category.FORAGE_PASTURES.origin -> Color.Blue
+        Category.FRUIT_NUT.origin -> Color(0xFF9C27B0)
+        Category.MATERIALS.origin -> Color(0xFFFF9100)
+        Category.ORNAMENTALS_TURF.origin -> Color(0xFFE91E63)
+        Category.MEDICINALS_AND_ARMOATIC.origin -> Color(0xFF936123)
         else -> Color(0xFF9E9E9E)
     }
 }
 
 fun translateCategory(category: String): String {
     when (category) {
-        other.head -> return "Lainnya"
-        vegetables.head -> return "Sayur"
-        cereals_pseudocereals.head -> return "Pseudocereal"
-        roots_tubers.head -> return "Akar/Umbi"
-        forage_pastures.head -> return "Padang rumput"
-        fruit_nut.head -> return "Buah & kacang"
-        materials.head -> return "Bahan"
-        ornamentals_turf.head -> return "Rumput hias"
-        medicinals_and_armoatic.head -> return "Obat & aromatik"
-        forest_or_wood.head -> return "Hutan/Kayu"
-        cover_crop.head -> return "Tanaman penutup"
-        environmental.head -> return "Lingkungan"
-        weed.head -> return "Gulma"
+        Category.OTHER.origin -> return "Lainnya"
+        Category.VEGETABLES.origin -> return "Sayur"
+        Category.CEREALS_PSEUDOCEREALS.origin -> return "Pseudocereal"
+        Category.ROOTS_TUBERS.origin -> return "Akar/Umbi"
+        Category.FORAGE_PASTURES.origin -> return "Padang rumput"
+        Category.FRUIT_NUT.origin -> return "Buah & kacang"
+        Category.MATERIALS.origin -> return "Bahan"
+        Category.ORNAMENTALS_TURF.origin -> return "Rumput hias"
+        Category.MEDICINALS_AND_ARMOATIC.origin -> return "Obat & aromatik"
+        Category.FOREST_OR_WOOD.origin -> return "Hutan/Kayu"
+        Category.COVER_CROP.origin -> return "Tanaman penutup"
+        Category.ENVIRONMENTAL.origin -> return "Lingkungan"
+        Category.WEED.origin -> return "Gulma"
     }
     return "Lainnya"
 }
