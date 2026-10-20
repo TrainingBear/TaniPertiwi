@@ -80,221 +80,220 @@ fun CoachMarkScope.PlantCardDisplayer(
 ) {
     val context = LocalContext.current
 
-    if (ref != null) {
-        val cmodifier: Modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(max = 600.dp)
-            .padding(8.dp)
-            .onGloballyPositioned {
-                ready = true
-            }
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(8.dp),
-            onClick = {
-                DataStore.completeTanaman()
-                val intent = Intent(context, PlantDetail::class.java)
-                intent.putExtra("plant", ref)
-                intent.putExtra("score", score)
-                context.startActivity(intent)
-            },
-            modifier =
+    if(ref==null) return
+    val cmodifier: Modifier = Modifier
+        .fillMaxWidth()
+        .heightIn(max = 600.dp)
+        .padding(8.dp)
+        .onGloballyPositioned {
+            ready = true
+        }
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(8.dp),
+        onClick = {
+            DataStore.completeTanaman()
+            val intent = Intent(context, PlantDetail::class.java)
+            intent.putExtra("plant", ref)
+            intent.putExtra("score", score)
+            context.startActivity(intent)
+        },
+        modifier =
 //                cardModifier
-                if (!coached) {
-                    cmodifier
-                        .enableCoachMark(
-                            key = MarkKey.cocok,
-                            toolTipPlacement = ToolTipPlacement.Bottom,
-                            highlightedViewConfig = highlightConfig
-                        ) {
-                            MarkKey.cocok.tooltip(ToolTipPlacement.Bottom)
-                        }
-                } else
-                    cmodifier
-        ) {
-            Column(modifier = Modifier.padding(10.dp)) {
+            if (!coached) {
+                cmodifier
+                    .enableCoachMark(
+                        key = MarkKey.cocok,
+                        toolTipPlacement = ToolTipPlacement.Bottom,
+                        highlightedViewConfig = highlightConfig
+                    ) {
+                        MarkKey.cocok.tooltip(ToolTipPlacement.Bottom)
+                    }
+            } else
+                cmodifier
+    ) {
+        Column(modifier = Modifier.padding(10.dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(16 / 9f)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.LightGray)
+            ) {
                 Box(
-                    modifier = Modifier
+                    Modifier
                         .fillMaxWidth()
                         .aspectRatio(16 / 9f)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.LightGray)
                 ) {
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(16 / 9f)
-                    ) {
-                        var isError by remember { mutableStateOf(false) }
-                        var isLoading by remember { mutableStateOf(false) }
-                        val model = getPlantImage(ref)
-                        AsyncImage(
-                            model = model,
-                            contentDescription = "${ref.nama_ilmiah} image",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(16.dp)),
-                            onError = {
-                                isError = true
-                                isLoading = false
-                            },
-                            onLoading = {
-                                isLoading = true
-                                isError = false
-                            },
-                            onSuccess = {
-                                isLoading = false
-                                isError = false
-                            }
-                        )
-                        if (isError) {
-                            Column(
-                                modifier = Modifier.align(Alignment.Center),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Image(
-                                    imageVector = CONS.noImage,
-                                    contentDescription = "${ref.nama_ilmiah ?: "no"} image",
-                                    modifier = Modifier
-                                        .fillMaxSize(fraction = 0.5f)
-                                        .clip(RoundedCornerShape(16.dp))
-                                )
-                                Text(
-                                    text = "Gambar tidak tersedia untuk ${ref?.commonName}",
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
+                    var isError by remember { mutableStateOf(false) }
+                    var isLoading by remember { mutableStateOf(false) }
+                    val model = getPlantImage(ref)
+                    AsyncImage(
+                        model = model,
+                        contentDescription = "${ref.nama_ilmiah} image",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(16.dp)),
+                        onError = {
+                            isError = true
+                            isLoading = false
+                        },
+                        onLoading = {
+                            isLoading = true
+                            isError = false
+                        },
+                        onSuccess = {
+                            isLoading = false
+                            isError = false
                         }
-                        if (isLoading) {
-                            Column(
-                                modifier = Modifier.align(Alignment.Center),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .fillMaxSize(fraction = 0.5f)
-                                        .clip(RoundedCornerShape(16.dp))
-                                )
-                                Text(
-                                    text = "Memuat Gambar...",
-                                )
-                            }
+                    )
+                    if (isError) {
+                        Column(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Image(
+                                imageVector = CONS.noImage,
+                                contentDescription = "${ref.nama_ilmiah ?: "no"} image",
+                                modifier = Modifier
+                                    .fillMaxSize(fraction = 0.5f)
+                                    .clip(RoundedCornerShape(16.dp))
+                            )
+                            Text(
+                                text = "Gambar tidak tersedia untuk ${ref.commonName}",
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
+                            )
                         }
+                    }
+                    if (isLoading) {
+                        Column(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxSize(fraction = 0.5f)
+                                    .clip(RoundedCornerShape(16.dp))
+                            )
+                            Text(
+                                text = "Memuat Gambar...",
+                            )
+                        }
+                    }
 
-                        if (score != 0) {
-                            val star = (score / 10f) * 5
-                            val half = (star - star.toInt()) > 0.1f
-                            val modifier = Modifier
-                                .padding(end = 10.dp, top = 7.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .wrapContentSize(Alignment.Center)
-                                .background(Color.Black.copy(alpha = 0.5f))
-                                .align(Alignment.TopEnd)
-                            Row(
-                                modifier =
+                    if (score != 0) {
+                        val star = (score / 10f) * 5
+                        val half = (star - star.toInt()) > 0.1f
+                        val modifier = Modifier
+                            .padding(end = 10.dp, top = 7.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .wrapContentSize(Alignment.Center)
+                            .background(Color.Black.copy(alpha = 0.5f))
+                            .align(Alignment.TopEnd)
+                        Row(
+                            modifier =
 //                                    scoreModifier()
-                                    if (!coached) modifier
-                                        .enableCoachMark(
-                                            key = MarkKey.skor,
-                                            toolTipPlacement = ToolTipPlacement.Bottom,
-                                            highlightedViewConfig = highlightConfig
-                                        ) {
-                                            MarkKey.skor.tooltip(ToolTipPlacement.Bottom)
-                                        }
-                                    else
-                                        modifier
-                            ) {
-                                repeat(star.toInt()) {
-                                    Icon(
-                                        imageVector = Icons.Default.Star,
-                                        contentDescription = "Score",
-                                        tint = Color.Yellow,
-                                        modifier = Modifier
-                                            .size(30.dp)
-                                    )
-                                }
-                                if (half) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.StarHalf,
-                                        contentDescription = "Half Score",
-                                        tint = Color.Yellow,
-                                        modifier = Modifier
-                                            .size(30.dp)
-                                    )
-                                }
+                                if (!coached) modifier
+                                    .enableCoachMark(
+                                        key = MarkKey.skor,
+                                        toolTipPlacement = ToolTipPlacement.Bottom,
+                                        highlightedViewConfig = highlightConfig
+                                    ) {
+                                        MarkKey.skor.tooltip(ToolTipPlacement.Bottom)
+                                    }
+                                else
+                                    modifier
+                        ) {
+                            repeat(star.toInt()) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = "Score",
+                                    tint = Color.Yellow,
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                )
+                            }
+                            if (half) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.StarHalf,
+                                    contentDescription = "Half Score",
+                                    tint = Color.Yellow,
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                )
                             }
                         }
                     }
                 }
+            }
 
-                // Plant Title
-                Text(
-                    text = ref.commonName?.split(",")[0] ?: "Tidak tersedia",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 10.dp)
+            // Plant Title
+            Text(
+                text = ref.commonName?.split(",")[0] ?: "Tidak tersedia",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 10.dp)
+            )
+
+            // Plant Description
+            Text(
+                text = ref.description?.take(100) +
+                        if ((ref.description?.length ?: 0) > 100) "..." else "",
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 6.dp)
+            )
+
+            // Plant Tags
+            FlowRow(
+                modifier = Modifier.padding(top = 6.dp),
+                mainAxisSpacing = 2.dp,
+                crossAxisSpacing = 2.dp
+            ) {
+                Kat(
+                    ref.difficulty ?: "???",
+                    Color.Black,
+                    diffToColor(ref.difficulty?.toString() ?: "UNKNOWN")
                 )
-
-                // Plant Description
-                Text(
-                    text = ref.description?.take(100) +
-                            if ((ref.description?.length ?: 0) > 100) "..." else "",
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 6.dp)
+                val panen_min = ref.minCycle
+                val panen_max = ref.maxCycle
+                Kat(
+                    if (panen_min != panen_max) "$panen_min-$panen_max hari"
+                    else if (panen_min == "0") ""
+                    else if (panen_min == "null") ""
+                    else "$panen_min hari",
+                    bcolor = Color.LightGray
                 )
-
-                // Plant Tags
-                FlowRow(
-                    modifier = Modifier.padding(top = 6.dp),
-                    mainAxisSpacing = 2.dp,
-                    crossAxisSpacing = 2.dp
-                ) {
+                ref.category.forEach {
+            //                        "PlantCategories for ${ref.commonName}: $it".debug("PlantCardTrack")
                     Kat(
-                        ref.difficulty?.toString() ?: "???",
-                        Color.Black,
-                        diffToColor(ref.difficulty?.toString() ?: "UNKNOWN")
+                        translateCategory(it), tcolor = Color.White,
+                        bcolor = categoryToColor(it)
                     )
-                    val panen_min = plantRepository.ecocrop[ref.nama_ilmiah]?.get(Constants.MIN_crop_cycle)
-                    val panen_max = plantRepository.ecocrop[ref.nama_ilmiah]?.get(Constants.MAX_crop_cycle)
-                    Kat(
-                        if (panen_min != panen_max) "$panen_min-$panen_max hari"
-                        else if (panen_min == "0") ""
-                        else if (panen_min == "null") ""
-                        else "$panen_min hari",
-                        bcolor = Color.LightGray
-                    )
-                    ref.category?.forEach {
-//                        "PlantCategories for ${ref.commonName}: $it".debug("PlantCardTrack")
-                        Kat(
-                            translateCategory(it), tcolor = Color.White,
-                            bcolor = categoryToColor(it)
-                        )
-                    }
                 }
             }
-            if (!coached) "${ref.commonName} has been added coach mark highlighter!".info("PlantCard")
-            coached = true
         }
-        LaunchedEffect(Unit) {
-            if (!flag && !displayed && ready) {
-                delay(1500)
-                if (!DataStore.isCompleteTanah && !DataStore.isCompleteTanaman) {
-                    show(
-                        MarkKey.analisa,
-                        MarkKey.cocok,
-                        MarkKey.skor,
-                    )
+        if (!coached) "${ref.commonName} has been added coach mark highlighter!".info("PlantCard")
+        coached = true
+    }
+    LaunchedEffect(Unit) {
+        if (!flag && !displayed && ready) {
+            delay(1500)
+            if (!DataStore.isCompleteTanah && !DataStore.isCompleteTanaman) {
+                show(
+                    MarkKey.analisa,
+                    MarkKey.cocok,
+                    MarkKey.skor,
+                )
 //                    DataStore.completeTanah()
-                } else if (!DataStore.isCompleteTanah) {
-                    show(MarkKey.analisa)
-                }
-//                Toast.makeText(context, "Loaded ${ref.commonName}", Toast.LENGTH_SHORT).show()
-                displayed = true
+            } else if (!DataStore.isCompleteTanah) {
+                show(MarkKey.analisa)
             }
-
+//                Toast.makeText(context, "Loaded ${ref.commonName}", Toast.LENGTH_SHORT).show()
+            displayed = true
         }
+
     }
 }
 

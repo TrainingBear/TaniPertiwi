@@ -185,6 +185,7 @@ class PlantRepository private constructor() : Serializable {
         val ilmiah = record[Science_name].lowercase()
         if (plant.containsKey(ilmiah)) return plant[ilmiah]!!
 
+        anjing, jetbug
         val plant = if (plant[ilmiah] == null) {
             "Full plant version of $ilmiah not found".warn(this)
             val plant = Plant(record)

@@ -284,7 +284,8 @@ fun PlantDetail(score: Int = 0, ref: Plant = PlantDummy(), onExit: () -> Unit = 
                     // Description card
                     SectionCard {
                         Text(
-                            text = plant.description ?: "Deskripsi untuk tanaman ini belum tersedia.",
+                            text = plant.description
+                                ?: "Deskripsi untuk tanaman ini belum tersedia.",
                             fontSize = 15.sp,
                             color = TextPrimary,
                             lineHeight = 24.sp
@@ -388,7 +389,10 @@ fun PlantDetail(score: Int = 0, ref: Plant = PlantDummy(), onExit: () -> Unit = 
 
                     // Taxonomy button
                     val taksonUrl = plant.takson
-                    if (taksonUrl.isNotBlank() && taksonUrl != "Unknown" && (taksonUrl.startsWith("http://") || taksonUrl.startsWith("https://"))) {
+                    if (taksonUrl.isNotBlank() && taksonUrl != "Unknown" && (taksonUrl.startsWith("http://") || taksonUrl.startsWith(
+                            "https://"
+                        ))
+                    ) {
                         Button(
                             onClick = {
                                 try {

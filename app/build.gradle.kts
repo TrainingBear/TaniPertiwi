@@ -5,6 +5,7 @@ import java.io.FileInputStream
 plugins {
     alias(libs.plugins.android.application)
     id("org.jetbrains.kotlin.plugin.compose")
+    kotlin("plugin.lombok")
 }
 
 
@@ -116,8 +117,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     implementation("org.apache.commons:commons-csv:1.10.0")
 //    implementation("org.slf4j:slf4j-api:2.0.17")
-    implementation ("androidx.paging:paging-runtime:3.3.6")
-    implementation ("androidx.paging:paging-compose:3.3.6")
+    implementation("androidx.paging:paging-runtime:3.3.6")
+    implementation("androidx.paging:paging-compose:3.3.6")
     implementation(libs.vico.compose)
 //    implementation(libs.vico.compose.m2)
 //    implementation(libs.vico.compose.m3)
@@ -147,7 +148,7 @@ dependencies {
     implementation(libs.mediarouter)
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junitPlatformLauncher)
-    testImplementation(libs.room.compiler.processing.testing){
+    testImplementation(libs.room.compiler.processing.testing) {
         exclude(group = "org.checkerframework", module = "checker-qual")
         exclude(group = "com.google.auto.value", module = "auto-value")
         exclude(group = "org.jetbrains.kotlin", module = "kotlin-compiler-embeddable")
@@ -189,3 +190,7 @@ tasks.register("printDirectDependencies") {
         }
     }
 }
+/*
+repositories {
+    mavenCentral()
+}*/

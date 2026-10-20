@@ -12,6 +12,7 @@ enum class PlantAttribute(
     harvested_from_wild("harvested from wild", "Dipanen dari Alam"),
     previously_widely_grown("previously widely grown", "Sebelumnya Ditanam Luas"),
     ;
+    override fun toString(): String = translation
 
     companion object {
         val optimal: String = Constants.Plant_attributes

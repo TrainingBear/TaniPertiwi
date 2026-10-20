@@ -14,6 +14,9 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+    plugins {
+        kotlin("plugin.lombok") version "2.2.10"
+    }
 }
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.10.0"

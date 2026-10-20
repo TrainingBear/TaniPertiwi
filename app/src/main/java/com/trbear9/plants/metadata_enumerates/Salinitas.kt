@@ -10,6 +10,7 @@ enum class Salinitas(
     low("low", "Rendah"),
     moderate("moderate", "Sedang"),
     high("high", "Tinggi");
+    override fun toString(): String = translation
 
     companion object {
         val absolute: String = Constants.A_soil_salinity

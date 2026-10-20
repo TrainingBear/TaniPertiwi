@@ -1,3 +1,5 @@
+@file:Suppress("LombokKotlinCompilerPlugin")
+
 package com.trbear9.ui.view
 
 import SoilResultTopBar

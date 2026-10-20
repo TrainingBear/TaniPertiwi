@@ -9,6 +9,7 @@ enum class Drainase(
     poorly("poorly (saturated >50% of year)", "Buruk (Tergenang >50% setahun)"),
     well("well (dry spells)", "Baik"),
     excessive("excessive (dry/moderately dry)", "Berlebihan (Sangat Cepat)");
+    override fun toString(): String = translation
 
     companion object {
         val absolute: String = Constants.A_soil_drainage

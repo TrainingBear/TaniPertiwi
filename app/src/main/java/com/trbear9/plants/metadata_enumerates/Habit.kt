@@ -11,6 +11,7 @@ enum class Habit(
     climber_scrambler_scadent("climber/scrambler/scadent", "Merambat"),
     acaulescent_or_rosette_plants("acaulescent(or rosette plants)", "Tanpa Batang (Roset)"),
     ;
+    override fun toString(): String = translation
 
     companion object {
         val optimal: String = Constants.Habitat

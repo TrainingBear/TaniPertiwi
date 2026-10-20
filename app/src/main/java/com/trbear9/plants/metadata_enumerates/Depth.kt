@@ -28,6 +28,7 @@ enum class Depth(
         "Dalam (>= 120cm)",
         120
     );
+    override fun toString(): String = translation
 
     companion object {
         const val absolute = "A_soil_depth"

@@ -11,6 +11,7 @@ enum class Texture(
     light("light", "Ringan (Pasir)"),
     wide("wide", "Luas"),
     organic("organic", "Organik");
+    override fun toString(): String = translation
 
     companion object {
         val absolute: String = Constants.A_soil_texture

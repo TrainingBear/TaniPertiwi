@@ -3,7 +3,7 @@ package com.trbear9.plants.metadata_enumerates
 enum class Category(
     override val origin: String,
     override val translation: String
-): TranslatableEnum {
+) : TranslatableEnum {
     OTHER("other", "Lainnya"),
     CEREALS_PSEUDOCEREALS("cereals & pseudocereals", "Pseudocereal"),
     PULLS("pulses (grain legumes)", "Kacang-Kacangan"),
@@ -18,12 +18,14 @@ enum class Category(
     COVER_CROP("cover crop", "Tanaman Penutup Tanah"),
     ENVIRONMENTAL("environmental", "Lingkungan"),
     WEED("weed", "Gulma");
+
+    override fun toString(): String = translation
 }
 
 enum class Climate(
     override val origin: String,
     override val translation: String
-): TranslatableEnum {
+) : TranslatableEnum {
     TROPICAL_WET_AND_DRY(
         "tropical wet & dry (Aw)",
         "tropis basah & kering (Aw)"
@@ -88,6 +90,8 @@ enum class Climate(
         "polar (F)",
         "kutub"
     );
+
+    override fun toString(): String = translation
 
     companion object {
         const val optimal = "Climate_zone"

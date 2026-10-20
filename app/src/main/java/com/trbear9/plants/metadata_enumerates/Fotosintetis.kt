@@ -10,6 +10,7 @@ enum class Fotosintetis(
     long_day("long day", "Hari Panjang"),
     neutral_day("neutral day", "Hari Netral"),
     sensitive("sensitive", "Sensitif");
+    override fun toString(): String = translation
 
     companion object {
         val optimal: String = Constants.Photoperiod

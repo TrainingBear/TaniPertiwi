@@ -10,6 +10,7 @@ enum class Lifespan(
     annual("annual", "Semusim (Tahunan)"),
     perennial("perennial", "Menahun"),
     biennial("biennial", "Dua Musim");
+    override fun toString(): String = translation
 
     companion object {
         val optimal: String = Constants.Life_span

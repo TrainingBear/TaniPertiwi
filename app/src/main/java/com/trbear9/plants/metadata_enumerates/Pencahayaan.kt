@@ -11,6 +11,7 @@ enum class Pencahayaan(
     cloudy_skies("cloudy skies", "Langit Berawan"),
     clear_skies("clear skies", "Langit Cerah"),
     very_bright("very bright", "Sangat Terang");
+    override fun toString(): String = translation
 
     companion object {
         val optimal_min: String = Constants.O_minimum_light_intentsity

@@ -7,6 +7,7 @@ enum class Bentuk(
     override val translation: String
 ) : TranslatableEnum {
     ;
+    override fun toString(): String = translation
 
     companion object {
         val optimal: String = Constants.Life_form
