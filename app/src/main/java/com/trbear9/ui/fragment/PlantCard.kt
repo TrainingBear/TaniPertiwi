@@ -62,6 +62,7 @@ import com.trbear9.ui.view.PlantDetail
 import com.trbear9.plants.metadata_enumerates.Category
 import com.trbear9.ui.viewmodel.getPlantImage
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 object CONS {
     val noImage = Icons.Default.Image
@@ -80,7 +81,7 @@ fun CoachMarkScope.PlantCardDisplayer(
 ) {
     val context = LocalContext.current
 
-    if(ref==null) return
+    if (ref == null) return
     val cmodifier: Modifier = Modifier
         .fillMaxWidth()
         .heightIn(max = 600.dp)
@@ -265,11 +266,10 @@ fun CoachMarkScope.PlantCardDisplayer(
                     else "$panen_min hari",
                     bcolor = Color.LightGray
                 )
-                ref.category.forEach {
-            //                        "PlantCategories for ${ref.commonName}: $it".debug("PlantCardTrack")
+                ref.getEnumCategory().forEach {
                     Kat(
-                        translateCategory(it), tcolor = Color.White,
-                        bcolor = categoryToColor(it)
+                        it.toString(), tcolor = Color.White,
+                        bcolor = it.color
                     )
                 }
             }
@@ -279,7 +279,7 @@ fun CoachMarkScope.PlantCardDisplayer(
     }
     LaunchedEffect(Unit) {
         if (!flag && !displayed && ready) {
-            delay(1500)
+            delay(1500.milliseconds)
             if (!DataStore.isCompleteTanah && !DataStore.isCompleteTanaman) {
                 show(
                     MarkKey.analisa,
@@ -347,40 +347,6 @@ fun scoreToColor(score: Int): Color {
         in 7..354 -> Color.Green
         else -> Color.Blue
     }
-}
-
-fun categoryToColor(category: String): Color {
-    return when (category) {
-        Category.OTHER.origin -> Color.Gray
-        Category.VEGETABLES.origin -> Color.Green
-        Category.CEREALS_PSEUDOCEREALS.origin -> Color(0xFF4CAF50)
-        Category.ROOTS_TUBERS.origin -> Color.Red
-        Category.FORAGE_PASTURES.origin -> Color.Blue
-        Category.FRUIT_NUT.origin -> Color(0xFF9C27B0)
-        Category.MATERIALS.origin -> Color(0xFFFF9100)
-        Category.ORNAMENTALS_TURF.origin -> Color(0xFFE91E63)
-        Category.MEDICINALS_AND_ARMOATIC.origin -> Color(0xFF936123)
-        else -> Color(0xFF9E9E9E)
-    }
-}
-
-fun translateCategory(category: String): String {
-    when (category) {
-        Category.OTHER.origin -> return "Lainnya"
-        Category.VEGETABLES.origin -> return "Sayur"
-        Category.CEREALS_PSEUDOCEREALS.origin -> return "Pseudocereal"
-        Category.ROOTS_TUBERS.origin -> return "Akar/Umbi"
-        Category.FORAGE_PASTURES.origin -> return "Padang rumput"
-        Category.FRUIT_NUT.origin -> return "Buah & kacang"
-        Category.MATERIALS.origin -> return "Bahan"
-        Category.ORNAMENTALS_TURF.origin -> return "Rumput hias"
-        Category.MEDICINALS_AND_ARMOATIC.origin -> return "Obat & aromatik"
-        Category.FOREST_OR_WOOD.origin -> return "Hutan/Kayu"
-        Category.COVER_CROP.origin -> return "Tanaman penutup"
-        Category.ENVIRONMENTAL.origin -> return "Lingkungan"
-        Category.WEED.origin -> return "Gulma"
-    }
-    return "Lainnya"
 }
 
 class ImageAsset {

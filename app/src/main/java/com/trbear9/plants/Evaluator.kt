@@ -25,7 +25,7 @@ object Evaluator {
             scanned++;
             val score = evaluate(plant)
 //            if (score < 0) "evaluated '${record.get(E.Science_name)}' with score: $score".info(this)
-            if (plantRepository.isAuthored(plant.record!!) && score > 0) {
+            if (plant.authored) {
                 processedData.computeIfAbsent(score) { HashSet() }
                     .add(plant)
                 if (plant.isAvaiable) cnt++;
@@ -40,19 +40,27 @@ object Evaluator {
         val processedData = TreeMap<Int, MutableSet<Plant>>()
 
         var cnt = 0
+        var cat = 0;
         var scanned = 0;
         for ((name, record) in plantRepository.ecocrop) {
             val plant = plantRepository.loadPlant(record)
             scanned++;
             val score = evaluate(plant)
 //            if (score < 0) "evaluated '${record.get(E.Science_name)}' with score: $score".info(this)
-            if (plantRepository.isAuthored(record) && score > 0) {
+            if (plant.authored && score > 0) {
                 processedData.computeIfAbsent(score) { HashSet() }
                     .add(plant)
                 if (plant.isAvaiable) cnt++;
+                if (plant.category.isEmpty()) "Cant find any category on plant $plant".info(this)
+                else {
+                    "Loaded ${plant.category.size} ${plant.category} categories from $plant".info(this)
+                    cat++
+                }
+            } else {
+
             }
         }
-        "$scanned plants successfully filtered with $cnt plants are accepted!".info(this)
+        "$scanned plants successfully filtered with $cnt plants are accepted! ($cat are defined cateogry)".info(this)
         return processedData
     }
 
@@ -82,8 +90,7 @@ object Evaluator {
 //            "Can't evaluate ${record.get(E.Science_name)} with constraint of ${constraint::class.simpleName}".warn("CsvHandler")
             }
         }
-        val plant = plantRepository.plant[record.get(Constants.Science_name) ?: "Unknown"]
-        if (score <= 0 && plant?.isAvaiable == true) {
+        if (score <= 0 && plant.isAvaiable) {
             "Couldnt evaluate ${plant.commonName} with total score $score. heres what missing:".debug(
                 this
             )

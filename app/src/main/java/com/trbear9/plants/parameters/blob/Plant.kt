@@ -6,6 +6,10 @@ import com.fasterxml.jackson.annotation.JsonSetter
 import com.fasterxml.jackson.annotation.Nulls
 import com.fasterxml.jackson.databind.JsonNode
 import com.trbear9.plants.Constants
+import com.trbear9.plants.Constants.Common_names
+import com.trbear9.plants.Constants.Science_name
+import com.trbear9.plants.metadata_enumerates.Category
+import com.trbear9.ui.model.plantRepository
 import com.trbear9.ui.util.Util
 import lombok.AllArgsConstructor
 import lombok.Getter
@@ -21,6 +25,10 @@ import java.io.Serializable
 open class Plant(
     var record: CSVRecord? = null
 ) : Serializable {
+    companion object {
+        private const val serialVersionUID = -4282027494278299715L
+    }
+
     var full_taxon: JsonNode? = null
 
     @JvmField
@@ -31,6 +39,7 @@ open class Plant(
 
     @JsonSetter(nulls = Nulls.SKIP)
     var fullsize: String = "Unknown"
+
     @JsonSetter(nulls = Nulls.SKIP)
     var thumbnail: String = "Unknown"
 
@@ -47,8 +56,10 @@ open class Plant(
     @JvmField
     @JsonSetter(nulls = Nulls.SKIP)
     var family: String = "Unknown"
+
     @JsonSetter(nulls = Nulls.SKIP)
     var ph: String = "Unknown"
+
     @JsonSetter(nulls = Nulls.SKIP)
     var temp: String = "Unknown"
 
@@ -86,6 +97,7 @@ open class Plant(
     @JvmField
     @JsonSetter(nulls = Nulls.SKIP)
     var difficulty: String = "?"
+
     @JvmField
     @JsonSetter(nulls = Nulls.SKIP)
     var description: String = "Tidak tersedia untuk tanaman ini"
@@ -105,23 +117,41 @@ open class Plant(
     @JsonSetter(nulls = Nulls.SKIP)
     var pruneGuide: String = "Unknown"
 
-    @JsonIgnore var isAvaiable = false
-    @JsonIgnore var minTemperature = record?.get(Constants.O_minimum_temperature)?:"Unknown"
-    @JsonIgnore var maxTemperature = record?.get(Constants.O_minimum_temperature)?:"Unknown"
-    @JsonIgnore var minPH = record?.get(Constants.O_minimum_ph)?:"Unknown"
-    @JsonIgnore var maxPH = record?.get(Constants.O_minimum_ph)?:"Unknown"
-    @JsonIgnore var minCycle = record?.get(Constants.MIN_crop_cycle)?:"Unknown"
-    @JsonIgnore var maxCycle = record?.get(Constants.MAX_crop_cycle)?:"Unknown"
-    @JsonIgnore var salinity = record?.get(Constants.A_soil_salinity)?:"Unknown"
-    @JsonIgnore var photoperiod = record?.get(Constants.Photoperiod)?:"Unknown"
-    @JsonIgnore var resiko = record?.get(Constants.Introduction_risk)?:"Unknown"
-    @JsonIgnore var skalaProduksi = record?.get(Constants.Production_system)?:"Unknown"
-    @JsonIgnore var author = record?.get(Constants.Authority)?:"Unknown"
-    @JsonIgnore var sinonim = record?.get(Constants.Synonyms)?:"Unknown"
-    @JsonIgnore var takson = taxon?:"Unknown"
-    @JsonIgnore var iklim = Util.bulkClimateTranslate(record?.get(Constants.Climate_zone)) ?:"Unknown"
+    @JsonIgnore
+    var authored = false
+    @JsonIgnore
+    var isAvaiable = false
+    @JsonIgnore
+    var minTemperature = record?.get(Constants.O_minimum_temperature) ?: "Unknown"
+    @JsonIgnore
+    var maxTemperature = record?.get(Constants.O_minimum_temperature) ?: "Unknown"
+    @JsonIgnore
+    var minPH = record?.get(Constants.O_minimum_ph) ?: "Unknown"
+    @JsonIgnore
+    var maxPH = record?.get(Constants.O_minimum_ph) ?: "Unknown"
+    @JsonIgnore
+    var minCycle = record?.get(Constants.MIN_crop_cycle) ?: "Unknown"
+    @JsonIgnore
+    var maxCycle = record?.get(Constants.MAX_crop_cycle) ?: "Unknown"
+    @JsonIgnore
+    var salinity = record?.get(Constants.A_soil_salinity) ?: "Unknown"
+    @JsonIgnore
+    var photoperiod = record?.get(Constants.Photoperiod) ?: "Unknown"
+    @JsonIgnore
+    var resiko = record?.get(Constants.Introduction_risk) ?: "Unknown"
+    @JsonIgnore
+    var skalaProduksi = record?.get(Constants.Production_system) ?: "Unknown"
+    @JsonIgnore
+    var author = record?.get(Constants.Authority) ?: "Unknown"
+    @JsonIgnore
+    var sinonim = record?.get(Constants.Synonyms) ?: "Unknown"
+    @JsonIgnore
+    var takson = taxon ?: "Unknown"
+    @JsonIgnore
+    var iklim = Util.bulkClimateTranslate(record?.get(Constants.Climate_zone)) ?: "Unknown"
 
-    fun load(record:  CSVRecord){
+    fun load(record: CSVRecord) {
+        plantRepository.writeTaxonomy(this)
         minTemperature = record.get(Constants.O_minimum_temperature);
         maxTemperature = record.get(Constants.O_minimum_temperature);
         minPH = record.get(Constants.O_minimum_ph);
@@ -135,7 +165,65 @@ open class Plant(
         author = record.get(Constants.Authority)
         sinonim = record.get(Constants.Synonyms)
         takson = taxon
-        iklim = Util.bulkClimateTranslate(record.get(Constants.Climate_zone))?:"Unknown"
+        iklim = Util.bulkClimateTranslate(record.get(Constants.Climate_zone)) ?: "Unknown"
+        this.record = record
+        authored = isAuthored(record)
+        nama_ilmiah = record[Science_name]
+
+        val ilmiah = nama_ilmiah.lowercase()
+        record[Common_names]?.split(", ")?.forEach {
+            nama_umum.add(it)
+            plantRepository.plantByTag.computeIfAbsent(it) { key ->
+                mutableSetOf()
+            }.add(this)
+        }
+        record[Constants.Category]?.split(", ")?.forEach {
+            category.add(it)
+            plantRepository.tags += it.lowercase()
+            plantRepository.plantByTag.computeIfAbsent(it) { key ->
+                mutableSetOf()
+            }.add(this)
+            plantRepository.plantByTag.computeIfAbsent(Util.translateCategory(it)) { key ->
+                mutableSetOf()
+            }.add(this)
+            plantRepository.plantByTag.computeIfAbsent("All") { key ->
+                mutableSetOf()
+            }.add(this)
+        }
+        plantRepository.tags += ilmiah
+        val commonname = if(commonName!="Unknown") commonName.lowercase() else ilmiah
+        plantRepository.tags += commonname
+
+        plantRepository.namaUmumToNamaIlmiah[commonname.lowercase()] = ilmiah
+        plantRepository.namaIlmiahToNamaUmum[ilmiah] = commonname
+
+//        Log.d(this, "Loaded ${plant.commonName} plants")
+        plantRepository.plant[ilmiah] = this
+    }
+
+    fun isAuthored(record: CSVRecord): Boolean {
+        return record.get(Constants.Authority) != null || !record.get(Constants.Authority).isEmpty()
+    }
+
+    override fun toString(): String {
+        return "$commonName ($nama_ilmiah)"
+    }
+
+    fun getTranslatedCategories(): String {
+        var r = ""
+        val enum = getEnumCategory()
+        for ((i, item) in enum.withIndex()) {
+            r += item.toString()
+            if(i+1 != enum.size) r+= ", "
+        }
+        return r
+    }
+    fun getEnumCategory(): List<Category> {
+        return category.mapNotNull { cat ->
+            Category.entries.find {
+                it.origin.equals(cat, ignoreCase = true)
+            }
+        }
     }
 }
 

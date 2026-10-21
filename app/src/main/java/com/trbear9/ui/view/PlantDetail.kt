@@ -375,7 +375,7 @@ fun PlantDetail(score: Int = 0, ref: Plant = PlantDummy(), onExit: () -> Unit = 
                         MarkdownText(
                             markdown = buildString {
                                 append("**Kecocokan iklim:** ${plant.iklim}\n")
-                                append("**Kategori:** ${plant.kategori}\n")
+                                append("**Kategori:** ${plant.getTranslatedCategories()}\n")
                                 plant.sinonim?.let { if (it.isNotEmpty()) append("**Nama lain:** $it\n") }
                                 plant.skalaProduksi?.let { if (it.isNotEmpty()) append("**Skala produksi:** $it") }
                             },

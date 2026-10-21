@@ -1,24 +1,26 @@
 package com.trbear9.plants.metadata_enumerates
 
+import androidx.compose.ui.graphics.Color
+
 enum class Category(
     override val origin: String,
-    override val translation: String
+    override val translation: String,
+    val color: Color = Color(0xFF9E9E9E)
 ) : TranslatableEnum {
-    OTHER("other", "Lainnya"),
-    CEREALS_PSEUDOCEREALS("cereals & pseudocereals", "Pseudocereal"),
+    OTHER("other", "Lainnya",Color.Gray),
+    CEREALS_PSEUDOCEREALS("cereals & pseudocereals", "Pseudocereal",Color(0xFF4CAF50)),
     PULLS("pulses (grain legumes)", "Kacang-Kacangan"),
-    ROOTS_TUBERS("roots/tubers", "Akar/Umbi"),
-    FORAGE_PASTURES("forage/pasture", "Pakan ternak"),
-    FRUIT_NUT("fruits & nuts", "Buah & kacang"),
-    VEGETABLES("vegetables", "Sayur"),
-    MATERIALS("materials", "Bahan"),
-    ORNAMENTALS_TURF("ornamentals/turf", "Rumput hias"),
-    MEDICINALS_AND_ARMOATIC("medicinals & aromatic", "Obat & aromatik"),
+    ROOTS_TUBERS("roots/tubers", "Akar/Umbi", Color.Red),
+    FORAGE_PASTURES("forage/pasture", "Pakan ternak", Color.Blue),
+    FRUIT_NUT("fruits & nuts", "Buah & kacang", Color(0xFF9C27B0)),
+    VEGETABLES("vegetables", "Sayur", Color.Green),
+    MATERIALS("materials", "Bahan", Color(0xFFFF9100)),
+    ORNAMENTALS_TURF("ornamentals/turf", "Rumput hias", Color(0xFFE91E63)),
+    MEDICINALS_AND_ARMOATIC("medicinals & aromatic", "Obat & aromatik", Color(0xFF936123)),
     FOREST_OR_WOOD("forest/wood", "Hutan/Kayu"),
     COVER_CROP("cover crop", "Tanaman Penutup Tanah"),
     ENVIRONMENTAL("environmental", "Lingkungan"),
     WEED("weed", "Gulma");
-
     override fun toString(): String = translation
 }
 

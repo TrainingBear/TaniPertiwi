@@ -7,7 +7,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.trbear9.plants.parameters.Response
 import com.trbear9.plants.parameters.blob.Plant
-import com.trbear9.ui.fragment.translateCategory
 import com.trbear9.ui.util.Util
 import com.trbear9.ui.util.info
 import kotlinx.coroutines.flow.Flow
@@ -46,8 +45,8 @@ class SoilResult {
 class SearchResult : AbstractPlantResult() {
     override fun add(plant: Plant) {
         plants.add(plant)
-        for (category in plant.category) {
-            plantByCategory.computeIfAbsent(translateCategory(category)) {
+        for (category in plant.getEnumCategory()) {
+            plantByCategory.computeIfAbsent(category.toString()) {
                 mutableSetOf()
             }.add(plant)
         }

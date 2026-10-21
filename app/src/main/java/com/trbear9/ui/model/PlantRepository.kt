@@ -85,26 +85,26 @@ fun loadPlantRepository(context: Context) {
     "Successfully Loaded ${plantRepository.ecocrop.size} plants".info("loadPlantRepository()")
 }
 
-fun log(plant: Plant){
-    "Logging ${plant.commonName} (${plant.nama_ilmiah})".debug("PlantRepository")
+fun log(plant: Plant) {
+    "Logging $plant".debug("PlantRepository")
     "   pH: ${plant.ph}"
 }
 
-fun streamEcoCrop(init: (CSVRecord)->Unit){
-        File("EcoCrop_DB.csv").inputStream().use { `is` ->
-            InputStreamReader(`is`).use { reader ->
-                for (record in CSVFormat.DEFAULT.builder()
-                    .setHeader()
-                    .setSkipHeaderRecord(true)
-                    .build()
-                    .parse(reader)
-                    .records
-                ) {
-                    init(record)
-                }
+fun streamEcoCrop(init: (CSVRecord) -> Unit) {
+    File("EcoCrop_DB.csv").inputStream().use { `is` ->
+        InputStreamReader(`is`).use { reader ->
+            for (record in CSVFormat.DEFAULT.builder()
+                .setHeader()
+                .setSkipHeaderRecord(true)
+                .build()
+                .parse(reader)
+                .records
+            ) {
+                init(record)
             }
         }
     }
+}
 
 class PlantRepository private constructor() : Serializable {
     val tags = HashSet<String>()
@@ -144,6 +144,16 @@ class PlantRepository private constructor() : Serializable {
             throw RuntimeException(e)
         }
 
+        File("KEW.json").inputStream().use {
+            val type = object : TypeReference<Map<String, JsonNode>>() {}
+            val k = objectMapper.readValue(it, type)
+            for (entry in k) {
+                val name = entry.key
+                val ke = k[name]
+                kew[name] = ke
+            }
+        }
+
         val plants = File("plants.json").inputStream().use {
             objectMapper.readValue(it, Array<Plant>::class.java)
         }
@@ -157,15 +167,6 @@ class PlantRepository private constructor() : Serializable {
             it.isAvaiable = true
             "Loaded ${it.nama_ilmiah}".info(this)
         }
-        File("KEW.json").inputStream().use {
-            val type = object : TypeReference<Map<String, JsonNode>>() {}
-            val k = objectMapper.readValue(it, type)
-            for (entry in k) {
-                val name = entry.key
-                val ke = k[name]
-                kew[name] = ke
-            }
-        }
         "Loaded ${ecocrop.size} ecocrop".debug(this)
         "Loaded ${kew.size} kew".debug(this)
         "Loaded ${plant.size} plants".debug(this)
@@ -177,55 +178,23 @@ class PlantRepository private constructor() : Serializable {
         DataSerializer.write(save("src/main/assets/$REPOSITORY"), this)
     }
 
-    fun isAuthored(record: CSVRecord): Boolean {
-        return record.get(Constants.Authority) != null || !record.get(Constants.Authority).isEmpty()
-    }
-
     fun loadPlant(record: CSVRecord): Plant {
         val ilmiah = record[Science_name].lowercase()
-        if (plant.containsKey(ilmiah)) return plant[ilmiah]!!
+//        if (plant.containsKey(ilmiah)) return plant[ilmiah]!!
 
-        anjing, jetbug
-        val plant = if (plant[ilmiah] == null) {
-            "Full plant version of $ilmiah not found".warn(this)
+//        "Loading $ilmiah".info(this)
+        return if (plant[ilmiah] == null) {
+//            "Full plant version of $ilmiah not found".warn(this)
             val plant = Plant(record)
-            plant.commonName = ilmiah ?: "Tidak diketahui"
+            plant.load(record)
             plant
-        } else plant[ilmiah]!!
-
-        plant.nama_ilmiah = ilmiah
-        record[Common_names]?.split(", ")?.forEach {
-            plant.nama_umum.add(it)
-            plantByTag.computeIfAbsent(it) { key ->
-                mutableSetOf()
-            }.add(plant)
+        } else {
+//            val plant = plant [ilmiah]!!
+//            if (plant.category.isEmpty()) "Cant find any category on plant $plant".info(this)
+//            else "Loaded ${plant.category.size} categories from $plant".info(this)
+            plant[ilmiah]!!
+//            plant
         }
-        record[Category]?.split(", ")?.forEach {
-            plant.category.add(it)
-            tags += it.lowercase()
-            plantByTag.computeIfAbsent(it) { key ->
-                mutableSetOf()
-            }.add(plant)
-            plantByTag.computeIfAbsent(Util.translateCategory(it)) { key ->
-                mutableSetOf()
-            }.add(plant)
-            plantByTag.computeIfAbsent("All") { key ->
-                mutableSetOf()
-            }.add(plant)
-        }
-        writeTaxonomy(plant)
-        tags += ilmiah
-        val commonname = plant.commonName?.lowercase() ?: ilmiah
-        tags += commonname
-
-        namaUmumToNamaIlmiah[commonname.lowercase()] = ilmiah
-        namaIlmiahToNamaUmum[ilmiah] = commonname
-
-//        Log.d(this, "Loaded ${plant.commonName} plants")
-        plant.load(record)
-        plant.record = record
-        this.plant[ilmiah] = plant
-        return plant
     }
 
     @Throws(IOException::class)
@@ -248,7 +217,9 @@ class PlantRepository private constructor() : Serializable {
         try {
             "Getting temperature".info(this)
             meteo(geo)
-        } catch (_: Exception) { "Failed to get temperature".error(this) }
+        } catch (_: Exception) {
+            "Failed to get temperature".error(this)
+        }
         response.geoParameterLoaded = true
         emit(response)
         "Successfully loaded geo parameter!".info(this)
@@ -279,7 +250,7 @@ class PlantRepository private constructor() : Serializable {
     }.flowOn(Dispatchers.Default)
 
 
-    private fun writeTaxonomy(plant: Plant) {
+    fun writeTaxonomy(plant: Plant) {
         plant.genus = plant.nama_ilmiah.split(" ")[0]
         if (kew.containsKey(plant.nama_ilmiah)) {
             plant.full_taxon = kew[plant.nama_ilmiah]
