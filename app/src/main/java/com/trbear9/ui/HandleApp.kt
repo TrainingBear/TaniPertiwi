@@ -45,6 +45,7 @@ import com.trbear9.ui.view.PointDetail
 import com.trbear9.ui.view.SearchLayout
 import com.trbear9.ui.view.SoilResultScreen
 import com.trbear9.ui.view.SoilStatsActivity
+import com.trbear9.ui.viewmodel.Parameter
 import com.trbear9.ui.viewmodel.depth
 import com.trbear9.ui.viewmodel.getLocation
 import com.trbear9.ui.viewmodel.gps
@@ -211,6 +212,7 @@ private fun NavGraphBuilder.appNavGraph(
     // ── Input Soil ────────────────────────────────────────────────────
     composable(route = Screen.inputSoil) {
         val context = LocalContext.current
+//        resetParameter()
         InputSoil(nav, nextCallback = {
             processSoilAnalysisAndNavigate(context = context, app = app, nav = nav)
         })
@@ -302,7 +304,6 @@ private fun processSoilAnalysisAndNavigate(
         return
     }
 
-    resetParameter()
     getLocation(context)
     gps = true
 
@@ -310,6 +311,7 @@ private fun processSoilAnalysisAndNavigate(
     if (pH != null) soil.pH = pH!!.coerceAtMost(14f)
     soil.numericDepth = depth
 
+    Parameter.start2info2Process()
     recommendationResult.collected = false
     recommendationResult.flow = plantRepository.process()
     Util.debug("Job has been finished!")

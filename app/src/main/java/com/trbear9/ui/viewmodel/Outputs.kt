@@ -22,7 +22,7 @@ class SoilResult {
     var collecting by mutableStateOf(false)
 
     fun add(score: Int, plant: Plant) {
-        "Loaded ${plant.nama_ilmiah} with score $score".info("Data Processor")
+//        "Loaded ${plant.nama_ilmiah} with score $score".info("Data Processor")
         plants.computeIfAbsent(score) { mutableSetOf() }.add(plant)
         for (category in plant.category) {
             plantByCategory.computeIfAbsent(

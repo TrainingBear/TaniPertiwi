@@ -51,16 +51,14 @@ object Evaluator {
                 processedData.computeIfAbsent(score) { HashSet() }
                     .add(plant)
                 if (plant.isAvaiable) cnt++;
-                if (plant.category.isEmpty()) "Cant find any category on plant $plant".info(this)
-                else {
-                    "Loaded ${plant.category.size} ${plant.category} categories from $plant".info(this)
+                if (!plant.category.isEmpty()) {
                     cat++
                 }
-            } else {
-
             }
         }
-        "$scanned plants successfully filtered with $cnt plants are accepted! ($cat are defined cateogry)".info(this)
+        "$scanned plants successfully filtered with $cnt plants are accepted! ($cat are defined cateogry)".info(
+            this
+        )
         return processedData
     }
 

@@ -1,3 +1,5 @@
+package com.trbear9.ui.view
+
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

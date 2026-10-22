@@ -227,7 +227,8 @@ class PlantRepository private constructor() : Serializable {
             it.texture = resultSoil!!.texture
             it.fertility = resultSoil.fertility
             it.drainage = resultSoil.drainage
-            it.pH = it.pH ?: resultSoil.pH
+            if (it.pH == null)
+                it.pH = resultSoil.pH
         }
         val processedData = evaluateAllEcoCropPlants()
         for (i in processedData.keys)
@@ -254,7 +255,6 @@ class PlantRepository private constructor() : Serializable {
         plant.genus = plant.nama_ilmiah.split(" ")[0]
         if (kew.containsKey(plant.nama_ilmiah)) {
             plant.full_taxon = kew[plant.nama_ilmiah]
-        } else {
         }
     }
 

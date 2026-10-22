@@ -34,7 +34,7 @@ fun getLocation(context: Context) {
                 geo.longtitude = it.longitude;
             }
         }
-    "long: ${geo.longtitude} lat: ${geo.latitude} mdpl: ${geo.altitude}".debug("GETLOCATION")
+//    "long: ${geo.longtitude} lat: ${geo.latitude} mdpl: ${geo.altitude}".debug("GETLOCATION")
 }
 
 fun scanTanahButton(context: Context) {

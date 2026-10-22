@@ -1,6 +1,5 @@
 package com.trbear9.ui.view
 
-import SoilResultTopBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -49,6 +48,7 @@ import com.trbear9.ui.util.error
 import com.trbear9.ui.viewmodel.databaseSearchResult
 import kotlinx.coroutines.delay
 import kotlin.math.min
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -100,7 +100,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
             source
         }.flow
     }
-    val items = pagerFlow.collectAsLazyPagingItems()
+    val completerItems = pagerFlow.collectAsLazyPagingItems()
 
     var order by rememberSaveable { mutableStateOf("Tertinggi") }
     var expandedSearch by rememberSaveable { mutableStateOf(false) }
@@ -129,7 +129,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
                 remember(selected) {
                     Pager(PagingConfig(pageSize = 7)) {
                         CompleterSearchSource(
-                            plantRepository.plantByTag[selected]?.filterIsInstance<Plant>()?.toMutableList() ?: mutableListOf()
+                            plantRepository.plantByTag[selected]?.toList()?.toMutableList() ?: mutableListOf()
                         )
                     }.flow
                 }
@@ -137,7 +137,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
                 remember(finalQuery, selected) {
                     Pager(PagingConfig(pageSize = 7)) {
                         CompleterSearchSource(
-                            databaseSearchResult.plantByCategory.get(selected)?.filterIsInstance<Plant>()?.toMutableList()
+                            databaseSearchResult.plantByCategory.get(selected)?.toList()?.toMutableList()
                                 ?: mutableListOf()
                         )
                     }.flow
@@ -193,8 +193,8 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
                     LazyColumn(
                         horizontalAlignment = Alignment.Start
                     ) {
-                        items(items.itemCount) { i ->
-                            val plant = items[i]
+                        items(completerItems.itemCount) { i ->
+                            val plant = completerItems[i]
                             if (plant != null) {
                                 Text(
                                     text = plant.commonName,
@@ -229,7 +229,7 @@ class CompleterSearchSource(val completer: MutableList<Plant>) : PagingSource<In
         val pageSize = 20
 
         return try {
-            delay(500)
+            delay(500.milliseconds)
             val nextKey = if (page.toDouble() >= (completer.size / pageSize)) null else page + 1
             val item = completer.subList(
                 page * pageSize,

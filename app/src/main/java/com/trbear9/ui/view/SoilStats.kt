@@ -107,6 +107,7 @@ import com.trbear9.plants.metadata_enumerates.Depth
 import com.trbear9.ui.viewmodel.geo
 import com.trbear9.ui.viewmodel.getDosis
 import com.trbear9.ui.viewmodel.image
+import com.trbear9.ui.viewmodel.pH
 import com.trbear9.ui.viewmodel.recommendationResult
 import com.trbear9.ui.viewmodel.retention
 import com.trbear9.ui.viewmodel.round
@@ -151,7 +152,7 @@ fun SoilStats(click: () -> Unit = {}) {
     val modelProducer = remember { CartesianChartModelProducer() }
     val list = remember { mutableStateListOf<Float>() }
     val value: Response = recommendationResult.response
-    val pH: Float? = soil.pH ?: soil.pH
+    val pH: Float? = pH ?: soil.pH
     val depth: Depth =
         if (soil.numericDepth != null) Depth.scaleFrom(soil.numericDepth!!) else soil.depth
 
