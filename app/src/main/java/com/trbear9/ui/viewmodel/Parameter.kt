@@ -25,7 +25,6 @@ var custom by mutableStateOf(CustomParameters())
 
 // output
 var recommendationResult = SoilResult()
-var databaseSearchResult = SearchResult()
 
 fun resetParameter(){
     pH = null
@@ -36,7 +35,6 @@ fun resetParameter(){
     soil = SoilParameters()
     custom = CustomParameters()
     recommendationResult.reset()
-    databaseSearchResult.reset()
 }
 
 object Parameter : ViewModel() {

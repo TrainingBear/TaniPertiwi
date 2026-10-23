@@ -19,6 +19,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +34,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -43,17 +43,18 @@ import com.trbear9.ui.LocalNav
 import com.trbear9.ui.fragment.NavigateSoilStats
 import com.trbear9.ui.fragment.PlantCardDisplayer
 import com.trbear9.ui.util.Screen
-import com.trbear9.ui.util.Util
-import com.trbear9.ui.viewmodel.ALL_CATEGORY
+import com.trbear9.ui.util.info
 import com.trbear9.ui.viewmodel.SearchTopBar
-import com.trbear9.ui.viewmodel.SoilResultViewModel
+import com.trbear9.ui.viewmodel.SearchViewModel
 import com.trbear9.ui.viewmodel.recommendationResult
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onCompletion
 
 var coachStep = 0
 
 @Composable
 @Preview
-fun SoilResultScreen(vm: SoilResultViewModel = viewModel()) {
+fun SoilResultScreen(vm: SearchViewModel = SearchViewModel(recommendationResult.plants.toList())) {
     val nav = LocalNav.current
     val keyboard = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -62,11 +63,32 @@ fun SoilResultScreen(vm: SoilResultViewModel = viewModel()) {
     val category by vm.category.collectAsState()
     val order by vm.order.collectAsState()
     val count by vm.resultCount.collectAsState()
-    val ready by vm.ready.collectAsState()
     val suggestions by vm.suggestions.collectAsState()
     val plants = vm.results.collectAsLazyPagingItems()
 
     var searchFocused by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        val result = recommendationResult
+        if (result.collected) {
+            return@LaunchedEffect
+        }
+        "Collecting".info(this)
+        result.flow
+            ?.onCompletion { cause ->
+                // only mark as collected on a real completion, not on cancellation/error
+                if (cause == null) {
+                    result.flow = null
+                    result.collected = true
+                    recommendationResult.loaded = true
+                    "Collected".info(this)
+                    vm.refresh()
+                }
+            }
+            ?.catch { "Collect failed: ${it.message}".info(this) }
+            ?.collect {
+            }
+    }
 
     fun submit() {
         vm.submit()
@@ -91,16 +113,19 @@ fun SoilResultScreen(vm: SoilResultViewModel = viewModel()) {
         bottomBar = { SoilResultBottomBar(onHome = { nav?.navigate(Screen.home) }) },
     ) { padding ->
         UnifyCoachmark {
-            Box(Modifier
-                .fillMaxSize()
-                .padding(padding)) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
                 when {
                     recommendationResult.collecting -> LoadingState(
                         message = loadingMessage(),
                         modifier = Modifier.align(Alignment.Center),
                     )
 
-                    !ready -> NoSoilMatch(onScan = { nav?.navigate(Screen.camera) })
+                    !recommendationResult.loaded && !recommendationResult.collecting -> NoSoilMatch(
+                        onScan = { nav?.navigate(Screen.camera) })
                     else -> ResultList(plants)
                 }
 
@@ -108,7 +133,7 @@ fun SoilResultScreen(vm: SoilResultViewModel = viewModel()) {
                     SuggestionList(
                         suggestions = suggestions,
                         onPick = { text ->
-                            vm.onQueryChange(text)
+                            vm.onQueryChange(text.commonName)
                             submit()
                         },
                         modifier = Modifier.align(Alignment.TopCenter),
@@ -170,7 +195,7 @@ private fun NoSoilMatch(onScan: () -> Unit) {
 }
 
 @Composable
-private fun ResultList(plants: LazyPagingItems<Pair<Int, Plant>>) {
+private fun ResultList(plants: LazyPagingItems<Plant>) {
     val refresh = plants.loadState.refresh
     val isEmpty = plants.itemCount == 0 && refresh is LoadState.NotLoading
 
@@ -191,7 +216,7 @@ private fun ResultList(plants: LazyPagingItems<Pair<Int, Plant>>) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             items(plants.itemCount) { i ->
-                plants[i]?.let { (score, plant) -> PlantCardDisplayer(score, plant) }
+                plants[i]?.let { plant -> PlantCardDisplayer(plant.score, plant) }
             }
             when {
                 refresh is LoadState.Loading -> item { Text("Memuat…", Modifier.padding(16.dp)) }

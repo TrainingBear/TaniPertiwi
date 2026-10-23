@@ -85,13 +85,25 @@ fun loadPlantRepository(context: Context) {
     "Successfully Loaded ${plantRepository.ecocrop.size} plants".info("loadPlantRepository()")
 }
 
+fun findAssetFile(fileName: String): File {
+    val candidates = listOf(
+        File(fileName),
+        File("src/main/assets", fileName),
+        File("app/src/main/assets", fileName)
+    )
+    return candidates.firstOrNull { it.exists() }
+        ?: File("src/main/assets", fileName).takeIf { File("src/main/assets").exists() }
+        ?: File("app/src/main/assets", fileName).takeIf { File("app/src/main/assets").exists() }
+        ?: File(fileName)
+}
+
 fun log(plant: Plant) {
     "Logging $plant".debug("PlantRepository")
     "   pH: ${plant.ph}"
 }
 
 fun streamEcoCrop(init: (CSVRecord) -> Unit) {
-    File("EcoCrop_DB.csv").inputStream().use { `is` ->
+    findAssetFile("EcoCrop_DB.csv").inputStream().use { `is` ->
         InputStreamReader(`is`).use { reader ->
             for (record in CSVFormat.DEFAULT.builder()
                 .setHeader()
@@ -119,7 +131,7 @@ class PlantRepository private constructor() : Serializable {
 
     fun serialize() {
         try {
-            File("EcoCrop_DB.csv").inputStream().use { `is` ->
+            findAssetFile("EcoCrop_DB.csv").inputStream().use { `is` ->
                 InputStreamReader(`is`).use { reader ->
                     for (record in CSVFormat.DEFAULT.builder()
                         .setHeader()
@@ -144,7 +156,7 @@ class PlantRepository private constructor() : Serializable {
             throw RuntimeException(e)
         }
 
-        File("KEW.json").inputStream().use {
+        findAssetFile("KEW.json").inputStream().use {
             val type = object : TypeReference<Map<String, JsonNode>>() {}
             val k = objectMapper.readValue(it, type)
             for (entry in k) {
@@ -154,7 +166,7 @@ class PlantRepository private constructor() : Serializable {
             }
         }
 
-        val plants = File("plants.json").inputStream().use {
+        val plants = findAssetFile("plants.json").inputStream().use {
             objectMapper.readValue(it, Array<Plant>::class.java)
         }
         for (item in plants) plant[item.nama_ilmiah.lowercase(getDefault())] = item.also {
@@ -176,7 +188,7 @@ class PlantRepository private constructor() : Serializable {
         "Loaded ${tags.size} Tags size".debug(this)
 
         ecocrop.clear()
-        DataSerializer.write(save("src/main/assets/$REPOSITORY"), this)
+        DataSerializer.write(findAssetFile(REPOSITORY), this)
     }
 
     fun loadPlant(record: CSVRecord): Plant {
@@ -240,7 +252,7 @@ class PlantRepository private constructor() : Serializable {
                 val namaIlmiah = plant.commonName
                 "Loaded $namaIlmiah with score: $i".info(this)
 
-                response.put(i, plant)
+                response.put(plant)
                 response.progress++
                 response.current = namaIlmiah
                 emit(response)

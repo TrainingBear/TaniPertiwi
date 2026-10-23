@@ -11,7 +11,7 @@ import androidx.paging.cachedIn
 import com.trbear9.plants.metadata_enumerates.Category
 import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.ui.model.Searcher
-import com.trbear9.ui.model.plantRepository
+import com.trbear9.ui.util.debug
 import com.trbear9.ui.util.info
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -38,9 +38,10 @@ enum class SortOrder(val label: String) {
 const val ALL_CATEGORY = "All"
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-class SearchViewModel : ViewModel() {
+class SearchViewModel(val source: List<Plant>) : ViewModel() {
 
     // ── Inputs (single source of truth) ────────────────────────────────────
+    private val _refresh = MutableStateFlow(0)            // what is typed
     private val _query = MutableStateFlow("")            // what is typed
     private val _submitted = MutableStateFlow("")        // what was actually searched
     private val _category = MutableStateFlow(Category.ALL)
@@ -49,6 +50,11 @@ class SearchViewModel : ViewModel() {
     val query: StateFlow<String> = _query
     val category: StateFlow<Category> = _category
     val order: StateFlow<SortOrder> = _order
+
+    fun refresh() {
+        "Refresh button invoked!".debug(this)
+        _refresh.value++
+    }
 
     fun onQueryChange(value: String) {
         _query.value = value
@@ -75,18 +81,17 @@ class SearchViewModel : ViewModel() {
 
     // ── Results ────────────────────────────────────────────────────────────
     // 1) the (expensive) search only re-runs when the submitted query changes
-    private val searchResult: Flow<List<Plant>?> = _submitted
-        .map { q ->
-            if (q.isEmpty()) null else Searcher.search(plantRepository.plant.values, q)
-        }
+    private val searchResult: Flow<List<Plant>?> = combine(_submitted, _refresh) { q, _ ->
+        "Refreshed!".debug(this)
+        if (q.isEmpty()) null else Searcher.search(source, q)
+    }
         .flowOn(Dispatchers.Default)
 
     // 2) category + order are cheap and applied on top of it
     private val filtered: StateFlow<List<Plant>> =
         combine(searchResult, _category, _order) { result, category, order ->
-            val base = (result ?: plantRepository.plant.values.toList())
+            val base = (result ?: source)
             val filt = if (category == Category.ALL) base else base.filter {
-                "Filtering $it ${it.category}".info(this)
                 it.category.contains(category)
             }
             filt.sortedFor(order)
@@ -110,7 +115,7 @@ class SearchViewModel : ViewModel() {
     // ── Helpers ────────────────────────────────────────────────────────────
     private fun suggest(q: String): List<Plant> {
         if (q.isEmpty()) return emptyList()
-        return Searcher.search(plantRepository.plant.values, q)
+        return Searcher.search(source, q)
             .distinctBy { it.nama_ilmiah }
             .take(20)
     }

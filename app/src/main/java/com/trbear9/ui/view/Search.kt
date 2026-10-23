@@ -37,11 +37,12 @@ import com.trbear9.ui.viewmodel.ALL_CATEGORY
 import com.trbear9.ui.viewmodel.SearchViewModel
 import androidx.compose.runtime.collectAsState
 import com.trbear9.plants.metadata_enumerates.Category
+import com.trbear9.ui.model.plantRepository
 import com.trbear9.ui.viewmodel.SearchTopBar
 
 @Composable
 fun SearchLayout(
-    vm: SearchViewModel = viewModel(),
+    vm: SearchViewModel = SearchViewModel(plantRepository.plant.values.toList()),
 ) {
     val query by vm.query.collectAsState()
     val category by vm.category.collectAsState()
@@ -93,7 +94,7 @@ fun SearchLayout(
 }
 
 @Composable
-private fun PlantResultList(plants: LazyPagingItems<Plant>) {
+fun PlantResultList(plants: LazyPagingItems<Plant>) {
     val refreshing = plants.loadState.refresh is LoadState.Loading
     val isEmpty = plants.itemCount == 0 && !refreshing &&
         plants.loadState.refresh is LoadState.NotLoading

@@ -3,15 +3,14 @@ package com.trbear9.ui.model
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Test
-import java.io.File
 
 
 class PlantRepositoryTest {
 
     fun checkResurces(){
-        val plants = File("plants.json")
-        val ecocrop = File("EcoCrop_DB.csv")
-        val kew = File("KEW.json")
+        val plants = findAssetFile("plants.json")
+        val ecocrop = findAssetFile("EcoCrop_DB.csv")
+        val kew = findAssetFile("KEW.json")
         assert(plants.exists())
         assert(ecocrop.exists())
         assert(kew.exists())

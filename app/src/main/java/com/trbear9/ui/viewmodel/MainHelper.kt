@@ -11,7 +11,6 @@ import com.trbear9.plants.parameters.GeoParameters
 import com.trbear9.ui.LocalNav
 import com.trbear9.ui.util.DataStore
 import com.trbear9.ui.util.Screen
-import com.trbear9.ui.util.debug
 
 fun getLocation(context: Context) {
     perm.launch(

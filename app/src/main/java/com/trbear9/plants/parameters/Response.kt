@@ -31,8 +31,8 @@ class Response(val delegate: SoilResult) : Serializable {
     var soilMax by mutableStateOf(Pair("Belum Diketahui", 0f))
     var total by mutableIntStateOf(0)
 
-    fun put(score: Int, plant: Plant) {
-        delegate.add(score, plant)
+    fun put(plant: Plant) {
+        delegate.add(plant)
         total++
     }
 }
