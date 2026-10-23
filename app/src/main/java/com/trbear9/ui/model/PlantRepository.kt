@@ -121,8 +121,6 @@ fun streamEcoCrop(init: (CSVRecord) -> Unit) {
 class PlantRepository private constructor() : Serializable {
     val tags = HashSet<String>()
     var kew = HashMap<String, JsonNode?>()
-    val namaUmumToNamaIlmiah = HashMap<String, String>()
-    val namaIlmiahToNamaUmum = HashMap<String, String>()
 
     val plant = HashMap<String, Plant>()
     var plantByTag = HashMap<String, MutableSet<Plant>>()
@@ -183,8 +181,6 @@ class PlantRepository private constructor() : Serializable {
         "Loaded ${ecocrop.size} ecocrop".debug(this)
         "Loaded ${kew.size} kew".debug(this)
         "Loaded ${plant.size} plants".debug(this)
-        "Loaded ${namaUmumToNamaIlmiah.size} namaUmumToNamaIlmiah".debug(this)
-        "Loaded ${namaIlmiahToNamaUmum.size} namaIlmiahToNamaUmum".debug(this)
         "Loaded ${tags.size} Tags size".debug(this)
 
         ecocrop.clear()

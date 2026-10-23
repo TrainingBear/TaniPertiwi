@@ -9,9 +9,9 @@ import java.io.Serializable
 @Getter
 @Setter
 data class ProductSystem(
-    var rumah_tangga: String = "Unknwon",
-    var komersial: String = "Unknwon",
-    var industri: String = "Unknwon"
+    var rumah_tangga: String = "Belum Diketahui",
+    var komersial: String = "Belum Diketahui",
+    var industri: String = "Belum Diketahui"
 ) : Serializable {
 }
 

@@ -212,11 +212,8 @@ open class Plant(
             }.add(this)
         }
         plantRepository.tags += ilmiah
-        val commonname = if (commonName != "Unknown") commonName.lowercase() else ilmiah
-        plantRepository.tags += commonname
-
-        plantRepository.namaUmumToNamaIlmiah[commonname.lowercase()] = ilmiah
-        plantRepository.namaIlmiahToNamaUmum[ilmiah] = commonname
+        if(commonName=="Unknown") commonName = nama_ilmiah
+        plantRepository.tags += commonName.lowercase()
 
 //        Log.d(this, "Loaded ${plant.commonName} plants")
         plantRepository.plant[ilmiah] = this

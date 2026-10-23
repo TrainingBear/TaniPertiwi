@@ -11,12 +11,11 @@ import java.io.Serializable;
 @Getter
 @Setter
 public class PlantCare implements Serializable {
-    public String watering = "Unknown";
-    public String pruning = "Unknown";
-    public String fertilization = "Unknown";
-    public String sunlight = "Unknown";
-    @JsonProperty("pest_disease_management")
-    public String pestDiseaseManagement = "Unknown";
+    public String watering = "Belum Diketahui";
+    public String pruning = "Belum Diketahui";
+    public String fertilization = "Belum Diketahui";
+    public String sunlight = "Belum Diketahui";
+    @JsonProperty("pest_disease_management") public String pestDiseaseManagement = "Belum Diketahui";
 
     public PlantCare() {
     }

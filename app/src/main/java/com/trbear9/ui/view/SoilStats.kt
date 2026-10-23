@@ -353,7 +353,7 @@ fun SoilStats(click: () -> Unit = {}) {
                             Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
                                 SoilDataRow("MDPL", geo?.altitude?.round() ?: "–")
                                 SoilDividerLine()
-                                SoilDataRow("Iklim", geo?.iklim?.origin ?: "–")
+                                SoilDataRow("Iklim", geo?.iklim?.toString() ?: "–")
                                 SoilDividerLine()
                                 SoilDataRow("Min °C", geo?.min?.round() ?: "–")
                                 SoilDividerLine()

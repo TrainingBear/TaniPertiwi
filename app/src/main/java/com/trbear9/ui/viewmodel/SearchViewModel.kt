@@ -38,20 +38,29 @@ enum class SortOrder(val label: String) {
 const val ALL_CATEGORY = "All"
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-class SearchViewModel(val source: List<Plant>) : ViewModel() {
+class SearchViewModel(initialSource: List<Plant> = emptyList()) : ViewModel() {
 
     // ── Inputs (single source of truth) ────────────────────────────────────
+    private val _source = MutableStateFlow(initialSource)
     private val _refresh = MutableStateFlow(0)            // what is typed
     private val _query = MutableStateFlow("")            // what is typed
     private val _submitted = MutableStateFlow("")        // what was actually searched
     private val _category = MutableStateFlow(Category.ALL)
     private val _order = MutableStateFlow(SortOrder.HIGHEST)
 
+    val source: StateFlow<List<Plant>> = _source
     val query: StateFlow<String> = _query
     val category: StateFlow<Category> = _category
     val order: StateFlow<SortOrder> = _order
 
-    fun refresh() {
+    fun updateSource(newSource: List<Plant>) {
+        _source.value = newSource
+    }
+
+    fun refresh(newSource: List<Plant>? = null) {
+        if (newSource != null) {
+            _source.value = newSource
+        }
         "Refresh button invoked!".debug(this)
         _refresh.value++
     }
@@ -73,24 +82,25 @@ class SearchViewModel(val source: List<Plant>) : ViewModel() {
     }
 
     // ── Autocomplete (cheap, in-memory, no paging needed) ──────────────────
-    val suggestions: StateFlow<List<Plant>> = _query
+    val suggestions: StateFlow<List<Plant>> = combine(_query, _source) { q, src ->
+        suggest(q.trim(), src)
+    }
         .debounce(150.milliseconds)
-        .map { suggest(it.trim()) }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     // ── Results ────────────────────────────────────────────────────────────
-    // 1) the (expensive) search only re-runs when the submitted query changes
-    private val searchResult: Flow<List<Plant>?> = combine(_submitted, _refresh) { q, _ ->
+    // 1) the (expensive) search only re-runs when the submitted query, refresh, or source changes
+    private val searchResult: Flow<List<Plant>?> = combine(_submitted, _refresh, _source) { q, _, src ->
         "Refreshed!".debug(this)
-        if (q.isEmpty()) null else Searcher.search(source, q)
+        if (q.isEmpty()) null else Searcher.search(src, q)
     }
         .flowOn(Dispatchers.Default)
 
     // 2) category + order are cheap and applied on top of it
     private val filtered: StateFlow<List<Plant>> =
-        combine(searchResult, _category, _order) { result, category, order ->
-            val base = (result ?: source)
+        combine(searchResult, _category, _order, _source) { result, category, order, src ->
+            val base = (result ?: src)
             val filt = if (category == Category.ALL) base else base.filter {
                 it.category.contains(category)
             }
@@ -113,9 +123,9 @@ class SearchViewModel(val source: List<Plant>) : ViewModel() {
         .cachedIn(viewModelScope)
 
     // ── Helpers ────────────────────────────────────────────────────────────
-    private fun suggest(q: String): List<Plant> {
+    private fun suggest(q: String, src: List<Plant>): List<Plant> {
         if (q.isEmpty()) return emptyList()
-        return Searcher.search(source, q)
+        return Searcher.search(src, q)
             .distinctBy { it.nama_ilmiah }
             .take(20)
     }

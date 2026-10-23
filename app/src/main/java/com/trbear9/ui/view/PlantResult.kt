@@ -47,6 +47,7 @@ import com.trbear9.ui.util.info
 import com.trbear9.ui.viewmodel.SearchTopBar
 import com.trbear9.ui.viewmodel.SearchViewModel
 import com.trbear9.ui.viewmodel.recommendationResult
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 
@@ -54,7 +55,7 @@ var coachStep = 0
 
 @Composable
 @Preview
-fun SoilResultScreen(vm: SearchViewModel = SearchViewModel(recommendationResult.plants.toList())) {
+fun SoilResultScreen(vm: SearchViewModel = viewModel { SearchViewModel(recommendationResult.plants.toList()) }) {
     val nav = LocalNav.current
     val keyboard = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -71,6 +72,7 @@ fun SoilResultScreen(vm: SearchViewModel = SearchViewModel(recommendationResult.
     LaunchedEffect(Unit) {
         val result = recommendationResult
         if (result.collected) {
+            vm.updateSource(result.plants.toList())
             return@LaunchedEffect
         }
         "Collecting".info(this)
@@ -82,7 +84,7 @@ fun SoilResultScreen(vm: SearchViewModel = SearchViewModel(recommendationResult.
                     result.collected = true
                     recommendationResult.loaded = true
                     "Collected".info(this)
-                    vm.refresh()
+                    vm.updateSource(recommendationResult.plants.toList())
                 }
             }
             ?.catch { "Collect failed: ${it.message}".info(this) }
