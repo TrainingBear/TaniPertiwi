@@ -24,7 +24,7 @@ import java.io.Serializable
 @NoArgsConstructor
 open class Plant(
     var record: CSVRecord? = null
-) : Serializable {
+) : Serializable, Cloneable {
     companion object {
         private const val serialVersionUID = -4282027494278299715L
     }
@@ -35,7 +35,7 @@ open class Plant(
     var nama_umum: MutableSet<String> = HashSet()
 
     @JvmField
-    var category: MutableSet<String> = HashSet()
+    var category: MutableSet<Category> = HashSet()
 
     @JsonSetter(nulls = Nulls.SKIP)
     var fullsize: String = "Unknown"
@@ -118,35 +118,53 @@ open class Plant(
     var pruneGuide: String = "Unknown"
 
     @JsonIgnore
+    var score = 0
+
+    @JsonIgnore
     var authored = false
+
     @JsonIgnore
     var isAvaiable = false
+
     @JsonIgnore
     var minTemperature = record?.get(Constants.O_minimum_temperature) ?: "Unknown"
+
     @JsonIgnore
     var maxTemperature = record?.get(Constants.O_minimum_temperature) ?: "Unknown"
+
     @JsonIgnore
     var minPH = record?.get(Constants.O_minimum_ph) ?: "Unknown"
+
     @JsonIgnore
     var maxPH = record?.get(Constants.O_minimum_ph) ?: "Unknown"
+
     @JsonIgnore
     var minCycle = record?.get(Constants.MIN_crop_cycle) ?: "Unknown"
+
     @JsonIgnore
     var maxCycle = record?.get(Constants.MAX_crop_cycle) ?: "Unknown"
+
     @JsonIgnore
     var salinity = record?.get(Constants.A_soil_salinity) ?: "Unknown"
+
     @JsonIgnore
     var photoperiod = record?.get(Constants.Photoperiod) ?: "Unknown"
+
     @JsonIgnore
     var resiko = record?.get(Constants.Introduction_risk) ?: "Unknown"
+
     @JsonIgnore
     var skalaProduksi = record?.get(Constants.Production_system) ?: "Unknown"
+
     @JsonIgnore
     var author = record?.get(Constants.Authority) ?: "Unknown"
+
     @JsonIgnore
     var sinonim = record?.get(Constants.Synonyms) ?: "Unknown"
+
     @JsonIgnore
     var takson = taxon ?: "Unknown"
+
     @JsonIgnore
     var iklim = Util.bulkClimateTranslate(record?.get(Constants.Climate_zone)) ?: "Unknown"
 
@@ -178,7 +196,10 @@ open class Plant(
             }.add(this)
         }
         record[Constants.Category]?.split(", ")?.forEach {
-            category.add(it)
+            val cat = Category.entries.find { e ->
+                e.origin.equals(it, ignoreCase = true)
+            }
+            if (cat != null) category.add(cat)
             plantRepository.tags += it.lowercase()
             plantRepository.plantByTag.computeIfAbsent(it) { key ->
                 mutableSetOf()
@@ -191,7 +212,7 @@ open class Plant(
             }.add(this)
         }
         plantRepository.tags += ilmiah
-        val commonname = if(commonName!="Unknown") commonName.lowercase() else ilmiah
+        val commonname = if (commonName != "Unknown") commonName.lowercase() else ilmiah
         plantRepository.tags += commonname
 
         plantRepository.namaUmumToNamaIlmiah[commonname.lowercase()] = ilmiah
@@ -209,21 +230,17 @@ open class Plant(
         return "$commonName ($nama_ilmiah)"
     }
 
+    public override fun clone(): Plant {
+        return super.clone() as Plant
+    }
+
     fun getTranslatedCategories(): String {
         var r = ""
-        val enum = getEnumCategory()
-        for ((i, item) in enum.withIndex()) {
+        for ((i, item) in category.withIndex()) {
             r += item.toString()
-            if(i+1 != enum.size) r+= ", "
+            if (i + 1 != category.size) r += ", "
         }
         return r
-    }
-    fun getEnumCategory(): List<Category> {
-        return category.mapNotNull { cat ->
-            Category.entries.find {
-                it.origin.equals(cat, ignoreCase = true)
-            }
-        }
     }
 }
 

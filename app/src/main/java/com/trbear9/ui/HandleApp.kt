@@ -231,7 +231,7 @@ private fun NavGraphBuilder.appNavGraph(
 
     // ── Search ────────────────────────────────────────────────────────
     composable(route = Screen.search) {
-        SearchLayout(nav = nav)
+        SearchLayout()
     }
 
     // ── Soil Stats (External Activity Launch) ──────────────────────────

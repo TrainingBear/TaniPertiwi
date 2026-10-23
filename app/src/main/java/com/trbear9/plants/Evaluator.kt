@@ -43,11 +43,12 @@ object Evaluator {
         var cat = 0;
         var scanned = 0;
         for ((name, record) in plantRepository.ecocrop) {
-            val plant = plantRepository.loadPlant(record)
+            val plant = plantRepository.loadPlant(record).clone()
             scanned++;
             val score = evaluate(plant)
 //            if (score < 0) "evaluated '${record.get(E.Science_name)}' with score: $score".info(this)
             if (plant.authored && score > 0) {
+                plant.score = score
                 processedData.computeIfAbsent(score) { HashSet() }
                     .add(plant)
                 if (plant.isAvaiable) cnt++;

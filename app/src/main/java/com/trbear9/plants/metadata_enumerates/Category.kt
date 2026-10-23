@@ -7,20 +7,21 @@ enum class Category(
     override val translation: String,
     val color: Color = Color(0xFF9E9E9E)
 ) : TranslatableEnum {
-    OTHER("other", "Lainnya",Color.Gray),
-    CEREALS_PSEUDOCEREALS("cereals & pseudocereals", "Pseudocereal",Color(0xFF4CAF50)),
-    PULLS("pulses (grain legumes)", "Kacang-Kacangan"),
-    ROOTS_TUBERS("roots/tubers", "Akar/Umbi", Color.Red),
-    FORAGE_PASTURES("forage/pasture", "Pakan ternak", Color.Blue),
-    FRUIT_NUT("fruits & nuts", "Buah & kacang", Color(0xFF9C27B0)),
+    ALL("All", "All", Color.Gray),
     VEGETABLES("vegetables", "Sayur", Color.Green),
-    MATERIALS("materials", "Bahan", Color(0xFFFF9100)),
-    ORNAMENTALS_TURF("ornamentals/turf", "Rumput hias", Color(0xFFE91E63)),
+    FRUIT_NUT("fruits & nuts", "Buah & kacang", Color(0xFF9C27B0)),
+    ROOTS_TUBERS("roots/tubers", "Akar/Umbi", Color.Red),
+    PULLS("pulses (grain legumes)", "Kacang-Kacangan"),
+    CEREALS_PSEUDOCEREALS("cereals & pseudocereals", "Pseudocereal",Color(0xFF4CAF50)),
     MEDICINALS_AND_ARMOATIC("medicinals & aromatic", "Obat & aromatik", Color(0xFF936123)),
     FOREST_OR_WOOD("forest/wood", "Hutan/Kayu"),
-    COVER_CROP("cover crop", "Tanaman Penutup Tanah"),
+    FORAGE_PASTURES("forage/pasture", "Pakan ternak", Color.Blue),
+    ORNAMENTALS_TURF("ornamentals/turf", "Rumput hias", Color(0xFFE91E63)),
     ENVIRONMENTAL("environmental", "Lingkungan"),
-    WEED("weed", "Gulma");
+    MATERIALS("materials", "Bahan", Color(0xFFFF9100)),
+    COVER_CROP("cover crop", "Tanaman Penutup Tanah"),
+    WEED("weed", "Gulma"),
+    OTHER("other", "Lainnya",Color.Gray);
     override fun toString(): String = translation
 }
 

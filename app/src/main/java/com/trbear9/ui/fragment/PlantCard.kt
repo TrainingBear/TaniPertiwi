@@ -266,7 +266,7 @@ fun CoachMarkScope.PlantCardDisplayer(
                     else "$panen_min hari",
                     bcolor = Color.LightGray
                 )
-                ref.getEnumCategory().forEach {
+                ref.category.forEach {
                     Kat(
                         it.toString(), tcolor = Color.White,
                         bcolor = it.color

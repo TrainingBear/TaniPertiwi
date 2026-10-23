@@ -34,14 +34,14 @@ fun SnapshotStateMap<Int, MutableSet<Plant>>.flatten(order: String): MutableList
     return result
 }
 
-fun completer(query: String, holder: SnapshotStateSet<String>, limit: Int = Int.MAX_VALUE) {
+fun completer(query: String, holder: MutableSet<String>, limit: Int = Int.MAX_VALUE) {
     var i = 0
     outer@ for (it in (recommendationResult.plants)) {
         outer2@ for (plant in it.value) {
             val commonName = plant.commonName
             val prefix = query.lowercase()
-            if (commonName != null && (commonName.startsWith(prefix) ||
-                        commonName.endsWith(prefix) || commonName.contains(prefix))
+            if (commonName.startsWith(prefix) ||
+                commonName.endsWith(prefix) || commonName.contains(prefix)
             ) {
                 holder.add(commonName)
                 if (i++ > limit) break@outer

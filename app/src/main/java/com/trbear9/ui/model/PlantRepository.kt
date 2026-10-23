@@ -167,6 +167,7 @@ class PlantRepository private constructor() : Serializable {
             it.isAvaiable = true
             "Loaded ${it.nama_ilmiah}".info(this)
         }
+        evaluateAllEcoCropPlants()
         "Loaded ${ecocrop.size} ecocrop".debug(this)
         "Loaded ${kew.size} kew".debug(this)
         "Loaded ${plant.size} plants".debug(this)
