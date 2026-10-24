@@ -105,7 +105,7 @@ fun PlantResultList(plants: LazyPagingItems<Plant>) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             items(plants.itemCount) { i ->
-                plants[i]?.let { PlantCardDisplayer(0, it, true) }
+                plants[i]?.let { PlantCardDisplayer(0, it, false) }
             }
 
             when {

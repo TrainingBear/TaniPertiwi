@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Grain
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,10 +33,24 @@ import com.trbear9.ui.util.MarkKey
 import com.trbear9.ui.view.SoilStatsActivity
 import com.trbear9.ui.util.DataStore
 import com.trbear9.ui.util.highlightConfig
+import com.trbear9.ui.util.info
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun CoachMarkScope.NavigateSoilStats(modifier: Modifier) {
     val context = LocalContext.current
+//    LaunchedEffect(DataStore.isCompleteTanaman,DataStore.isCompleteTanah) {
+//        if (DataStore.isCompleteTanaman && !DataStore.isCompleteTanah) {
+//            delay(300.milliseconds)
+//            try {
+//                show(MarkKey.analisa)
+//                DataStore.completeTanah()
+//            } catch (e: Exception) {
+//                "CoachMark show error: ${e.message}".info("NavigateSoilStats")
+//            }
+//        }
+//    }
     BoxWithConstraints(modifier) {
         Column(
             Modifier

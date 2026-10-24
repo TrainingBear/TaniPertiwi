@@ -3,6 +3,9 @@ package com.trbear9.ui.util
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.content.edit
 
 /**
@@ -69,28 +72,28 @@ object DataStore {
 
     // ========================== Main Activity ==============================
     /** A [Boolean] indicate if the app is fresh or not*/
-    internal var firstTime = true
+    internal var firstTime by mutableStateOf(true)
     fun completeFirstTime() {
         firstTime = false
         pref.edit { putBoolean("firstTime", false) }
     }
     // =========================== Guide ================================
     /** A [Boolean] */
-    internal var isCompleteTanah = true
+    var isCompleteTanah by mutableStateOf(false)
     fun completeTanah() {
         isCompleteTanah = true
         pref.edit { putBoolean("coachTanah", true) }
     }
 
     /** A [Boolean] */
-    internal var isCompleteTanaman = true
+    internal var isCompleteTanaman by mutableStateOf(false)
     fun completeTanaman() {
         isCompleteTanaman = true
         pref.edit { putBoolean("coachTanaman", true) }
     }
 
     /** A [Boolean] */
-    internal var isCompletePupuk = true
+    internal var isCompletePupuk by mutableStateOf(false)
     fun completePupuk() {
         isCompletePupuk = true
         pref.edit { putBoolean("coachPupuk", true) }

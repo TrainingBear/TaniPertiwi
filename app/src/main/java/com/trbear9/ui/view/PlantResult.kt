@@ -1,5 +1,10 @@
 package com.trbear9.ui.view
 
+import com.pseudoankit.coachmark.scope.CoachMarkScope
+import com.trbear9.ui.util.DataStore
+import com.trbear9.ui.util.MarkKey
+import kotlinx.coroutines.delay
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,6 +55,7 @@ import com.trbear9.ui.viewmodel.recommendationResult
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
+import kotlin.time.Duration.Companion.milliseconds
 
 var coachStep = 0
 
@@ -128,6 +134,7 @@ fun SoilResultScreen(vm: SearchViewModel = viewModel { SearchViewModel(recommend
 
                     !recommendationResult.loaded && !recommendationResult.collecting -> NoSoilMatch(
                         onScan = { nav?.navigate(Screen.camera) })
+
                     else -> ResultList(plants)
                 }
 
@@ -197,7 +204,7 @@ private fun NoSoilMatch(onScan: () -> Unit) {
 }
 
 @Composable
-private fun ResultList(plants: LazyPagingItems<Plant>) {
+private fun CoachMarkScope.ResultList(plants: LazyPagingItems<Plant>) {
     val refresh = plants.loadState.refresh
     val isEmpty = plants.itemCount == 0 && refresh is LoadState.NotLoading
 
@@ -212,23 +219,46 @@ private fun ResultList(plants: LazyPagingItems<Plant>) {
         }
         return
     }
-    UnifyCoachmark {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            items(plants.itemCount) { i ->
-                plants[i]?.let { plant -> PlantCardDisplayer(plant.score, plant) }
-            }
-            when {
-                refresh is LoadState.Loading -> item { Text("Memuat…", Modifier.padding(16.dp)) }
-                plants.loadState.append is LoadState.Loading ->
-                    item { Text("Memuat lebih banyak…", Modifier.padding(16.dp)) }
 
-                plants.loadState.append is LoadState.Error -> item {
-                    Button(onClick = { plants.retry() }, modifier = Modifier.padding(16.dp)) {
-                        Text("Gagal memuat. Coba lagi")
-                    }
+    // Decide once whether this is the first time the user sees results
+    val shouldCoach = remember { !DataStore.isCompleteTanaman }
+    var firstCardReady by remember { mutableStateOf(false) }
+    val firstPageLoaded = plants.itemCount > 0 && refresh is LoadState.NotLoading
+
+    LaunchedEffect(firstPageLoaded, firstCardReady) {
+        if (shouldCoach && firstPageLoaded && firstCardReady) {
+            delay(300.milliseconds)
+            try {
+                val score = plants.peek(0)?.score ?: 0
+                if (score != 0) show(MarkKey.cocok, MarkKey.skor) else show(MarkKey.cocok)
+                DataStore.completeTanaman()
+            } catch (e: Exception) {
+                "CoachMark show error: ${e.message}".info("PlantResult")
+            }
+        }
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        items(plants.itemCount) { i ->
+            plants[i]?.let { plant ->
+                PlantCardDisplayer(
+                    score = plant.score,
+                    ref = plant,
+                    showCoach = shouldCoach && i == 0,
+                    onPositioned = { if (i == 0) firstCardReady = true },
+                )
+            }
+        }
+        when {
+            refresh is LoadState.Loading -> item { Text("Memuat…", Modifier.padding(16.dp)) }
+            plants.loadState.append is LoadState.Loading ->
+                item { Text("Memuat lebih banyak…", Modifier.padding(16.dp)) }
+            plants.loadState.append is LoadState.Error -> item {
+                Button(onClick = { plants.retry() }, modifier = Modifier.padding(16.dp)) {
+                    Text("Gagal memuat. Coba lagi")
                 }
             }
         }

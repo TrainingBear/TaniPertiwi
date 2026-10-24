@@ -97,7 +97,10 @@ fun SearchTopBar(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text("menampilkan $resultCount tanaman", fontSize = 13.sp)
-            Spacer(Modifier.height(24.dp).width(1.dp).background(Color.LightGray))
+            Spacer(Modifier
+                .height(24.dp)
+                .width(1.dp)
+                .background(Color.LightGray))
             Category.entries.forEach { cat ->
                 CategoryChip(cat.toString(), selected = cat == category) { onCategoryChange(cat) }
             }
@@ -141,7 +144,10 @@ private fun SearchField(
                     inner()
                 }
                 if (query.isNotEmpty()) {
-                    IconButton(onClick = { onQueryChange("") }, modifier = Modifier.size(20.dp)) {
+                    IconButton(onClick = {
+                        onQueryChange("")
+                        onSubmit()
+                    }, modifier = Modifier.size(20.dp)) {
                         Icon(Icons.Default.Close, "Clear", Modifier.size(16.dp), tint = Color.Gray)
                     }
                 }

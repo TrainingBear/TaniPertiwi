@@ -74,6 +74,7 @@ import com.trbear9.ui.R
 import com.trbear9.ui.util.MarkKey
 import com.trbear9.ui.util.getContext
 import com.trbear9.ui.util.highlightConfig
+import com.trbear9.ui.util.info
 import com.trbear9.ui.viewmodel.scanTanahButton
 import com.trbear9.ui.viewmodel.perm
 import kotlinx.coroutines.Dispatchers
@@ -165,7 +166,13 @@ fun Home(nav: NavController? = null) {
 
     UnifyCoachmark {
         LaunchedEffect(Unit) {
-            if (DataStore.firstTime) show(MarkKey.scantanah, MarkKey.help)
+            if (DataStore.firstTime) {
+                try {
+                    show(MarkKey.scantanah, MarkKey.help)
+                } catch (e: Exception) {
+                    "CoachMark show error: ${e.message}".info("MainActivity")
+                }
+            }
         }
 
         // ── Donate dialog ─────────────────────────────────────────────────

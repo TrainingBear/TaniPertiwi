@@ -55,11 +55,8 @@ import com.trbear9.ui.util.MarkKey
 import com.trbear9.ui.util.highlightConfig
 import com.trbear9.ui.util.info
 import com.trbear9.ui.util.DataStore
-import com.trbear9.plants.Constants
 import com.trbear9.plants.parameters.blob.Plant
-import com.trbear9.ui.model.plantRepository
 import com.trbear9.ui.view.PlantDetail
-import com.trbear9.plants.metadata_enumerates.Category
 import com.trbear9.ui.viewmodel.getPlantImage
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
@@ -77,18 +74,28 @@ var ready by mutableStateOf(false)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CoachMarkScope.PlantCardDisplayer(
-    score: Int = 0, ref: Plant?, flag: Boolean = false
+    score: Int = 0,
+    ref: Plant?,
+    showCoach: Boolean = false,          // true only for the first card on first visit
+    onPositioned: () -> Unit = {},
 ) {
     val context = LocalContext.current
-
     if (ref == null) return
-    val cmodifier: Modifier = Modifier
+
+    val baseModifier = Modifier
         .fillMaxWidth()
         .heightIn(max = 600.dp)
         .padding(8.dp)
-        .onGloballyPositioned {
-            ready = true
-        }
+        .onGloballyPositioned { onPositioned() }
+
+    val cardModifier = if (showCoach) {
+        baseModifier.enableCoachMark(
+            key = MarkKey.cocok,
+            toolTipPlacement = ToolTipPlacement.Bottom,
+            highlightedViewConfig = highlightConfig
+        ) { MarkKey.cocok.tooltip(ToolTipPlacement.Bottom) }
+    } else baseModifier
+
     Card(
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(8.dp),
@@ -99,19 +106,7 @@ fun CoachMarkScope.PlantCardDisplayer(
             intent.putExtra("score", score)
             context.startActivity(intent)
         },
-        modifier =
-//                cardModifier
-            if (!coached) {
-                cmodifier
-                    .enableCoachMark(
-                        key = MarkKey.cocok,
-                        toolTipPlacement = ToolTipPlacement.Bottom,
-                        highlightedViewConfig = highlightConfig
-                    ) {
-                        MarkKey.cocok.tooltip(ToolTipPlacement.Bottom)
-                    }
-            } else
-                cmodifier
+        modifier = cardModifier
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
             Box(
@@ -187,25 +182,19 @@ fun CoachMarkScope.PlantCardDisplayer(
                     if (score != 0) {
                         val star = (score / 10f) * 5
                         val half = (star - star.toInt()) > 0.1f
-                        val modifier = Modifier
+                        val badgeModifier = Modifier
                             .padding(end = 10.dp, top = 7.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .wrapContentSize(Alignment.Center)
                             .background(Color.Black.copy(alpha = 0.5f))
                             .align(Alignment.TopEnd)
+
                         Row(
-                            modifier =
-//                                    scoreModifier()
-                                if (!coached) modifier
-                                    .enableCoachMark(
-                                        key = MarkKey.skor,
-                                        toolTipPlacement = ToolTipPlacement.Bottom,
-                                        highlightedViewConfig = highlightConfig
-                                    ) {
-                                        MarkKey.skor.tooltip(ToolTipPlacement.Bottom)
-                                    }
-                                else
-                                    modifier
+                            modifier = if (showCoach) badgeModifier.enableCoachMark(
+                                key = MarkKey.skor,
+                                toolTipPlacement = ToolTipPlacement.Bottom,
+                                highlightedViewConfig = highlightConfig
+                            ) { MarkKey.skor.tooltip(ToolTipPlacement.Bottom) } else badgeModifier
                         ) {
                             repeat(star.toInt()) {
                                 Icon(
@@ -232,7 +221,7 @@ fun CoachMarkScope.PlantCardDisplayer(
 
             // Plant Title
             Text(
-                text = ref.commonName?.split(",")[0] ?: "Tidak tersedia",
+                text = ref.commonName.split(",")[0] ?: "Tidak tersedia",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 10.dp)
@@ -240,8 +229,8 @@ fun CoachMarkScope.PlantCardDisplayer(
 
             // Plant Description
             Text(
-                text = ref.description?.take(100) +
-                        if ((ref.description?.length ?: 0) > 100) "..." else "",
+                text = ref.description.take(160) +
+                        if (ref.description.length > 160) "..." else "",
                 fontSize = 12.sp,
                 modifier = Modifier.padding(top = 6.dp)
             )
@@ -253,9 +242,9 @@ fun CoachMarkScope.PlantCardDisplayer(
                 crossAxisSpacing = 2.dp
             ) {
                 Kat(
-                    ref.difficulty ?: "???",
+                    ref.difficulty,
                     Color.Black,
-                    diffToColor(ref.difficulty?.toString() ?: "UNKNOWN")
+                    diffToColor(ref.difficulty)
                 )
                 val panen_min = ref.minCycle
                 val panen_max = ref.maxCycle
@@ -274,26 +263,6 @@ fun CoachMarkScope.PlantCardDisplayer(
                 }
             }
         }
-        if (!coached) "${ref.commonName} has been added coach mark highlighter!".info("PlantCard")
-        coached = true
-    }
-    LaunchedEffect(Unit) {
-        if (!flag && !displayed && ready) {
-            delay(1500.milliseconds)
-            if (!DataStore.isCompleteTanah && !DataStore.isCompleteTanaman) {
-                show(
-                    MarkKey.analisa,
-                    MarkKey.cocok,
-                    MarkKey.skor,
-                )
-//                    DataStore.completeTanah()
-            } else if (!DataStore.isCompleteTanah) {
-                show(MarkKey.analisa)
-            }
-//                Toast.makeText(context, "Loaded ${ref.commonName}", Toast.LENGTH_SHORT).show()
-            displayed = true
-        }
-
     }
 }
 
@@ -372,20 +341,6 @@ class ImageAsset {
 
 fun test() {
 
-}
-
-fun getImage(context: Context, name: String?): Bitmap? {
-    if (name == null) return null
-    if (ImageAsset.images.containsKey(name)) return ImageAsset.images[name]!!
-    try {
-        context.assets.open("images/$name.webp").use {
-            val decodeStream = BitmapFactory.decodeStream(it)
-            ImageAsset.images[name] = decodeStream
-            return decodeStream
-        }
-    } catch (_: Exception) {
-        return null
-    }
 }
 
 
