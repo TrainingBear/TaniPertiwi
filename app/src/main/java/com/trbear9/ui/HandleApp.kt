@@ -32,6 +32,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.trbear9.plants.parameters.SoilParameters
 import com.trbear9.ui.model.plantRepository
+import com.trbear9.ui.util.DataStore
 import com.trbear9.ui.util.Screen
 import com.trbear9.ui.util.Util
 import com.trbear9.ui.view.AboutUs
@@ -231,6 +232,7 @@ private fun NavGraphBuilder.appNavGraph(
 
     // ── Search ────────────────────────────────────────────────────────
     composable(route = Screen.search) {
+        DataStore.completeFirstTime()
         SearchLayout()
     }
 
@@ -251,6 +253,7 @@ private fun NavGraphBuilder.appNavGraph(
 
     // ── Guide (Help) ──────────────────────────────────────────────────
     composable(route = Screen.help) {
+        DataStore.completeFirstTime()
         Guide(nav)
     }
 
@@ -277,6 +280,7 @@ private fun NavGraphBuilder.appNavGraph(
 
     // ── About Us ──────────────────────────────────────────────────────
     composable(route = Screen.about) {
+        DataStore.completeFirstTime()
         AboutUs(nav)
     }
 }

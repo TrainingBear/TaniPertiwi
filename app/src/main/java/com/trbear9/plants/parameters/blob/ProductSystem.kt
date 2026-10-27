@@ -13,5 +13,8 @@ data class ProductSystem(
     var komersial: String = "Belum Diketahui",
     var industri: String = "Belum Diketahui"
 ) : Serializable {
+    companion object {
+        private const val serialVersionUID = 6886084022447035419L
+    }
 }
 
