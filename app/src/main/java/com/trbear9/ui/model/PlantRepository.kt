@@ -19,6 +19,8 @@ import com.openmeteo.api.OpenMeteo
 import com.openmeteo.api.common.units.TemperatureUnit
 import com.trbear9.plants.Constants.Category
 import com.trbear9.plants.Constants.Common_names
+import com.trbear9.plants.DUMMY.AdamHawa
+import com.trbear9.plants.DUMMY.Bugenvil
 import com.trbear9.plants.Evaluator.evaluateAllEcoCropPlants
 import com.trbear9.plants.parameters.GeoParameters
 import com.trbear9.ui.util.error
@@ -240,6 +242,11 @@ class PlantRepository private constructor() : Serializable {
                 it.pH = resultSoil.pH
         }
         val processedData = evaluateAllEcoCropPlants()
+        // Tani Pertiwi - dummy start
+        response.put(AdamHawa())
+//        response.put(Bugenvil())
+        response.put(plant["bougainvillea glabra"]!!.clone().also { it.score = 6 })
+        // Tani Pertiwi - dummy end
         for (i in processedData.keys)
             response.target += processedData[i]!!.size
         emit(response)
